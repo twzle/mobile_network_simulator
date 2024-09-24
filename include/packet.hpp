@@ -10,7 +10,10 @@ class Packet {
     public:
         Packet(int size);
         ms get_size();
+        bool get_retry();
+        void set_retry();
 
     private:
         ms size; // Размер пакета (время на обслуживание) в мс
+        bool retry = false; // Превысил ли пакет дефицит
 };

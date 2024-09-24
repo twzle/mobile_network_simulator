@@ -9,7 +9,8 @@ class Stats {
         ms total_time; // Общее время работы планировщика в мс
         ms total_skip_time; // Общее время простоя планировщика в мс
         ms total_processing_time; // Общее время обслуживания пакетов в мс
-        int packet_count; // Число обслуженных пакетов
+        int packet_count; // Общее число обслуженных пакетов
+        int retried_packet_count; // Число обслуженных пакетов не с первого раза
 };
 
 class PacketQueueScheduler {

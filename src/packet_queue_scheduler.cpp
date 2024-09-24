@@ -41,6 +41,10 @@ void PacketQueueScheduler::run()
                     std::this_thread::sleep_for(sleep_duration);
                     auto packet_processing_end = std::chrono::high_resolution_clock::now();
 
+                    if (queue.front().get_retry()){
+                        stats.retried_packet_count++;
+                    }
+
                     queue.pop();
                     ++served_packets;
                     queue.set_deficit(deficit - packet_size);
@@ -61,6 +65,7 @@ void PacketQueueScheduler::run()
                 else
                 {
                     // Принудительная смена очереди из-за нехватки накопленного дефицита
+                    queue.front().set_retry();
                     break;
                 }
             }
@@ -100,7 +105,7 @@ void Stats::summarize(){
             // Общее время простоя
             auto total_idle_time = total_time.count() - total_processing_time.count();
 
-            std::cout << "Total running time = " 
+            std::cout << "\nTotal running time = " 
                 << total_time.count() << " ms\n" // Общее время работы
                 << "Total processing time = " 
                 << total_processing_time.count() << " ms (" // Общее время обслуживания пакетов и доля от общего времени
@@ -109,5 +114,7 @@ void Stats::summarize(){
                 << total_idle_time << " ms (" // Общее время простоя и доля от общего времени
                 <<  100 * ((float) total_idle_time / (float) total_time.count()) << "% of all)\n"
                 << "Average packet processing time = " 
-                << total_processing_time.count() / packet_count << " ms\n"; // Среднее время обслуживания пакета
+                << total_processing_time.count() / packet_count << " ms\n" // Среднее время обслуживания пакета
+                << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
+                << retried_packet_count << " (" << ((float) retried_packet_count / packet_count * 100) << "% of all)\n";
         }
