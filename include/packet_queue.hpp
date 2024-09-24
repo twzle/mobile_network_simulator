@@ -15,7 +15,7 @@ class PacketQueue {
         void pop();
 
     private:
-        ms quant;
-        ms deficit;
-        std::queue<Packet> packet_queue;
+        ms quant; // Время выделяемое очереди 
+        ms deficit; // Накопленный дефицит времени
+        std::queue<Packet> packet_queue; // Очередь из обслуживаемых пакетов
 };

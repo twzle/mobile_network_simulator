@@ -2,30 +2,14 @@
 
 class Stats {
     public:
-        Stats() : 
-            total_time(0), total_skip_time(0),
-            total_processing_time(0), packet_count(0){}
+        Stats();
         
-        void summarize(){
+        void summarize();
 
-            auto total_idle_time = total_time.count() - total_processing_time.count();
-
-            std::cout << "Total running time = " 
-                << total_time.count() << " ms\n"
-                << "Total processing time = " 
-                << total_processing_time.count() << " ms ("
-                <<  100 * ((float) total_processing_time.count() / (float) total_time.count()) << "% of all)\n"
-                << "Total idle time = " 
-                << total_idle_time << " ms ("
-                <<  100 * ((float) total_idle_time / (float) total_time.count()) << "% of all)\n"
-                << "Average packet processing time = " 
-                << total_processing_time.count() / packet_count << " ms\n";
-        }
-
-        ms total_time;
-        ms total_skip_time;
-        ms total_processing_time;
-        int packet_count;
+        ms total_time; // Общее время работы планировщика в мс
+        ms total_skip_time; // Общее время простоя планировщика в мс
+        ms total_processing_time; // Общее время обслуживания пакетов в мс
+        int packet_count; // Число обслуженных пакетов
 };
 
 class PacketQueueScheduler {
@@ -36,7 +20,7 @@ class PacketQueueScheduler {
         void schedule(const PacketQueue& packet_queue);
 
     private:
-        int total_packets = 0;
-        std::vector<PacketQueue> scheduled_queues;
-        Stats stats;
+        int total_packets = 0; // Общее число пакетов для обслуживания во всех очередях
+        std::vector<PacketQueue> scheduled_queues; // Обслуживаемые очереди
+        Stats stats; // Статистика производительности планировщика
 };

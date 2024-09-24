@@ -2,21 +2,24 @@
 
 
 int main(){
+    // Инициализация пакетов
     Packet p1(5);
     Packet p2(2);
     Packet p3(8);
     Packet p4(19);
     
+    // Инициализация очереди №1
     PacketQueue pq1(20);
     pq1.add_packet(p1);
     pq1.add_packet(p2);
     pq1.add_packet(p3);
 
-
+    // Инициализация очереди №2
     PacketQueue pq2(1);
     pq2.add_packet(p3);
     pq2.add_packet(p4);
 
+    // Инициализация планировщика
     PacketQueueScheduler pqs(pq1);
     pqs.schedule(pq2);
     pqs.run();
