@@ -1,4 +1,5 @@
 #include "packet_queue_scheduler.hpp"
+// #include "matplotlibcpp.h"
 
 
 int main(){
@@ -24,6 +25,8 @@ int main(){
 
     // Инициализация планировщика
     PacketQueueScheduler pqs(pq1);
+    pqs.schedule(pq2);
+    pqs.schedule(pq1);
     pqs.schedule(pq2);
     pqs.run();
 

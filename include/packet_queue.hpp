@@ -4,7 +4,8 @@ class PacketQueue {
     public:
         PacketQueue(int quant, size_t limit);
 
-        void add_packet(const Packet& packet);
+        void add_packet(Packet& packet);
+        void add_delay(int delay);
 
         int get_lost_packet_count() const;
         ms get_quant() const;

@@ -3,11 +3,12 @@
 PacketQueue::PacketQueue(int quant, size_t limit = 1) 
     : quant(quant), deficit(0), limit(limit) {};
 
-void PacketQueue::add_packet(const Packet &packet)
+void PacketQueue::add_packet(Packet &packet)
 {
     if (packet_queue.size() < limit)
     {
         packet_queue.push(packet);
+        packet.set_scheduled_at(SystemClock::now());
     } else {
         ++lost_packet_count;
     }
