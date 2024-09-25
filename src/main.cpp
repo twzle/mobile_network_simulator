@@ -9,15 +9,18 @@ int main(){
     Packet p4(19);
     
     // Инициализация очереди №1
-    PacketQueue pq1(20);
+    PacketQueue pq1(20, 3);
     pq1.add_packet(p1);
     pq1.add_packet(p2);
     pq1.add_packet(p3);
+    pq1.add_packet(p4);
 
     // Инициализация очереди №2
-    PacketQueue pq2(1);
+    PacketQueue pq2(1, 2);
     pq2.add_packet(p3);
     pq2.add_packet(p4);
+    pq2.add_packet(p2);
+    pq2.add_packet(p1);
 
     // Инициализация планировщика
     PacketQueueScheduler pqs(pq1);

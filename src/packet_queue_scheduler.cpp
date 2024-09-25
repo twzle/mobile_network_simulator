@@ -82,6 +82,11 @@ void PacketQueueScheduler::run()
     // Подсчет статистики
     stats.total_time = run_duration;
     stats.packet_count = total_packets;
+
+    for (auto &queue : scheduled_queues){
+        stats.lost_packet_count += queue.get_lost_packet_count();
+    }
+
     stats.summarize();
 }
 
@@ -116,5 +121,7 @@ void Stats::summarize(){
                 << "Average packet processing time = " 
                 << total_processing_time.count() / packet_count << " ms\n" // Среднее время обслуживания пакета
                 << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
-                << retried_packet_count << " (" << ((float) retried_packet_count / packet_count * 100) << "% of all)\n";
+                << retried_packet_count << " (" << ((float) retried_packet_count / packet_count * 100) << "% of all)\n"
+                << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
+                << lost_packet_count << " (" << ((float) lost_packet_count / packet_count * 100) << "% of all)\n";
         }
