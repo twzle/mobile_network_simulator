@@ -1,0 +1,90 @@
+Plots
+
+#1
+
+packet_count = 5;
+packet_size = 6;
+queue_count = 4;
+quant = 1;
+limit = 10000;
+dist = [0, 500]
+
+Result: 
+Total running time = 517 ms
+Total processing time = 312 ms (60.3482% of all)
+Total idle time = 205 ms (39.6518% of all)
+Average packet processing time = 15 ms
+Retried packet count = 20 (100% of all)
+Packet loss = 0 (0% of all)
+
+
+#2
+
+packet_count = 5;
+packet_size = 1;
+queue_count = 4;
+quant = 1;
+limit = 10000;
+dist = [0, 500]
+
+Result: 
+Total running time = 497 ms
+Total processing time = 31 ms (6.23742% of all)
+Total idle time = 466 ms (93.7626% of all)
+Average packet processing time = 1 ms
+Retried packet count = 20 (100% of all)
+Packet loss = 0 (0% of all)
+
+
+#3
+
+packet_count = 5000;
+packet_size = 1;
+queue_count = 4;
+quant = 1;
+limit = 10000;
+dist = [0, 500]
+
+Result: 
+Total running time = 45778 ms
+Total processing time = 35694 ms (77.972% of all)
+Total idle time = 10084 ms (22.028% of all)
+Average packet processing time = 1 ms
+Retried packet count = 12040 (60.2% of all)
+Packet loss = 0 (0% of all)
+
+
+#4
+
+packet_count = 5000;
+packet_size = 1;
+queue_count = 4;
+quant = 1;
+limit = 10000;
+dist = [0, 10]
+
+Result: 
+Total running time = 52745 ms
+Total processing time = 41724 ms (79.1051% of all)
+Total idle time = 11021 ms (20.8949% of all)
+Average packet processing time = 2 ms
+Retried packet count = 12124 (60.62% of all)
+Packet loss = 0 (0% of all)
+
+
+#5
+
+packet_count = 5000;
+packet_size = 1;
+queue_count = 4;
+quant = 100;
+limit = 10000;
+dist = [0, 10]
+
+Result: 
+Total running time = 51639 ms
+Total processing time = 40475 ms (78.3807% of all)
+Total idle time = 11164 ms (21.6193% of all)
+Average packet processing time = 2 ms
+Retried packet count = 404 (2.02% of all)
+Packet loss = 0 (0% of all)

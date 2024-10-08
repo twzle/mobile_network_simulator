@@ -1,33 +1,36 @@
 #include "packet_queue_scheduler.hpp"
+#include "time_generator.hpp"
 // #include "matplotlibcpp.h"
+#include <random>
 
 
 int main(){
-    // Инициализация пакетов
-    Packet p1(5);
-    Packet p2(2);
-    Packet p3(8);
-    Packet p4(19);
+    TimeGenerator::initialize();
+
+    // Параметры очередей
+    int packet_count = 1000;
+    int packet_size = 2;
+    int queue_count = 4;
+    int quant = 1;
+    int limit = 1000;
+
+    std::vector<PacketQueue> queues;
+    PacketQueueScheduler pqs;
     
-    // Инициализация очереди №1
-    PacketQueue pq1(20, 3);
-    pq1.add_packet(p1);
-    pq1.add_packet(p2);
-    pq1.add_packet(p3);
-    pq1.add_packet(p4);
+    // Наполнение очередей пакетами
+    for (int i = 0; i < queue_count; ++i){
+        PacketQueue queue(quant, limit);
 
-    // Инициализация очереди №2
-    PacketQueue pq2(1, 2);
-    pq2.add_packet(p3);
-    pq2.add_packet(p4);
-    pq2.add_packet(p2);
-    pq2.add_packet(p1);
+        for (int i = 0; i < packet_count; ++i){
+            Packet packet(packet_size);
+            queue.add_packet(packet);
+        }
 
-    // Инициализация планировщика
-    PacketQueueScheduler pqs(pq1);
-    pqs.schedule(pq2);
-    pqs.schedule(pq1);
-    pqs.schedule(pq2);
+        // Планирование обслуживания очереди
+        pqs.schedule(queue);
+    }
+
+    // Запуск планировщика
     pqs.run();
 
     return 0;
