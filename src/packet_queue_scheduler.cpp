@@ -79,15 +79,6 @@ void PacketQueueScheduler::run()
 
                     // Вычисление фактического дефицита по результатам времени обслуживания
                     queue.set_deficit(deficit - packet_processing_duration);
-
-                    // std::cout << "Queue #" << queue_id + 1 << ": "
-                    //           << "Packet of size "
-                    //           << packet_size.count()
-                    //           << " served in "
-                    //           << packet_processing_duration.count() << " ms."
-                    //           << " Remaining deficit: "
-                    //           << queue.get_deficit().count()
-                    //           << "\n";
                 }
                 else
                 {
