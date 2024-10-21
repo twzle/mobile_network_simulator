@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 
 typedef std::chrono::system_clock SystemClock;

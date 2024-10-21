@@ -110,8 +110,6 @@ void PacketQueueScheduler::run()
     }
 
     stats.summarize();
-    stats.draw_scheduling_plot();
-    stats.draw_delay_plot();
 }
 
 /*
@@ -122,4 +120,9 @@ void PacketQueueScheduler::schedule(const PacketQueue &packet_queue)
 {
     scheduled_queues.push_back(packet_queue);
     total_packets += packet_queue.size();
+}
+
+ExecutionStats PacketQueueScheduler::get_stats() const
+{
+    return this->stats;
 }

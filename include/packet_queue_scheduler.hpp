@@ -1,6 +1,8 @@
+#pragma once
+
 #include <map>
 #include "packet_queue.hpp"
-#include "stats.hpp"
+#include "execution_stats.hpp"
 
 class PacketQueueScheduler {
     public:
@@ -9,9 +11,10 @@ class PacketQueueScheduler {
 
         void run();
         void schedule(const PacketQueue& packet_queue);
+        ExecutionStats get_stats() const;
 
     private:
         int total_packets = 0; // Общее число пакетов для обслуживания во всех очередях
         std::vector<PacketQueue> scheduled_queues; // Обслуживаемые очереди
-        Stats stats; // Статистика производительности планировщика
+        ExecutionStats stats; // Статистика производительности планировщика
 };
