@@ -57,6 +57,7 @@ void AverageStats::calculate_average_delays(){
 }
 
 void AverageStats::calculate_average_packet_scheduling_time(){
+    int max_timestamps_count_on_graph = 20;
     int timestamps_count = stats_array[0].packets_scheduled_by_ms[0].size();
 
     for (auto &scheduling_stats : stats_array[0].packets_scheduled_by_ms){
@@ -85,6 +86,36 @@ void AverageStats::calculate_average_packet_scheduling_time(){
         for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
             scheduling_stats.second.at(i) /= stats_array.size();
         }
+    }
+    
+    int window_size = max_timestamps_count_on_graph; // Размер окна для сглаживания, может быть изменен для более сильного или слабого сглаживания
+    if (timestamps_count <= max_timestamps_count_on_graph) {
+        return;
+    } else {
+        window_size = timestamps_count / max_timestamps_count_on_graph;
+    }
+
+
+    /*
+     Применение скользящего среднего для сглаживания данных
+    */
+    for (auto &scheduling_stats : average_packets_scheduled_by_ms){
+        std::vector<float> smoothed_data(scheduling_stats.second.size(), 0.0);
+        for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
+            double sum = 0.0;
+            int count = 0;
+            // Усреднение по окну
+            for (int j = -window_size / 2; j <= window_size / 2; ++j){
+                int index = i + j;
+                if (index >= 0 && index < int(scheduling_stats.second.size())){
+                    sum += scheduling_stats.second[index];
+                    ++count;
+                }
+            }
+            smoothed_data[i] = sum / count;
+        }
+        // Обновляем данные на сглаженные
+        scheduling_stats.second = smoothed_data;
     }
 }
 
