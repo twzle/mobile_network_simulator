@@ -8,15 +8,15 @@ namespace plt = matplotlibcpp;
 void AverageStats::calculate(){
     calculate_average_values();
     calculate_average_delays();
-    calculate_average_packet_scheduling_time();
+    // calculate_average_packet_scheduling_time();
 }
 
 // Подсчет среднего арифметического базовых параметров работы планировщика
 void AverageStats::calculate_average_values(){
     for (auto &stats : stats_array){
-        common_total_time += stats.total_time.count();
-        common_total_skip_time += stats.total_skip_time.count();
-        common_total_processing_time += stats.total_processing_time.count();
+        common_total_time += stats.total_time;
+        common_total_skip_time += stats.total_skip_time;
+        common_total_processing_time += stats.total_processing_time;
         common_total_packet_count += stats.packet_count;
         common_total_lost_packet_count += stats.lost_packet_count;
         common_total_retried_packet_count += stats.retried_packet_count;
@@ -25,19 +25,19 @@ void AverageStats::calculate_average_values(){
     common_total_idle_time = common_total_time - common_total_processing_time;
 
     average_total_time = 
-        common_total_time / float(stats_array.size());
+        common_total_time / stats_array.size();
     average_total_idle_time = 
-        common_total_idle_time / float(stats_array.size());
+        common_total_idle_time / stats_array.size();
     average_total_skip_time = 
-        common_total_skip_time / float(stats_array.size());
+        common_total_skip_time / stats_array.size();
     average_total_processing_time = 
-        common_total_processing_time / float(stats_array.size());
+        common_total_processing_time / stats_array.size();
     average_total_packet_count =
-        common_total_packet_count / float(stats_array.size());
+        common_total_packet_count / stats_array.size();
     average_total_lost_packet_count =
-        common_total_lost_packet_count / float(stats_array.size());
+        common_total_lost_packet_count / stats_array.size();
     average_total_retried_packet_count =
-        common_total_retried_packet_count / float(stats_array.size());
+        common_total_retried_packet_count / stats_array.size();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
@@ -100,7 +100,7 @@ void AverageStats::calculate_average_packet_scheduling_time(){
      Применение скользящего среднего для сглаживания данных
     */
     for (auto &scheduling_stats : average_packets_scheduled_by_ms){
-        std::vector<float> smoothed_data(scheduling_stats.second.size(), 0.0);
+        std::vector<double> smoothed_data(scheduling_stats.second.size(), 0.0);
         for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
             double sum = 0.0;
             int count = 0;
@@ -129,25 +129,24 @@ void AverageStats::show()
         << "Processing time = "
         << average_total_processing_time 
         << " ms (" // Общее время обслуживания пакетов и доля от общего времени
-        << 100 * ((float)average_total_processing_time 
-            / (float)average_total_time) 
+        << 100 * (average_total_processing_time / average_total_time) 
         << "% of all)\n"
         << "Common total idle time = "
         << average_total_idle_time 
         << " ms (" // Общее время простоя и доля от общего времени
-        << 100 * ((float)average_total_idle_time 
-            / (float)average_total_time) 
+        << 100 * (average_total_idle_time / average_total_time) 
         << "% of all)\n"
         << "Average packet processing time = "
         << average_total_processing_time / average_total_packet_count 
         << " ms\n" // Среднее время обслуживания пакета
         << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
         << average_total_retried_packet_count 
-        << " (" << ((float)average_total_retried_packet_count / average_total_packet_count * 100) 
+        << " (" << ((double)average_total_retried_packet_count / average_total_packet_count * 100) 
         << "% of all)\n"
         << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
         << average_total_lost_packet_count << " (" 
-        << ((float)average_total_lost_packet_count / (average_total_packet_count + average_total_lost_packet_count) * 100) 
+        << ((double)average_total_lost_packet_count 
+        / (average_total_packet_count + average_total_lost_packet_count) * 100) 
         << "% of all)\n\n";
 }
 

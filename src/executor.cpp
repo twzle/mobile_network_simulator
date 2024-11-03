@@ -4,11 +4,13 @@
 
 Executor::Executor(Settings settings){
     this->settings = settings;
+    std::exponential_distribution<> time_distribution(settings.get_time_lambda());
+    TimeGenerator::set_distribution(std::exponential_distribution<>(settings.get_time_lambda()));
 }
 
 void Executor::run(){
     for (int i = 0; i < settings.get_launches(); ++i){
-        TimeGenerator::synchronize_time();
+        TimeGenerator::reset_time();
 
         std::cout << "Running scheduler #" << i + 1 << "...\n";
         this->execute();

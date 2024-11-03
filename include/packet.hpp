@@ -8,16 +8,16 @@
 class Packet {
     public:
         Packet(int size);
-        ms get_size() const;
+        double get_size() const;
         bool get_retry() const;
         void set_retry();
 
-        time_point get_scheduled_at() const;
-        void set_scheduled_at(time_point scheduled_at);
+        double get_scheduled_at() const;
+        void set_scheduled_at(double scheduled_at);
 
     private:
-        ms size; // Размер пакета (время на обслуживание) в мс
-        time_point scheduled_at; // Время в которое для пакета было запланировано обслуживание
+        double size; // Размер пакета (время на обслуживание) в мс
+        double scheduled_at; // Время в которое для пакета было запланировано обслуживание
         bool retry; // Превысил ли пакет дефицит
 };
 

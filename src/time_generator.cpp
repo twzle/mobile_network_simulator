@@ -3,35 +3,43 @@
 #include "types.hpp"
 
 std::mt19937 TimeGenerator::gen;
-ms TimeGenerator::initial_time;
+double TimeGenerator::initial_time;
+double TimeGenerator::last_scheduling_time;
+std::exponential_distribution<> TimeGenerator::distrib;
 
 void TimeGenerator::initialize()
 {
     std::random_device rd; // зерно для рандомизации
     gen.seed(rd());  // mersenne_twister_engine с зерном rd()
+    initial_time = 0.0;
+    last_scheduling_time = initial_time;
 }
 
-void TimeGenerator::synchronize_time()
+void TimeGenerator::reset_time()
 {
-    time_point current_time = SystemClock::now();
-    initial_time =
-        std::chrono::duration_cast<ms>(current_time.time_since_epoch());
+    last_scheduling_time = initial_time;
 }
 
 // Генератор времени относительно создания относительно инициилазации TimeGenerator
-ms TimeGenerator::generate_time()
+double TimeGenerator::generate_time()
 {
-    ms time_shift = ms(distrib(gen));
-    ms result_time = initial_time + time_shift;
+    double time_delta = distrib(gen);
+    double result_time = last_scheduling_time + time_delta;
+    last_scheduling_time = result_time;
     return result_time;
 }
 
-ms TimeGenerator::get_initial_time()
+double TimeGenerator::get_initial_time()
 {
     return initial_time;
 }
 
-std::uniform_int_distribution<> TimeGenerator::get_distribution()
+std::exponential_distribution<> TimeGenerator::get_distribution()
 {
     return distrib;
+}
+
+void TimeGenerator::set_distribution(std::exponential_distribution<> new_distrib)
+{
+    distrib = new_distrib;
 }

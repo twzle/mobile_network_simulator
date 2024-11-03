@@ -12,30 +12,30 @@ ExecutionStats::ExecutionStats() : total_time(0), total_skip_time(0),
 void ExecutionStats::summarize()
 {
     // Общее время простоя
-    auto total_idle_time = total_time.count() - total_processing_time.count();
+    double total_idle_time = total_time - total_processing_time;
 
     std::cout << "\nTotal running time = "
-              << total_time.count() << " ms\n" // Общее время работы
+              << total_time << " ms\n" // Общее время работы
               << "Total processing time = "
-              << total_processing_time.count() 
+              << total_processing_time 
               << " ms (" // Общее время обслуживания пакетов и доля от общего времени
-              << 100 * ((float)total_processing_time.count() / (float)total_time.count()) 
+              << 100 * (total_processing_time / total_time) 
               << "% of all)\n"
               << "Total idle time = "
               << total_idle_time 
               << " ms (" // Общее время простоя и доля от общего времени
-              << 100 * ((float)total_idle_time / (float)total_time.count()) 
+              << 100 * (total_idle_time / total_time) 
               << "% of all)\n"
               << "Average packet processing time = "
-              << total_processing_time.count() / float(packet_count) 
+              << total_processing_time / packet_count 
               << " ms\n" // Среднее время обслуживания пакета
               << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
               << retried_packet_count 
-              << " (" << ((float)retried_packet_count / packet_count * 100) 
+              << " (" << ((double)retried_packet_count / packet_count * 100) 
               << "% of all)\n"
               << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
               << lost_packet_count << " (" 
-              << ((float)lost_packet_count / (packet_count + lost_packet_count) * 100) 
+              << ((double)lost_packet_count / (packet_count + lost_packet_count) * 100) 
               << "% of all)\n\n";
 }
 
@@ -52,13 +52,13 @@ void ExecutionStats::evaluate_delay_stats()
     for (auto &stats : queue_stats)
     {
         // Подсчет времени задержек обслуживания пакетов в очереди
-        int total_delay = 0;
+        double total_delay = 0;
         for (auto &packet_stats : stats.second)
         {
-            total_delay += (int)packet_stats.processing_delay.count();
+            total_delay += packet_stats.processing_delay;
         }
 
-        float average_delay = (float)total_delay / stats.second.size();
+        double average_delay = total_delay / stats.second.size();
         this->average_delays.push_back(average_delay);
     }
 }
@@ -91,46 +91,46 @@ void ExecutionStats::draw_delay_plot(){
 // Рисование графика планирования
 void ExecutionStats::evaluate_scheduling_stats()
 {
-    ms initial_scheduling_time = TimeGenerator::get_initial_time();
+    // double initial_scheduling_time = TimeGenerator::get_initial_time();
 
-    std::map<int, std::map<int, int>> relative_scheduling_time;
+    // std::map<int, std::map<int, int>> relative_scheduling_time;
 
-    /*
-        Подсчет времени планирования для каждого пакета по очередям 
-        относительно запуска планировщика
-    */
-    for (auto &stats : queue_stats)
-    {
-        for (auto &packet_stats : stats.second)
-        {
-            int relative_packet_schedule_time =
-                (packet_stats.scheduled_at - initial_scheduling_time).count();
-            relative_scheduling_time[stats.first]
-                                    [relative_packet_schedule_time]++;
-        }
-    }
+    // /*
+    //     Подсчет времени планирования для каждого пакета по очередям 
+    //     относительно запуска планировщика
+    // */
+    // for (auto &stats : queue_stats)
+    // {
+    //     for (auto &packet_stats : stats.second)
+    //     {
+    //         int relative_packet_schedule_time =
+    //             packet_stats.scheduled_at - initial_scheduling_time;
+    //         relative_scheduling_time[stats.first]
+    //                                 [relative_packet_schedule_time]++;
+    //     }
+    // }
 
-    // Вычисление диапазона времени для планирования обслуживания 
-    int lower_limit = TimeGenerator::get_distribution().a();
-    int upper_limit = TimeGenerator::get_distribution().b();
+    // // Вычисление диапазона времени для планирования обслуживания 
+    // int lower_limit = TimeGenerator::get_distribution().a();
+    // int upper_limit = TimeGenerator::get_distribution().b();
 
-    int n = upper_limit - lower_limit + 1;
+    // int n = upper_limit - lower_limit + 1;
 
-    // Подсчет количества пакетов запланированных в каждый момент времени (мс)
-    for (auto &queue_stats : relative_scheduling_time)
-    {   
-        // Выделение требуемой памяти под хранение статистики для одной очереди за раз 
-        this->packets_scheduled_by_ms[queue_stats.first].resize(n);
-        for (int i = 0; i < n; ++i)
-        {
-            auto it = relative_scheduling_time[queue_stats.first].find(i);
-            if (it != relative_scheduling_time[queue_stats.first].end())
-            {
-                // Подсчет количества пакетов запланированных в одно время
-                this->packets_scheduled_by_ms[queue_stats.first].at(i) = it->second;
-            }
-        }
-    }
+    // // Подсчет количества пакетов запланированных в каждый момент времени (мс)
+    // for (auto &queue_stats : relative_scheduling_time)
+    // {   
+    //     // Выделение требуемой памяти под хранение статистики для одной очереди за раз 
+    //     this->packets_scheduled_by_ms[queue_stats.first].resize(n);
+    //     for (int i = 0; i < n; ++i)
+    //     {
+    //         auto it = relative_scheduling_time[queue_stats.first].find(i);
+    //         if (it != relative_scheduling_time[queue_stats.first].end())
+    //         {
+    //             // Подсчет количества пакетов запланированных в одно время
+    //             this->packets_scheduled_by_ms[queue_stats.first].at(i) = it->second;
+    //         }
+    //     }
+    // }
 }
 
 void ExecutionStats::draw_scheduling_plot(){

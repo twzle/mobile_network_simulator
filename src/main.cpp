@@ -3,18 +3,16 @@
 #include "executor.hpp"
 #include <random>
 
-// Равномерное распределение в диапазоне [a, b] (мс)
-std::uniform_int_distribution<> TimeGenerator::distrib(0, 10);
-
 int main(){
     TimeGenerator::initialize();
 
-    int launches = 10;
-    int packet_count = 500;
-    int packet_size = 2;
-    int queue_count = 2;
+    int launches = 50;
+    int packet_count = 1000;
+    int packet_size = 1;
+    int queue_count = 4;
     int queue_quant = 1;
-    int queue_limit = 1000;
+    int queue_limit = 5000;
+    double time_lambda = 2;
 
     Settings settings = 
     Settings(
@@ -23,7 +21,8 @@ int main(){
         packet_size, 
         queue_count, 
         queue_quant, 
-        queue_limit);
+        queue_limit,
+        time_lambda);
     Executor executor = Executor(settings);
     executor.run();
 
@@ -31,7 +30,6 @@ int main(){
     stats.calculate();
     stats.show();
     stats.draw_delay_plot();
-    stats.draw_scheduling_plot();
     
     return 0;
 }

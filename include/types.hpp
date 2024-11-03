@@ -2,6 +2,5 @@
 
 #include <chrono>
 
-typedef std::chrono::system_clock SystemClock;
-typedef std::chrono::milliseconds ms;
-typedef SystemClock::time_point time_point;
+const double epsilon = 1e-9;
+const double queue_switch_time = 0.001;

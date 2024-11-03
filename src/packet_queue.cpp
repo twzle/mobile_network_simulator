@@ -8,8 +8,8 @@ void PacketQueue::add_packet(Packet &packet)
 {
     if (packet_queue.size() < limit)
     {
-        ms time = TimeGenerator::generate_time();
-        packet.set_scheduled_at(time_point(time));
+        double time = TimeGenerator::generate_time();
+        packet.set_scheduled_at(time);
         packet_queue.push(packet);
     } else {
         ++lost_packet_count;
@@ -17,9 +17,9 @@ void PacketQueue::add_packet(Packet &packet)
 }
 
 int PacketQueue::get_lost_packet_count() const { return lost_packet_count; }
-ms PacketQueue::get_quant() const { return quant; }
-ms PacketQueue::get_deficit() const { return deficit; }
-void PacketQueue::set_deficit(ms deficit) { this->deficit = deficit; }
+double PacketQueue::get_quant() const { return quant; }
+double PacketQueue::get_deficit() const { return deficit; }
+void PacketQueue::set_deficit(double deficit) { this->deficit = deficit; }
 
 // Обертка над std::queue
 Packet PacketQueue::front() const { return this->packet_queue.top(); }
@@ -30,9 +30,8 @@ void PacketQueue::push(const Packet& packet) { return this->packet_queue.push(pa
 void PacketQueue::print(){
     while (!this->packet_queue.empty()) {
         Packet packet = this->front();
-        ms initial_time = 
-            std::chrono::duration_cast<ms>(packet.get_scheduled_at().time_since_epoch());
-        std::cout << initial_time.count() << "\n";
+        double schedule_time = packet.get_scheduled_at();
+        std::cout << schedule_time << "\n";
         this->packet_queue.pop();  // Удаляем элемент после его обработки
     }
 }

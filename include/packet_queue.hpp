@@ -10,9 +10,9 @@ class PacketQueue {
         void add_delay(int delay);
 
         int get_lost_packet_count() const;
-        ms get_quant() const;
-        ms get_deficit() const;
-        void set_deficit(ms deficit);
+        double get_quant() const;
+        double get_deficit() const;
+        void set_deficit(double deficit);
 
         Packet front() const;
         int size() const;
@@ -22,8 +22,8 @@ class PacketQueue {
         void print();
 
     private:
-        ms quant; // Время выделяемое очереди 
-        ms deficit; // Накопленный дефицит времени
+        double quant; // Время выделяемое очереди 
+        double deficit; // Накопленный дефицит времени
         size_t limit; // Размер очереди
         int lost_packet_count = 0; // Число потерянных пакетов
         std::priority_queue<Packet, std::vector<Packet>, PacketGreater> packet_queue; // Очередь из обслуживаемых пакетов
