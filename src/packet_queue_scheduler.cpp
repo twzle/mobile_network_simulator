@@ -23,6 +23,8 @@ void PacketQueueScheduler::run()
 
         for (auto &queue : scheduled_queues)
         {
+            double queue_processing_start_time = current_time;
+
             // Перебор пакетов только в наполненной очереди
             while (queue.size() > 0)
             {
@@ -78,6 +80,11 @@ void PacketQueueScheduler::run()
                     break;
                 }
             }
+            double queue_processing_end_time = current_time;
+            double queue_processing_duration = 
+                queue_processing_end_time - queue_processing_start_time;
+            
+            stats.queue_processing_time[queue_id] += queue_processing_duration;
 
             queue_id++;
             current_time += queue_switch_time;
@@ -99,7 +106,7 @@ void PacketQueueScheduler::run()
         stats.lost_packet_count += queue.get_lost_packet_count();
     }
 
-    stats.summarize();
+    stats.print();
 }
 
 /*

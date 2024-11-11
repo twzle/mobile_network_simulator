@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "execution_stats.hpp"
 
 class AverageStats {
@@ -10,9 +11,13 @@ class AverageStats {
         void calculate_average_values();
         void calculate_average_delays();
         void calculate_average_packet_scheduling_time();
+        void calculate_average_queue_processing_time();
         void show();
         void draw_delay_plot();
         void draw_scheduling_plot();
+        void draw_queue_processing_time_plot();
+
+        std::string write_yaml();
 
         double average_total_time = 0;
         double common_total_time = 0;
@@ -35,8 +40,11 @@ class AverageStats {
         double average_total_retried_packet_count = 0;
         double common_total_retried_packet_count = 0;
 
+        std::vector<double> average_queue_processing_time;
+        double total_average_queue_processing_time = 0;
+
         std::vector<double> average_delays;
-        std::map<double, std::vector<double>> average_packets_scheduled_by_ms;
+        double total_average_delay = 0;
 
         std::vector<ExecutionStats> stats_array;
 

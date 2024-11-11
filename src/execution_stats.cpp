@@ -1,15 +1,9 @@
-#include <matplotlibcpp.h>
 #include "execution_stats.hpp"
 #include "time_generator.hpp"
-
-namespace plt = matplotlibcpp;
-
-ExecutionStats::ExecutionStats() : total_time(0), total_skip_time(0),
-                 total_processing_time(0), packet_count(0),
-                 retried_packet_count(0), lost_packet_count(0) {}
+#include <iostream>
 
 // Вывод статистики в stdout
-void ExecutionStats::summarize()
+void ExecutionStats::print()
 {
     // Общее время простоя
     double total_idle_time = total_time - total_processing_time;
@@ -40,8 +34,22 @@ void ExecutionStats::summarize()
 }
 
 void ExecutionStats::evaluate(){
+    evaluate_queue_processing_time_stats();
     evaluate_delay_stats();
-    evaluate_scheduling_stats();
+}
+
+// Рисование графика задержек
+void ExecutionStats::evaluate_queue_processing_time_stats()
+{
+    double sum_of_all_queue_prcoessing_time = 0;
+    // Подсчет общего времени работы всех очередей
+    for (auto &stats : queue_processing_time)
+    {
+        sum_of_all_queue_prcoessing_time += stats.second;
+    }
+
+    average_queue_processing_time = 
+        sum_of_all_queue_prcoessing_time / queue_processing_time.size();
 }
 
 
@@ -58,95 +66,10 @@ void ExecutionStats::evaluate_delay_stats()
             total_delay += packet_stats.processing_delay;
         }
 
-        double average_delay = total_delay / stats.second.size();
-        this->average_delays.push_back(average_delay);
-    }
-}
-
-// Рисование графика задержек
-void ExecutionStats::draw_delay_plot(){
-    std::vector<int> x_ticks = {};
-    std::vector<std::string> x_labels = {};
-
-    // Подписи к графикам
-    for (auto &stats : queue_stats){
-        x_ticks.push_back(stats.first);
-
-        std::string label = "queue " + std::to_string(stats.first + 1);
-        x_labels.push_back(label);
-    }
-    
-    // Построение графика
-    plt::bar(this->average_delays, "black", "-", 0.5);
-    plt::xticks(x_ticks, x_labels);
-    plt::title("Средняя задержка обслуживания пакетов");
-    plt::xlabel("Название очереди");
-    plt::ylabel("Задержка (мс) ");
-    std::string filename = "./average_delay.png";
-    std::cout << "Saving result to " << filename << std::endl;
-    plt::save(filename);
-    plt::close();
-}
-
-// Рисование графика планирования
-void ExecutionStats::evaluate_scheduling_stats()
-{
-    // double initial_scheduling_time = TimeGenerator::get_initial_time();
-
-    // std::map<int, std::map<int, int>> relative_scheduling_time;
-
-    // /*
-    //     Подсчет времени планирования для каждого пакета по очередям 
-    //     относительно запуска планировщика
-    // */
-    // for (auto &stats : queue_stats)
-    // {
-    //     for (auto &packet_stats : stats.second)
-    //     {
-    //         int relative_packet_schedule_time =
-    //             packet_stats.scheduled_at - initial_scheduling_time;
-    //         relative_scheduling_time[stats.first]
-    //                                 [relative_packet_schedule_time]++;
-    //     }
-    // }
-
-    // // Вычисление диапазона времени для планирования обслуживания 
-    // int lower_limit = TimeGenerator::get_distribution().a();
-    // int upper_limit = TimeGenerator::get_distribution().b();
-
-    // int n = upper_limit - lower_limit + 1;
-
-    // // Подсчет количества пакетов запланированных в каждый момент времени (мс)
-    // for (auto &queue_stats : relative_scheduling_time)
-    // {   
-    //     // Выделение требуемой памяти под хранение статистики для одной очереди за раз 
-    //     this->packets_scheduled_by_ms[queue_stats.first].resize(n);
-    //     for (int i = 0; i < n; ++i)
-    //     {
-    //         auto it = relative_scheduling_time[queue_stats.first].find(i);
-    //         if (it != relative_scheduling_time[queue_stats.first].end())
-    //         {
-    //             // Подсчет количества пакетов запланированных в одно время
-    //             this->packets_scheduled_by_ms[queue_stats.first].at(i) = it->second;
-    //         }
-    //     }
-    // }
-}
-
-void ExecutionStats::draw_scheduling_plot(){
-    // Подписи к графикам
-    for (auto& queue_stats : this->packets_scheduled_by_ms){
-        std::string label = "Queue " + std::to_string(queue_stats.first + 1);
-        plt::named_plot(label, queue_stats.second);
+        double average_delay_in_queue = total_delay / stats.second.size();
+        average_delay += average_delay_in_queue;
+        this->average_delay_by_queue.push_back(average_delay_in_queue);
     }
 
-    // Построение графика
-    plt::title("Время прихода пакетов по очередям");
-    plt::ylabel("Количество пакетов");
-    plt::xlabel("Время прихода пакета относительно запуска (мс) ");
-    plt::legend();
-    std::string filename = "./scheduling.png";
-    std::cout << "Saving result to " << filename << std::endl;;
-    plt::save(filename);
-    plt::close();
+    average_delay /= queue_stats.size();
 }

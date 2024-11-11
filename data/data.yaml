@@ -1,0 +1,12 @@
+average_queue_processing_time:
+  - 1000
+  - 1000
+  - 1000
+  - 1000
+total_average_queue_processing_time: 1000
+average_delays:
+  - 410.71624880779854
+  - 1077.1002083820042
+  - 1287.2185168596427
+  - 1229.5976944522868
+total_average_delay: 1001.158167125433

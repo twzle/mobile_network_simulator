@@ -1,7 +1,9 @@
 #include "packet_queue_scheduler.hpp"
 #include "time_generator.hpp"
 #include "executor.hpp"
+#include "plotter.hpp"
 #include <random>
+
 
 int main(){
     TimeGenerator::initialize();
@@ -29,7 +31,10 @@ int main(){
     AverageStats stats = executor.get_stats();
     stats.calculate();
     stats.show();
-    stats.draw_delay_plot();
-    
+
+    std::string stats_file_path = stats.write_yaml();
+
+    Plotter plotter = Plotter();
+    plotter.run(stats_file_path);
     return 0;
 }

@@ -1,14 +1,7 @@
 CXX = g++
-CXXFLAGS = -O2 -Wall -Werror -Wextra -std=c++17 \
-           -Iinclude \
-           -I/usr/include/python3.10 \
-		   -I./venv/include/python3.10 \
-           -I./venv/lib/python3.10/site-packages/numpy/_core/include \
-           -L/usr/lib/python3.10/config-3.10-x86_64-linux-gnu \
-           -L/usr/lib/x86_64-linux-gnu \
-           -lcrypt -ldl -lm -lpython3.10
-           
-LDFLAGS =
+CXXFLAGS = -O2 -Wall -Werror -Wextra -std=c++17 -Iinclude \
+		   -I/home/user/Desktop/CPP/Other/yaml-cpp/include
+LDFLAGS = -L/home/user/Desktop/CPP/Other/yaml-cpp/build -lyaml-cpp
 
 EXE = drr
 SRCDIR = src

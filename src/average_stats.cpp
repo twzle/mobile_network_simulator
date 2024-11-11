@@ -1,19 +1,25 @@
-#include <matplotlibcpp.h>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <yaml-cpp/yaml.h>
 #include "average_stats.hpp"
 
-namespace plt = matplotlibcpp;
+#define DATA_DIR "data/"
+#define FILE_NAME "data.yaml"
 
 // Подсчет средних значений
-void AverageStats::calculate(){
+void AverageStats::calculate()
+{
     calculate_average_values();
     calculate_average_delays();
-    // calculate_average_packet_scheduling_time();
+    calculate_average_queue_processing_time();
 }
 
 // Подсчет среднего арифметического базовых параметров работы планировщика
-void AverageStats::calculate_average_values(){
-    for (auto &stats : stats_array){
+void AverageStats::calculate_average_values()
+{
+    for (auto &stats : stats_array)
+    {
         common_total_time += stats.total_time;
         common_total_skip_time += stats.total_skip_time;
         common_total_processing_time += stats.total_processing_time;
@@ -24,13 +30,13 @@ void AverageStats::calculate_average_values(){
 
     common_total_idle_time = common_total_time - common_total_processing_time;
 
-    average_total_time = 
+    average_total_time =
         common_total_time / stats_array.size();
-    average_total_idle_time = 
+    average_total_idle_time =
         common_total_idle_time / stats_array.size();
-    average_total_skip_time = 
+    average_total_skip_time =
         common_total_skip_time / stats_array.size();
-    average_total_processing_time = 
+    average_total_processing_time =
         common_total_processing_time / stats_array.size();
     average_total_packet_count =
         common_total_packet_count / stats_array.size();
@@ -41,155 +47,114 @@ void AverageStats::calculate_average_values(){
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
-void AverageStats::calculate_average_delays(){
-    int queue_count = stats_array[0].average_delays.size();
+void AverageStats::calculate_average_delays()
+{
+    int queue_count = stats_array[0].average_delay_by_queue.size();
     average_delays.resize(queue_count);
 
-    for (auto &stats : stats_array){
-        for (int i = 0; i < queue_count; ++i){
-            average_delays[i] += stats.average_delays[i];
+    for (auto &stats : stats_array)
+    {
+        for (int i = 0; i < queue_count; ++i)
+        {
+            average_delays[i] += stats.average_delay_by_queue[i];
         }
+        total_average_delay += stats.average_delay;
     }
 
-    for (int i = 0; i < queue_count; ++i){
+    for (int i = 0; i < queue_count; ++i)
+    {
         average_delays[i] /= stats_array.size();
     }
+
+    total_average_delay /= stats_array.size();
 }
 
-void AverageStats::calculate_average_packet_scheduling_time(){
-    int max_timestamps_count_on_graph = 20;
-    int timestamps_count = stats_array[0].packets_scheduled_by_ms[0].size();
+void AverageStats::calculate_average_queue_processing_time()
+{
+    int queue_count = stats_array[0].queue_processing_time.size();
+    average_queue_processing_time.resize(queue_count);
 
-    for (auto &scheduling_stats : stats_array[0].packets_scheduled_by_ms){
-        average_packets_scheduled_by_ms[scheduling_stats.first].resize(timestamps_count);
-    }
+    double total_average_processing_time = 0;
 
-    /*
-     Суммирование количества запланированных пакетов 
-     в единицу времени по каждой очереди за все запуски
-    */
-    for (auto &stats : stats_array){
-        for (auto &scheduling_stats : stats.packets_scheduled_by_ms){
-            for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
-                average_packets_scheduled_by_ms[scheduling_stats.first].at(i) 
-                    += scheduling_stats.second.at(i);
-            }
+    for (auto &stats : stats_array)
+    {
+        for (int i = 0; i < queue_count; ++i)
+        {
+            average_queue_processing_time[i] += stats.queue_processing_time[i];
         }
-    }
-    
-
-    /*
-     Вычисление среднего арифметического количества запланированных пакетов 
-     в единицу времени по каждой очереди за все запуски
-    */
-    for (auto &scheduling_stats : average_packets_scheduled_by_ms){
-        for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
-            scheduling_stats.second.at(i) /= stats_array.size();
-        }
-    }
-    
-    int window_size = max_timestamps_count_on_graph; // Размер окна для сглаживания, может быть изменен для более сильного или слабого сглаживания
-    if (timestamps_count <= max_timestamps_count_on_graph) {
-        return;
-    } else {
-        window_size = timestamps_count / max_timestamps_count_on_graph;
+        total_average_processing_time += stats.average_queue_processing_time;
     }
 
-
-    /*
-     Применение скользящего среднего для сглаживания данных
-    */
-    for (auto &scheduling_stats : average_packets_scheduled_by_ms){
-        std::vector<double> smoothed_data(scheduling_stats.second.size(), 0.0);
-        for (size_t i = 0; i < scheduling_stats.second.size(); ++i){
-            double sum = 0.0;
-            int count = 0;
-            // Усреднение по окну
-            for (int j = -window_size / 2; j <= window_size / 2; ++j){
-                int index = i + j;
-                if (index >= 0 && index < int(scheduling_stats.second.size())){
-                    sum += scheduling_stats.second[index];
-                    ++count;
-                }
-            }
-            smoothed_data[i] = sum / count;
-        }
-        // Обновляем данные на сглаженные
-        scheduling_stats.second = smoothed_data;
+    for (int i = 0; i < queue_count; ++i)
+    {
+        average_queue_processing_time[i] /= stats_array.size();
     }
+
+    total_average_queue_processing_time = total_average_processing_time / stats_array.size();
 }
 
 // Вывод в stdout срденего арифметического по статистике работы планировщика
 void AverageStats::show()
-{   
+{
     std::cout << "--------------\n\n";
     std::cout << "Average stats\n";
     std::cout << "\nRunning time = "
-        << average_total_time << " ms\n" // Общее время работы
-        << "Processing time = "
-        << average_total_processing_time 
-        << " ms (" // Общее время обслуживания пакетов и доля от общего времени
-        << 100 * (average_total_processing_time / average_total_time) 
-        << "% of all)\n"
-        << "Common total idle time = "
-        << average_total_idle_time 
-        << " ms (" // Общее время простоя и доля от общего времени
-        << 100 * (average_total_idle_time / average_total_time) 
-        << "% of all)\n"
-        << "Average packet processing time = "
-        << average_total_processing_time / average_total_packet_count 
-        << " ms\n" // Среднее время обслуживания пакета
-        << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
-        << average_total_retried_packet_count 
-        << " (" << ((double)average_total_retried_packet_count / average_total_packet_count * 100) 
-        << "% of all)\n"
-        << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
-        << average_total_lost_packet_count << " (" 
-        << ((double)average_total_lost_packet_count 
-        / (average_total_packet_count + average_total_lost_packet_count) * 100) 
-        << "% of all)\n\n";
+              << average_total_time << " ms\n" // Общее время работы
+              << "Processing time = "
+              << average_total_processing_time
+              << " ms (" // Общее время обслуживания пакетов и доля от общего времени
+              << 100 * (average_total_processing_time / average_total_time)
+              << "% of all)\n"
+              << "Common total idle time = "
+              << average_total_idle_time
+              << " ms (" // Общее время простоя и доля от общего времени
+              << 100 * (average_total_idle_time / average_total_time)
+              << "% of all)\n"
+              << "Average packet processing time = "
+              << average_total_processing_time / average_total_packet_count
+              << " ms\n"                   // Среднее время обслуживания пакета
+              << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
+              << average_total_retried_packet_count
+              << " (" << ((double)average_total_retried_packet_count / average_total_packet_count * 100)
+              << "% of all)\n"
+              << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
+              << average_total_lost_packet_count << " ("
+              << ((double)average_total_lost_packet_count / (average_total_packet_count + average_total_lost_packet_count) * 100)
+              << "% of all)\n\n";
 }
 
-// Рисование графика средних задержек по очередям для всех запусков
-void AverageStats::draw_delay_plot(){
-    std::vector<int> x_ticks = {};
-    std::vector<std::string> x_labels = {};
+std::string AverageStats::write_yaml()
+{
+    YAML::Emitter out;
 
-    // Подписи к графикам
-    for (size_t i = 0; i < average_delays.size(); ++i){
-        x_ticks.push_back(i);
+    out << YAML::BeginMap;
 
-        std::string label = "queue " + std::to_string(i + 1);
-        x_labels.push_back(label);
-    }
-    
-    // Построение графика
-    plt::bar(average_delays, "black", "-", 0.5);
-    plt::xticks(x_ticks, x_labels);
-    plt::title("Средняя задержка обслуживания пакетов");
-    plt::xlabel("Название очереди");
-    plt::ylabel("Задержка (мс) ");
-    std::string filename = "./average_delay.png";
-    std::cout << "Saving result to " << filename << std::endl;
-    plt::save(filename);
-    plt::close();
-}
+    // average_queue_processing_time
+    out << YAML::Key << "average_queue_processing_time" 
+        << YAML::Value << average_queue_processing_time;
 
-// Рисование графика средних количества пакетов пришедших в очереди для всех запусков
-void AverageStats::draw_scheduling_plot(){
-    // Подписи к графикам
-    for (auto& queue_stats : average_packets_scheduled_by_ms){
-        std::string label = "Queue " + std::to_string(queue_stats.first + 1);
-        plt::named_plot(label, queue_stats.second);
-    }
+    // total_average_queue_processing_time
+    out << YAML::Key << "total_average_queue_processing_time" 
+        << YAML::Value << total_average_queue_processing_time;
 
-    // Построение графика
-    plt::title("Время прихода пакетов по очередям");
-    plt::ylabel("Среднее количество пакетов");
-    plt::xlabel("Время прихода пакета относительно запуска (мс) ");
-    plt::legend();
-    std::string filename = "./average_scheduling.png";
-    std::cout << "Saving result to " << filename << std::endl;;
-    plt::save(filename);
-    plt::close();
+    // average_delays
+    out << YAML::Key << "average_delays" 
+        << YAML::Value << average_delays;
+
+    // total_average_delay
+    out << YAML::Key << "total_average_delay" 
+        << YAML::Value << total_average_delay;
+
+    out << YAML::EndMap;
+
+    std::string local_file_path = std::string(DATA_DIR) + std::string(FILE_NAME);
+    std::string relative_file_path = "./" + local_file_path;
+    std::ofstream fout(relative_file_path);
+
+    fout << out.c_str();
+    fout.close();
+
+    std::string absolute_file_path = 
+        std::filesystem::current_path().c_str() + std::string("/") + local_file_path;
+    return absolute_file_path;
 }
