@@ -1,6 +1,9 @@
 #include "executor.hpp"
 #include "packet_queue_scheduler.hpp"
 #include "time_generator.hpp"
+#include <thread>   // Для sleep_for и chrono
+#include <chrono>   // Для единиц времени
+
 
 Executor::Executor(Settings settings){
     this->settings = settings;
@@ -18,8 +21,6 @@ void Executor::run(){
 }
 
 void Executor::execute(){
-
-    std::vector<PacketQueue> queues;
     PacketQueueScheduler pqs;
             
     // Наполнение очередей пакетами
@@ -35,19 +36,20 @@ void Executor::execute(){
         }
 
         // Планирование обслуживания очереди
-        pqs.schedule(queue);
+        pqs.schedule(std::move(queue));
     }
 
-    // Запуск планировщика
     pqs.run();
 
-    ExecutionStats stats = pqs.get_stats();
+    ExecutionStats& stats = pqs.get_stats();
     stats.evaluate();
+    stats.release_memory_resources();
+    stats.print();
 
     // Запись статистики текущего запуска в массив
-    this->average_stats.stats_array.push_back(stats);
+    this->average_stats.stats_array.push_back(std::move(stats));
 }
 
-AverageStats Executor::get_stats(){
+AverageStats& Executor::get_stats(){
     return this->average_stats;
 }

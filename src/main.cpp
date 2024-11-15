@@ -8,12 +8,12 @@
 int main(){
     TimeGenerator::initialize();
 
-    int launches = 50;
+    int launches = 10;
     int packet_count = 1000;
     int packet_size = 1;
-    int queue_count = 4;
+    int queue_count = 2;
     int queue_quant = 1;
-    int queue_limit = 5000;
+    int queue_limit = 1000;
     double time_lambda = 2;
 
     Settings settings = 
@@ -28,11 +28,12 @@ int main(){
     Executor executor = Executor(settings);
     executor.run();
 
-    AverageStats stats = executor.get_stats();
+    AverageStats& stats = executor.get_stats();
     stats.calculate();
     stats.show();
 
     std::string stats_file_path = stats.write_yaml();
+
 
     Plotter plotter = Plotter();
     plotter.run(stats_file_path);

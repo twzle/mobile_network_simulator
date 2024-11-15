@@ -7,11 +7,10 @@
 class PacketQueueScheduler {
     public:
         PacketQueueScheduler() = default;
-        PacketQueueScheduler(PacketQueue& packet_queue);
 
         void run();
-        void schedule(const PacketQueue& packet_queue);
-        ExecutionStats get_stats() const;
+        void schedule(PacketQueue&& packet_queue);
+        ExecutionStats& get_stats();
 
     private:
         int total_packets = 0; // Общее число пакетов для обслуживания во всех очередях

@@ -1,11 +1,6 @@
 #include <string>
 #include "packet_queue_scheduler.hpp"
 
-PacketQueueScheduler::PacketQueueScheduler(PacketQueue &packet_queue)
-{
-    this->schedule(packet_queue);
-}
-
 /*
 Логика работы планировщика
 */
@@ -77,6 +72,7 @@ void PacketQueueScheduler::run()
                     packet.set_retry();
                     queue.pop();
                     queue.push(packet);
+                    stats.total_skip_time += queue_switch_time;
                     break;
                 }
             }
@@ -84,7 +80,7 @@ void PacketQueueScheduler::run()
             double queue_processing_duration = 
                 queue_processing_end_time - queue_processing_start_time;
             
-            stats.queue_processing_time[queue_id] += queue_processing_duration;
+            stats.processing_time_by_queue[queue_id] += queue_processing_duration;
 
             queue_id++;
             current_time += queue_switch_time;
@@ -105,21 +101,19 @@ void PacketQueueScheduler::run()
     {
         stats.lost_packet_count += queue.get_lost_packet_count();
     }
-
-    stats.print();
 }
 
 /*
 Планирование очереди через запись в массив очередей
 и вычисление новой суммы общего количества пакетов
 */
-void PacketQueueScheduler::schedule(const PacketQueue &packet_queue)
+void PacketQueueScheduler::schedule(PacketQueue &&packet_queue)
 {
     scheduled_queues.push_back(packet_queue);
     total_packets += packet_queue.size();
 }
 
-ExecutionStats PacketQueueScheduler::get_stats() const
+ExecutionStats& PacketQueueScheduler::get_stats()
 {
     return this->stats;
 }

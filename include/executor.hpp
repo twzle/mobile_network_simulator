@@ -9,7 +9,7 @@ class Executor
         Executor(Settings settings);
         void run();
         void execute();
-        AverageStats get_stats();
+        AverageStats& get_stats();
     
     private:
         Settings settings; // Конфигурация запуска
