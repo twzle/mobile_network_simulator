@@ -9,11 +9,11 @@ int main(){
     TimeGenerator::initialize();
 
     int launches = 10;
-    int packet_count = 1000;
+    int packet_count = 10000;
     int packet_size = 1;
-    int queue_count = 2;
+    int queue_count = 4;
     int queue_quant = 1;
-    int queue_limit = 1000;
+    int queue_limit = 10000;
     double time_lambda = 2;
 
     Settings settings = 

@@ -7,6 +7,8 @@
 class ExecutionStats {
     public:
         ExecutionStats() = default;
+        ExecutionStats(const ExecutionStats&) = delete;
+        ExecutionStats(ExecutionStats&&) = default;
 
         void print();
         void evaluate();

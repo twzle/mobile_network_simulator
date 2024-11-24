@@ -56,10 +56,9 @@ void PacketQueueScheduler::run()
 
 
                     stats.total_processing_time += packet_processing_duration;
-                    stats.queue_stats[queue_id].push_back(
-                        PacketStats(
+                    stats.queue_stats[queue_id].emplace_back(
                             packet_scheduled_at,
-                            packet_delay_duration));
+                            packet_delay_duration);
 
                     // Вычисление фактического дефицита по результатам времени обслуживания
                     queue.set_deficit(queue_deficit - packet_processing_duration);

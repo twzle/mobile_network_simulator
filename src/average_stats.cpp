@@ -13,9 +13,64 @@ void AverageStats::calculate()
     calculate_average_values();
     calculate_average_delays();
     calculate_average_queue_processing_time();
+    
+    collect_history();
 
-    calculate_standard_deviation_for_delay();
-    calculate_execution_count_for_delay();
+    // Общая задержка обработки пакетов
+    std::cout << "\nОбщая задержка обработки пакетов" << "\n";
+    double std_dev = calculate_standard_deviation_for_metric(
+        average_delay_by_scheduler_history, 
+        total_average_delay_by_scheduler
+    );
+    calculate_execution_count_for_metric(std_dev, 1);
+
+    // задержка обработки пакетов по очередям
+    std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
+    for (size_t queue_id = 0; queue_id < average_delay_by_queue_history.size(); ++queue_id){
+        std::cout << "Oчередь №" << queue_id << "\n";
+        double std_dev = calculate_standard_deviation_for_metric(
+            average_delay_by_queue_history[queue_id], 
+            average_delays_by_queue[queue_id]
+        );
+        calculate_execution_count_for_metric(std_dev, 1);
+    }
+
+    for (size_t queue_id = 0; queue_id < average_delay_by_queue_history.size(); ++queue_id){
+        std::cout << "Oчередь №" << queue_id << "\n";
+        std::cout << "Среднее: " << average_delays_by_queue[queue_id] << "\n";
+        for (auto& av : average_delay_by_queue_history[queue_id]){
+            std::cout << av << " ";
+        }
+        std::cout << "\n";
+    }
+}
+
+// Сбор исторических данных по запускам для оптимизации доступа к данным
+void AverageStats::collect_history()
+{
+    for (auto &stats : stats_array){
+        this->average_delay_by_scheduler_history
+            .push_back(stats.average_delay_by_scheduler);
+        this->average_processing_time_by_scheduler_history
+            .push_back(stats.average_processing_time_by_scheduler);
+
+        for (size_t queue_id = 0; queue_id < stats.average_delay_by_queue.size(); ++queue_id){
+            this->average_delay_by_queue_history[queue_id]
+                .push_back(stats.average_delay_by_queue[queue_id]);
+        }
+
+        for (size_t queue_id = 0; queue_id < stats.processing_time_by_queue.size(); ++queue_id){
+            this->processing_time_by_queue_history[queue_id]
+                .push_back(stats.processing_time_by_queue[queue_id]);
+        }
+    }
+    
+    std::cout << "Delay history size: " << average_delay_by_scheduler_history.size() << "\n";
+    std::cout << "Delay history queues: " << average_delay_by_queue_history.size() << "\n";
+    std::cout << "Delay history queue size: " << average_delay_by_queue_history[0].size() << "\n";
+    std::cout << "Proc time history size: " << average_processing_time_by_scheduler_history.size() << "\n";
+    std::cout << "Proc time history queues: " << processing_time_by_queue_history.size() << "\n";
+    std::cout << "Proc time history queue size: " << processing_time_by_queue_history[0].size() << "\n";
 }
 
 // Подсчет среднего арифметического базовых параметров работы планировщика
@@ -96,12 +151,36 @@ void AverageStats::calculate_average_queue_processing_time()
         = total_average_processing_time / stats_array.size();
 }
 
-void AverageStats::calculate_standard_deviation_for_delay(){
+// Подсчет минимального числа запусков для уровня достоверности
+void AverageStats::calculate_execution_count_for_metric
+(const double& standard_deviation, const double& accuracy)
+{
+    double credability_out_of_95 = 1.96; // z
+    double credability_out_of_99 = 2.576; // z
+    
+    // (z * S / E)^2
+    double product_for_95 
+        = (credability_out_of_95 * standard_deviation / accuracy);
+    
+    double product_for_99 
+        = (credability_out_of_99 * standard_deviation / accuracy);
+    
+    double launches_for_95 = std::pow(product_for_95, 2);
+    double launches_for_99 = std::pow(product_for_99, 2);
+
+    std::cout << "E (допустимая погрешность) = " << accuracy << "\n";
+    std::cout << "Количество запусков для достоверности 95% = " << launches_for_95 << "\n"; 
+    std::cout << "Количество запусков для достоверности 99% = " << launches_for_99 << "\n"; 
+}
+
+// Подсчет стандартного отклонения величины
+double AverageStats::calculate_standard_deviation_for_metric
+(const std::vector<double>& values, const double& average)
+{
     // sum(Xi - X)^2
     double total_deviation = 0;
-    for (auto &stats : stats_array){
-        double difference 
-            = stats.average_delay_by_scheduler - total_average_delay_by_scheduler;
+    for (auto &value : values){
+        double difference = value - average;
         total_deviation += difference * difference;
     }
 
@@ -110,31 +189,11 @@ void AverageStats::calculate_standard_deviation_for_delay(){
         = total_deviation/(stats_array.size() - 1);
     
     // sqrt(sum(Xi - X)^2 / (n - 1))
-    standard_devaition_delay_by_scheduler = std::sqrt(square_of_deviation);
-    std::cout << "Стандартное отклонение средней задержки обслуживания = " 
-        << standard_devaition_delay_by_scheduler << " ms\n"; 
+    double standard_devaition = std::sqrt(square_of_deviation);
+    std::cout << "Стандартное отклонение величины = " << standard_devaition << "\n";
+
+    return standard_devaition;
 }
-
-void AverageStats::calculate_execution_count_for_delay(){
-    double credability_out_of_95 = 1.96; // z
-    double credability_out_of_99 = 2.576; // z
-    double accuracy_of_deviation = 1; // E (ms)
-    
-    // (z * S / E)^2
-    double product_for_95 
-        = (credability_out_of_95 * standard_devaition_delay_by_scheduler / accuracy_of_deviation);
-    
-    double product_for_99 
-        = (credability_out_of_99 * standard_devaition_delay_by_scheduler / accuracy_of_deviation);
-    
-    double count_for_95 = std::pow(product_for_95, 2);
-    double count_for_99 = std::pow(product_for_99, 2); 
-
-    std::cout << "E (допустимая погрешность) = " << accuracy_of_deviation << " ms\n";
-    std::cout << "Количество запусков для достоверности 95% = " << count_for_95 << "\n"; 
-    std::cout << "Количество запусков для достоверности 99% = " << count_for_99 << "\n"; 
-}
-
 
 // Вывод в stdout срденего арифметического по статистике работы планировщика
 void AverageStats::show()
