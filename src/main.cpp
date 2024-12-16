@@ -1,30 +1,41 @@
-#include "packet_queue_scheduler.hpp"
 #include "time_generator.hpp"
 #include "executor.hpp"
 #include "plotter.hpp"
+#include "settings.hpp"
+#include <iostream>
 #include <random>
-
 
 int main(){
     TimeGenerator::initialize();
 
-    int launches = 10;
-    int packet_count = 10000;
-    int packet_size = 1;
-    int queue_count = 4;
-    int queue_quant = 1;
-    int queue_limit = 10000;
-    double time_lambda = 2;
+    int launches = 1; // Количество перезапусков
+    double bandwidth = 10; // Полоса пропускания в МГц
+    int packet_count = 10000; // Количество пакетов в очереди
+    int packet_size = 10; // Размер пакета (RB)
+    int queue_count = 4; // Количество очередей
+    int queue_quant = 1; // Квант времени (RB)
+    int queue_limit = 10000; // Размер очереди
+    double time_lambda = 200; // Частота прихода пакетов
 
     Settings settings = 
-    Settings(
-        launches, 
-        packet_count, 
-        packet_size, 
-        queue_count, 
-        queue_quant, 
-        queue_limit,
-        time_lambda);
+        Settings(
+            launches, 
+            bandwidth,
+            packet_count, 
+            packet_size, 
+            queue_count, 
+            queue_quant, 
+            queue_limit,
+            time_lambda
+        );
+
+    try {
+        settings.validate();
+    } catch (const std::invalid_argument& e) {
+        std::cout << "Invalid settings: " << e.what() << std::endl;
+        return 1;
+    }
+
     Executor executor = Executor(settings);
     executor.run();
 

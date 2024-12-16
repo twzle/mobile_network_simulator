@@ -35,14 +35,14 @@ void AverageStats::calculate()
         calculate_execution_count_for_metric(std_dev, 1);
     }
 
-    for (size_t queue_id = 0; queue_id < average_delay_by_queue_history.size(); ++queue_id){
-        std::cout << "Oчередь №" << queue_id << "\n";
-        std::cout << "Среднее: " << average_delays_by_queue[queue_id] << "\n";
-        for (auto& av : average_delay_by_queue_history[queue_id]){
-            std::cout << av << " ";
-        }
-        std::cout << "\n";
-    }
+    // for (size_t queue_id = 0; queue_id < average_delay_by_queue_history.size(); ++queue_id){
+    //     std::cout << "Oчередь №" << queue_id << "\n";
+    //     std::cout << "Среднее: " << average_delays_by_queue[queue_id] << "\n";
+    //     for (auto& av : average_delay_by_queue_history[queue_id]){
+    //         std::cout << av << " ";
+    //     }
+    //     std::cout << "\n";
+    // }
 }
 
 // Сбор исторических данных по запускам для оптимизации доступа к данным

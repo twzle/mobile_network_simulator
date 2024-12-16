@@ -1,5 +1,5 @@
 #include "executor.hpp"
-#include "packet_queue_scheduler.hpp"
+#include "default_drr_scheduler.hpp"
 #include "time_generator.hpp"
 #include <thread>   // Для sleep_for и chrono
 #include <chrono>   // Для единиц времени
@@ -8,7 +8,9 @@
 Executor::Executor(Settings settings){
     this->settings = settings;
     std::exponential_distribution<> time_distribution(settings.get_time_lambda());
-    TimeGenerator::set_distribution(std::exponential_distribution<>(settings.get_time_lambda()));
+    TimeGenerator::set_distribution(
+        std::exponential_distribution<>(settings.get_time_lambda())
+    );
 }
 
 void Executor::run(){
@@ -21,7 +23,7 @@ void Executor::run(){
 }
 
 void Executor::execute(){
-    PacketQueueScheduler pqs;
+    DefaultDRRScheduler pqs;
             
     // Наполнение очередей пакетами
     for (int i = 0; i < settings.get_queue_count(); ++i){
@@ -37,6 +39,9 @@ void Executor::execute(){
 
         // Планирование обслуживания очереди
         pqs.schedule(std::move(queue));
+        pqs.set_resource_block_per_tti_limit(
+            settings.get_resource_block_per_tti_limit()
+        );
     }
 
     pqs.run();

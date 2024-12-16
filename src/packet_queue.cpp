@@ -17,9 +17,9 @@ void PacketQueue::add_packet(Packet &packet)
 }
 
 int PacketQueue::get_lost_packet_count() const { return lost_packet_count; }
-double PacketQueue::get_quant() const { return quant; }
-double PacketQueue::get_deficit() const { return deficit; }
-void PacketQueue::set_deficit(double deficit) { this->deficit = deficit; }
+int PacketQueue::get_quant() const { return quant; }
+int PacketQueue::get_deficit() const { return deficit; }
+void PacketQueue::set_deficit(int deficit) { this->deficit = deficit; }
 
 // Обертка над std::queue
 Packet PacketQueue::front() const { return this->packet_queue.top(); }
