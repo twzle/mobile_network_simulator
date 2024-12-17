@@ -1,6 +1,9 @@
 #include <string>
 #include "scheduling/default_drr_scheduler.hpp"
 
+DefaultDRRScheduler::DefaultDRRScheduler(double tti) 
+    : BaseDRRScheduler(tti) {};
+
 /*
 Логика работы планировщика
 */

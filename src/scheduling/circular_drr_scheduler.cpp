@@ -1,6 +1,9 @@
 #include <string>
 #include "scheduling/circular_drr_scheduler.hpp"
 
+CircularDRRScheduler::CircularDRRScheduler(double tti) 
+    : BaseDRRScheduler(tti) {};
+
 /*
 Логика работы планировщика
 */

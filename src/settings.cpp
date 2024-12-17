@@ -4,21 +4,25 @@
 #include "scheduling/fixed_drr_scheduler.hpp"
 #include "scheduling/circular_drr_scheduler.hpp"
 #include "scheduling/default_drr_scheduler.hpp"
+#include "standard_info.hpp"
 
 
 #define RB_BANDWIDTH 0.180 // Ширина RB в МГц
 
-std::vector<double> allowed_bandwidths = { 1.4, 3, 5, 10, 15, 20 };
-
 Settings::Settings(
-    int launches, double bandwidth, int scheduler_type, 
+    int launches, 
+    std::string standard_type, std::string tti_duration,
+    std::string scheduler_type,
+    double bandwidth, 
     int packet_count, int packet_size, 
     int queue_count, int queue_quant, int queue_limit,
     double time_lambda)
     {
         this->launches = launches;
-        this->bandwidth = bandwidth;
+        this->standard_type = standard_type;
+        this->tti_duration = tti_duration;
         this->scheduler_type = scheduler_type;
+        this->bandwidth = bandwidth;
         this->packet_count = packet_count;
         this->packet_size = packet_size;
         this->queue_count = queue_count;
@@ -33,14 +37,38 @@ void Settings::validate() {
         throw std::invalid_argument("Launches should be greater than or equal to 1.");
     }
 
+    StandardInfo standard_info;
+    try {
+        standard_info = StandardManager::get_standard_info(standard_type);
+    } catch (const std::out_of_range& e) {
+        throw std::invalid_argument("Invalid standard.");
+    }
+
+    try {
+        StandardManager::get_tti(tti_duration);
+    } catch (const std::out_of_range& e) {
+        throw std::invalid_argument("Invalid TTI.");
+    }
+
+    auto is_allowed_scheduler_type = 
+        std::find(
+            standard_info.schedulers.begin(), 
+            standard_info.schedulers.end(), 
+            scheduler_type
+        ) != standard_info.schedulers.end();
+
+    if (!is_allowed_scheduler_type) {
+        throw std::invalid_argument("Invalid scheduler type.");
+    }
+
     auto is_allowed_bandwidth = 
         std::find(
-            allowed_bandwidths.begin(), 
-            allowed_bandwidths.end(), 
+            standard_info.bandwidths.begin(), 
+            standard_info.bandwidths.end(), 
             bandwidth
-        ) != allowed_bandwidths.end();
+        ) != standard_info.bandwidths.end();
 
-    if (bandwidth < 1 || !is_allowed_bandwidth) {
+    if (!is_allowed_bandwidth) {
         throw std::invalid_argument("Invalid bandwidth.");
     }
 
@@ -74,21 +102,30 @@ int Settings::get_launches(){
     return this->launches;
 }
 
-double Settings::get_bandwidth(){
-    return this->bandwidth;
+std::string Settings::get_standard_type(){
+    return this->standard_type;
 }
 
-std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance() {
-    if (this->scheduler_type == 1) {
-        return std::make_unique<FixedDRRScheduler>();
-    } else if (this->scheduler_type == 2) {
-        return std::make_unique<CircularDRRScheduler>();
-    } else if (this->scheduler_type == 3) {
-        return std::make_unique<DefaultDRRScheduler>();
+std::string Settings::get_tti_duration(){
+    return this->tti_duration;
+}
+
+std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance(){
+    double tti = StandardManager::get_tti(tti_duration);
+
+    if (this->scheduler_type == "FixedDRRScheduler") {
+        return std::make_unique<FixedDRRScheduler>(tti);
+    } else if (this->scheduler_type == "CircularDRRScheduler") {
+        return std::make_unique<CircularDRRScheduler>(tti);
+    } else if (this->scheduler_type == "DefaultDRRScheduler") {
+        return std::make_unique<DefaultDRRScheduler>(tti);
     }
     return nullptr;
 }
 
+double Settings::get_bandwidth(){
+    return this->bandwidth;
+}
 
 int Settings::get_packet_count(){
     return this->packet_count;

@@ -17,7 +17,7 @@ extern std::map<TTI, double> tti_values;
 class BaseDRRScheduler
 {
 public:
-    BaseDRRScheduler();
+    explicit BaseDRRScheduler(double tti);
     virtual ~BaseDRRScheduler() = default;
 
     // Основной метод запуска планировщика

@@ -1,11 +1,8 @@
 #include "scheduling/base_drr_scheduler.hpp"
 
-std::map<TTI, double> tti_values = {
-    {TTI::LTE, 0.001}, // 1 мс
-};
 
-BaseDRRScheduler::BaseDRRScheduler()
-    : tti_duration(tti_values[TTI::LTE]) {}
+BaseDRRScheduler::BaseDRRScheduler(double tti)
+    : tti_duration(tti) {}
 
 /*
 Планирование очереди через запись в массив очередей

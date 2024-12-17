@@ -9,8 +9,10 @@ class Settings {
         Settings() = default;
         Settings(
             int launches,
-            double bandwidth,
-            int scheduler_type, 
+            std::string standard_type,
+            std::string tti_duration,
+            std::string scheduler_type,
+            double bandwidth, 
             int packet_count, 
             int packet_size, 
             int queue_count, 
@@ -21,8 +23,10 @@ class Settings {
         void validate();
 
         int get_launches();
-        double get_bandwidth();
+        std::string get_standard_type();
+        std::string get_tti_duration();
         std::unique_ptr<BaseDRRScheduler> get_scheduler_instance();
+        double get_bandwidth();
         int get_packet_count();
         int get_packet_size();
         int get_queue_count();
@@ -33,8 +37,10 @@ class Settings {
 
     private:
         int launches; // Количество повторов
+        std::string standard_type; // Стандарт передачи данных
+        std::string tti_duration; // Длительность TTI
+        std::string scheduler_type; // Тип планировщика
         double bandwidth; // Полоса пропускания в МГц
-        int scheduler_type; // Тип планировщика
         int packet_count; // Количество пакетов для каждого повтора
         int packet_size; // Размеры пакетов для каждого повтора
         int queue_count; // Количество очередей для каждого повтора

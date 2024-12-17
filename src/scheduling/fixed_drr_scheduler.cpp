@@ -1,6 +1,9 @@
 #include <string>
 #include "scheduling/fixed_drr_scheduler.hpp"
 
+FixedDRRScheduler::FixedDRRScheduler(double tti) 
+    : BaseDRRScheduler(tti) {};
+
 /*
 Логика работы планировщика
 */

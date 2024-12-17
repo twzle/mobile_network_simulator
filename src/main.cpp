@@ -1,16 +1,20 @@
 #include "core/time_generator.hpp"
 #include "core/executor.hpp"
 #include "utils/plotter.hpp"
+#include "standard_info.hpp" 
 #include "settings.hpp"
 #include <iostream>
 #include <random>
 
 int main(){
     TimeGenerator::initialize();
+    StandardManager::initialize();
 
     int launches = 10; // Количество перезапусков
+    std::string standard_type = "LTE"; // Стандарт связи
+    std::string tti_duration = "1ms"; // Длительность TTI
+    std::string scheduler_type = "DefaultDRRScheduler";
     double bandwidth = 10; // Полоса пропускания в МГц
-    int scheduler_type = 3;
     int packet_count = 10000; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
     int queue_count = 4; // Количество очередей
@@ -21,8 +25,10 @@ int main(){
     Settings settings = 
         Settings(
             launches, 
-            bandwidth,
+            standard_type,
+            tti_duration,
             scheduler_type,
+            bandwidth,
             packet_count, 
             packet_size, 
             queue_count, 

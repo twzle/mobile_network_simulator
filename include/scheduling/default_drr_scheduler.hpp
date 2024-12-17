@@ -4,5 +4,6 @@
 class DefaultDRRScheduler : public BaseDRRScheduler
 {
 public:
+    explicit DefaultDRRScheduler(double tti);
     void run() override;
 };
