@@ -1,4 +1,4 @@
-#include "base_drr_scheduler.hpp"
+#include "scheduling/base_drr_scheduler.hpp"
 
 std::map<TTI, double> tti_values = {
     {TTI::LTE, 0.001}, // 1 мс

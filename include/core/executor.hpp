@@ -1,7 +1,7 @@
 #pragma once
 
 #include "settings.hpp"
-#include "average_stats.hpp"
+#include "stats/average_stats.hpp"
 
 class Executor
 {

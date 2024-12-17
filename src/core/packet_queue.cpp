@@ -1,5 +1,5 @@
-#include "packet_queue.hpp"
-#include "time_generator.hpp"
+#include "core/packet_queue.hpp"
+#include "core/time_generator.hpp"
 
 PacketQueue::PacketQueue(int quant, size_t limit = 1) 
     : quant(quant), deficit(0), limit(limit) {};

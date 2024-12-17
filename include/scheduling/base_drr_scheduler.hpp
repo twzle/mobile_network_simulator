@@ -2,8 +2,8 @@
 
 #include <map>
 #include <vector>
-#include "packet_queue.hpp"
-#include "execution_stats.hpp"
+#include "core/packet_queue.hpp"
+#include "stats/execution_stats.hpp"
 
 // Тип TTI
 enum class TTI

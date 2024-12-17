@@ -1,5 +1,5 @@
-#include "execution_stats.hpp"
-#include "time_generator.hpp"
+#include "stats/execution_stats.hpp"
+#include "core/time_generator.hpp"
 #include <iostream>
 
 

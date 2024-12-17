@@ -1,17 +1,17 @@
 #include <string>
-#include "fixed_drr_scheduler.hpp"
+#include "scheduling/circular_drr_scheduler.hpp"
 
 /*
 Логика работы планировщика
 */
-void FixedDRRScheduler::run()
+void CircularDRRScheduler::run()
 {
-    // Метка времени в момент запуска планировщика
-    double scheduling_start = 0.0;
+    // Начало планирования
+    double scheduling_start = 0.0; // Метка времени в момент запуска планировщика
     double current_time = scheduling_start;
     int processed_packets_count = 0; // Счетчик обслуженных пакетов
-    
-    size_t initial_relative_queue_id_for_next_tti = 0; // Начало следующего TTI всегда с 0 очереди
+
+    size_t initial_relative_queue_id_for_next_tti = 0;
     set_initial_queue(initial_relative_queue_id_for_next_tti);
 
     // Цикл до обслуживания всех пакетов во всех очередях
@@ -84,6 +84,15 @@ void FixedDRRScheduler::run()
                 queue_processing_duration;
         }
         // Конец TTI
+
+        if (initial_relative_queue_id_for_next_tti == scheduled_queues.size()){
+            initial_relative_queue_id_for_next_tti = 0;
+        } else {
+            ++initial_relative_queue_id_for_next_tti;
+        }
+
+        set_initial_queue(initial_relative_queue_id_for_next_tti); // Начало следующего TTI всегда с последней недообслуженной очереди 
+        
         current_time += this->tti_duration;
     }
 

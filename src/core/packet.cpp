@@ -1,4 +1,4 @@
-#include "packet.hpp"
+#include "core/packet.hpp"
 
 Packet::Packet(int size = 0) : size(size), scheduled_at(0.0), retry(false) {}
 

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
-#include "average_stats.hpp"
+#include "stats/average_stats.hpp"
 
 #define DATA_DIR "data/"
 #define FILE_NAME "data.yaml"

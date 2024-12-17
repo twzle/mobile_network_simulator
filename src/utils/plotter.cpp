@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-#include "plotter.hpp"
+#include "utils/plotter.hpp"
 
 Plotter::Plotter(const std::string& plotter_path){
     this->plotter_path = plotter_path;

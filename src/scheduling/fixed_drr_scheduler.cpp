@@ -1,17 +1,17 @@
 #include <string>
-#include "default_drr_scheduler.hpp"
+#include "scheduling/fixed_drr_scheduler.hpp"
 
 /*
 Логика работы планировщика
 */
-void DefaultDRRScheduler::run()
+void FixedDRRScheduler::run()
 {
     // Метка времени в момент запуска планировщика
     double scheduling_start = 0.0;
     double current_time = scheduling_start;
     int processed_packets_count = 0; // Счетчик обслуженных пакетов
-
-    size_t initial_relative_queue_id_for_next_tti = 0;
+    
+    size_t initial_relative_queue_id_for_next_tti = 0; // Начало следующего TTI всегда с 0 очереди
     set_initial_queue(initial_relative_queue_id_for_next_tti);
 
     // Цикл до обслуживания всех пакетов во всех очередях
@@ -19,7 +19,6 @@ void DefaultDRRScheduler::run()
     {
         // Начало TTI
         int avaialable_resource_blocks = this->resource_blocks_per_tti;
-        size_t last_starving_queue = 0; // Последняя недообслуженная очередь
 
         for (size_t absolute_queue_id = 0; 
             absolute_queue_id < scheduled_queues.size(); 
@@ -55,7 +54,6 @@ void DefaultDRRScheduler::run()
                 }
                 
                 if (packet.get_size() > avaialable_resource_blocks){
-                    last_starving_queue = relative_queue_id;
                     break;
                 }
 
@@ -86,9 +84,6 @@ void DefaultDRRScheduler::run()
                 queue_processing_duration;
         }
         // Конец TTI
-        initial_relative_queue_id_for_next_tti = last_starving_queue;
-        set_initial_queue(initial_relative_queue_id_for_next_tti); // Начало следующего TTI всегда с последней недообслуженной очереди 
-        
         current_time += this->tti_duration;
     }
 

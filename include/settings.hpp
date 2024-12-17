@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 #include <memory>
-#include "base_drr_scheduler.hpp"
+#include "scheduling/base_drr_scheduler.hpp"
 
 class Settings {
     public:

@@ -1,6 +1,6 @@
-#include "time_generator.hpp"
-#include "executor.hpp"
-#include "plotter.hpp"
+#include "core/time_generator.hpp"
+#include "core/executor.hpp"
+#include "utils/plotter.hpp"
 #include "settings.hpp"
 #include <iostream>
 #include <random>
@@ -8,7 +8,7 @@
 int main(){
     TimeGenerator::initialize();
 
-    int launches = 1; // Количество перезапусков
+    int launches = 10; // Количество перезапусков
     double bandwidth = 10; // Полоса пропускания в МГц
     int scheduler_type = 3;
     int packet_count = 10000; // Количество пакетов в очереди

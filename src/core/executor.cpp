@@ -1,10 +1,8 @@
-#include "executor.hpp"
-#include "default_drr_scheduler.hpp"
-#include "fixed_drr_scheduler.hpp"
-#include "circular_drr_scheduler.hpp"
-#include "time_generator.hpp"
-#include <thread>   // Для sleep_for и chrono
-#include <chrono>   // Для единиц времени
+#include "core/executor.hpp"
+#include "core/time_generator.hpp"
+#include "scheduling/default_drr_scheduler.hpp"
+#include "scheduling/fixed_drr_scheduler.hpp"
+#include "scheduling/circular_drr_scheduler.hpp"
 
 
 Executor::Executor(Settings settings){
