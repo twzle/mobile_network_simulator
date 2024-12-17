@@ -1,5 +1,7 @@
 #include "executor.hpp"
 #include "default_drr_scheduler.hpp"
+#include "fixed_drr_scheduler.hpp"
+#include "circular_drr_scheduler.hpp"
 #include "time_generator.hpp"
 #include <thread>   // Для sleep_for и chrono
 #include <chrono>   // Для единиц времени
@@ -23,7 +25,7 @@ void Executor::run(){
 }
 
 void Executor::execute(){
-    DefaultDRRScheduler pqs;
+    auto scheduler = settings.get_scheduler_instance();
             
     // Наполнение очередей пакетами
     for (int i = 0; i < settings.get_queue_count(); ++i){
@@ -32,21 +34,21 @@ void Executor::execute(){
             settings.get_queue_limit()
         );
 
-        for (int i = 0; i < settings.get_packet_count(); ++i){
+        for (int j = 0; j < settings.get_packet_count(); ++j){
             Packet packet(settings.get_packet_size());
             queue.add_packet(packet);
         }
 
         // Планирование обслуживания очереди
-        pqs.schedule(std::move(queue));
-        pqs.set_resource_block_per_tti_limit(
+        scheduler->schedule(std::move(queue));
+        scheduler->set_resource_block_per_tti_limit(
             settings.get_resource_block_per_tti_limit()
         );
     }
 
-    pqs.run();
+    scheduler->run();
 
-    ExecutionStats& stats = pqs.get_stats();
+    ExecutionStats& stats = scheduler->get_stats();
     stats.evaluate();
     stats.release_memory_resources();
     stats.print();

@@ -10,6 +10,7 @@ int main(){
 
     int launches = 1; // Количество перезапусков
     double bandwidth = 10; // Полоса пропускания в МГц
+    int scheduler_type = 3;
     int packet_count = 10000; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
     int queue_count = 4; // Количество очередей
@@ -21,6 +22,7 @@ int main(){
         Settings(
             launches, 
             bandwidth,
+            scheduler_type,
             packet_count, 
             packet_size, 
             queue_count, 

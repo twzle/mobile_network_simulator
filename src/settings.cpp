@@ -1,6 +1,9 @@
 #include <vector>
 #include <algorithm>
 #include "settings.hpp"
+#include "fixed_drr_scheduler.hpp"
+#include "circular_drr_scheduler.hpp"
+#include "default_drr_scheduler.hpp"
 
 
 #define RB_BANDWIDTH 0.180 // Ширина RB в МГц
@@ -8,13 +11,14 @@
 std::vector<double> allowed_bandwidths = { 1.4, 3, 5, 10, 15, 20 };
 
 Settings::Settings(
-    int launches, double bandwidth, 
+    int launches, double bandwidth, int scheduler_type, 
     int packet_count, int packet_size, 
     int queue_count, int queue_quant, int queue_limit,
     double time_lambda)
     {
         this->launches = launches;
         this->bandwidth = bandwidth;
+        this->scheduler_type = scheduler_type;
         this->packet_count = packet_count;
         this->packet_size = packet_size;
         this->queue_count = queue_count;
@@ -73,6 +77,18 @@ int Settings::get_launches(){
 double Settings::get_bandwidth(){
     return this->bandwidth;
 }
+
+std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance() {
+    if (this->scheduler_type == 1) {
+        return std::make_unique<FixedDRRScheduler>();
+    } else if (this->scheduler_type == 2) {
+        return std::make_unique<CircularDRRScheduler>();
+    } else if (this->scheduler_type == 3) {
+        return std::make_unique<DefaultDRRScheduler>();
+    }
+    return nullptr;
+}
+
 
 int Settings::get_packet_count(){
     return this->packet_count;

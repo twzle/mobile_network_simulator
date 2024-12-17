@@ -1,13 +1,16 @@
 #pragma once
 
 #include <stdexcept>
+#include <memory>
+#include "base_drr_scheduler.hpp"
 
 class Settings {
     public:
         Settings() = default;
         Settings(
             int launches,
-            double bandwidth, 
+            double bandwidth,
+            int scheduler_type, 
             int packet_count, 
             int packet_size, 
             int queue_count, 
@@ -19,6 +22,7 @@ class Settings {
 
         int get_launches();
         double get_bandwidth();
+        std::unique_ptr<BaseDRRScheduler> get_scheduler_instance();
         int get_packet_count();
         int get_packet_size();
         int get_queue_count();
@@ -30,6 +34,7 @@ class Settings {
     private:
         int launches; // Количество повторов
         double bandwidth; // Полоса пропускания в МГц
+        int scheduler_type; // Тип планировщика
         int packet_count; // Количество пакетов для каждого повтора
         int packet_size; // Размеры пакетов для каждого повтора
         int queue_count; // Количество очередей для каждого повтора

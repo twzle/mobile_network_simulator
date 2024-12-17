@@ -1,7 +1,7 @@
 #pragma once
 #include "base_drr_scheduler.hpp"
 
-class DefaultDRRScheduler : public BaseDRRScheduler
+class CircularDRRScheduler : public BaseDRRScheduler
 {
 public:
     void run() override;
