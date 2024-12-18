@@ -42,6 +42,26 @@ size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
     }
 }
 
+void BaseDRRScheduler::increment_processed_packet_count(int increment){
+    this->processed_packets += increment;
+}
+
+void BaseDRRScheduler::set_scheduling_start_time(double time){
+    this->scheduling_start = time;
+}
+
+void BaseDRRScheduler::set_scheduling_end_time(double time){
+    this->scheduling_end = time;
+}
+
+double BaseDRRScheduler::get_scheduling_start_time(){
+    return this->scheduling_start;
+}
+
+double BaseDRRScheduler::get_scheduling_end_time(){
+    return this->scheduling_end;
+}
+
 /*
 Подсчет статистики по результатам работы планировщика
 */

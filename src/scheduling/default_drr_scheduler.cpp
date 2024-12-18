@@ -1,7 +1,7 @@
 #include <string>
 #include "scheduling/default_drr_scheduler.hpp"
 
-DefaultDRRScheduler::DefaultDRRScheduler(double tti) 
+DefaultDRRScheduler::DefaultDRRScheduler(double tti)
     : BaseDRRScheduler(tti) {};
 
 /*
@@ -10,32 +10,29 @@ DefaultDRRScheduler::DefaultDRRScheduler(double tti)
 void DefaultDRRScheduler::run()
 {
     // Метка времени в момент запуска планировщика
-    double scheduling_start = 0.0;
-    double current_time = scheduling_start;
-    int processed_packets_count = 0; // Счетчик обслуженных пакетов
+    set_scheduling_start_time(0.0);
+    double current_time = get_scheduling_start_time();
 
     size_t initial_relative_queue_id_for_next_tti = 0;
     set_initial_queue(initial_relative_queue_id_for_next_tti);
 
     // Цикл до обслуживания всех пакетов во всех очередях
-    while (processed_packets_count < this->total_packets)
+    while (this->processed_packets < this->total_packets)
     {
         // Начало TTI
         int avaialable_resource_blocks = this->resource_blocks_per_tti;
         size_t last_starving_queue = 0; // Последняя недообслуженная очередь
 
-        for (size_t absolute_queue_id = 0; 
-            absolute_queue_id < scheduled_queues.size(); 
-            ++absolute_queue_id)
+        for (size_t absolute_queue_id = 0;
+             absolute_queue_id < scheduled_queues.size();
+             ++absolute_queue_id)
         {
             size_t relative_queue_id = get_relative_queue_id(absolute_queue_id);
 
             // std::cout << "-> " << relative_queue_id << " ";
 
-            PacketQueue& queue = scheduled_queues[relative_queue_id];
+            PacketQueue &queue = scheduled_queues[relative_queue_id];
             queue.set_deficit(queue.get_deficit() + queue.get_quant());
-
-            double queue_processing_start_time = current_time;
 
             if (queue.size() == 0)
             {
@@ -56,8 +53,9 @@ void DefaultDRRScheduler::run()
                 {
                     break;
                 }
-                
-                if (packet.get_size() > avaialable_resource_blocks){
+
+                if (packet.get_size() > avaialable_resource_blocks)
+                {
                     last_starving_queue = relative_queue_id;
                     break;
                 }
@@ -70,34 +68,36 @@ void DefaultDRRScheduler::run()
                     queue.set_deficit(queue.get_deficit() - packet.get_size());
                     avaialable_resource_blocks -= packet.get_size();
 
-                    ++processed_packets_count;
+                    increment_processed_packet_count(1);
 
-                    double packet_processing_duration = packet.get_size();
-                    double packet_delay_duration = current_time - packet.get_scheduled_at();
-
-                    stats.total_processing_time += packet_processing_duration;
-                    stats.queue_stats[relative_queue_id].emplace_back(
+                    stats.add_packet_stats_for_queue(
+                        relative_queue_id,
                         packet.get_scheduled_at(),
-                        packet_delay_duration);
+                        current_time);
+
+                    stats.increment_active_processing_time_for_queue(
+                        relative_queue_id,
+                        tti_duration);
+
+                    if (queue.size() == 0)
+                    {
+                        stats.set_total_processing_time_for_queue(
+                            relative_queue_id,
+                            current_time);
+                    }
                 }
             }
-            double queue_processing_end_time = current_time;
-            double queue_processing_duration =
-                queue_processing_end_time - queue_processing_start_time;
-
-            stats.processing_time_by_queue[relative_queue_id] += 
-                queue_processing_duration;
         }
         // Конец TTI
         initial_relative_queue_id_for_next_tti = last_starving_queue;
-        set_initial_queue(initial_relative_queue_id_for_next_tti); // Начало следующего TTI всегда с последней недообслуженной очереди 
-        
+        set_initial_queue(initial_relative_queue_id_for_next_tti); // Начало следующего TTI всегда с последней недообслуженной очереди
+
         current_time += this->tti_duration;
     }
 
     // Метка времени в момент завершения работы планировщика
-    double scheduling_end = current_time;
-    scheduling_duration = scheduling_end - scheduling_start;
+    set_scheduling_end_time(current_time);
+    scheduling_duration = get_scheduling_end_time() - get_scheduling_start_time();
 
     // Подсчет статистики
     evaluate_stats();
