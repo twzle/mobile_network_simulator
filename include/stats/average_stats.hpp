@@ -54,7 +54,7 @@ class AverageStats {
         double average_total_retried_packet_count = 0;
         double common_total_retried_packet_count = 0;
 
-        std::vector<double> average_processing_time_by_queue;  // TODO: поменять на std::map<int, double>
+        std::vector<double> queue_average_processing_time;  // TODO: поменять на std::map<int, double>
         double total_average_processing_time_by_scheduler = 0;
 
         std::vector<double> average_delays_by_queue; // TODO: поменять на std::map<int, double> 

@@ -2,64 +2,125 @@
 #include "core/time_generator.hpp"
 #include <iostream>
 
-double ExecutionStats::get_active_processing_time_for_queue(size_t queue_id)
+double ExecutionStats::get_queue_total_time(size_t queue_id)
 {
-    return active_processing_time_by_queue[queue_id];
+    return queue_total_time[queue_id];
 }
 
-void ExecutionStats::set_active_processing_time_for_queue(
-    size_t queue_id, double active_processing_time)
+void ExecutionStats::set_queue_total_time(
+    size_t queue_id, double total_time)
 {
-    active_processing_time_by_queue[queue_id] = active_processing_time;
+    queue_total_time[queue_id] = total_time;
 }
 
-void ExecutionStats::increment_active_processing_time_for_queue(
+double ExecutionStats::get_queue_processing_time(size_t queue_id)
+{
+    return queue_processing_time[queue_id];
+}
+
+void ExecutionStats::set_queue_processing_time(
+    size_t queue_id, double processing_time)
+{
+    queue_processing_time[queue_id] = processing_time;
+}
+
+void ExecutionStats::increment_queue_processing_time(
     size_t queue_id, double tti_duration)
 {
-    set_active_processing_time_for_queue(
+    set_queue_processing_time(
         queue_id,
-        get_active_processing_time_for_queue(queue_id) + tti_duration);
+        get_queue_processing_time(queue_id) + tti_duration);
 }
 
-double ExecutionStats::get_total_processing_time_for_queue(size_t queue_id)
+void ExecutionStats::increment_scheduler_processing_time(
+    double tti_duration)
 {
-    return total_processing_time_by_queue[queue_id];
+    scheduler_processing_time += tti_duration;
 }
 
-void ExecutionStats::set_total_processing_time_for_queue(
-    size_t queue_id, double total_processing_time)
+double ExecutionStats::get_queue_idle_time(size_t queue_id)
 {
-    total_processing_time_by_queue[queue_id] = total_processing_time;
+    return queue_idle_time[queue_id];
 }
 
-void ExecutionStats::add_packet_stats_for_queue(
+void ExecutionStats::set_queue_idle_time(
+    size_t queue_id, double idle_time)
+{
+    queue_idle_time[queue_id] = idle_time;
+}
+
+void ExecutionStats::increment_queue_idle_time(
+    size_t queue_id, double tti_duration)
+{
+    set_queue_idle_time(
+        queue_id,
+        get_queue_idle_time(queue_id) + tti_duration);
+}
+
+void ExecutionStats::increment_scheduler_idle_time(
+    double tti_duration)
+{
+    scheduler_idle_time += tti_duration;
+}
+
+void ExecutionStats::update_queue_time_stats(
+    int allocated_resource_blocks, 
+    size_t queue_id, 
+    double tti_duration)
+{
+    if (allocated_resource_blocks > 0)
+    {
+        increment_queue_processing_time(
+            queue_id, tti_duration);
+    }
+    else
+    {
+        increment_queue_idle_time(
+            queue_id, tti_duration);
+    }
+}
+
+void ExecutionStats::update_scheduler_time_stats(
+    int allocated_resource_blocks,  
+    double tti_duration)
+{
+    if (allocated_resource_blocks > 0)
+    {
+        increment_scheduler_processing_time(tti_duration);
+    }
+    else
+    {
+        increment_scheduler_idle_time(tti_duration);
+    }
+}
+
+void ExecutionStats::add_queue_packet_stats(
     size_t queue_id,
     double scheduled_at,
     double processed_at)
 {
     queue_stats[queue_id].emplace_back(
         scheduled_at,
-        processed_at - scheduled_at
-    );
+        processed_at - scheduled_at);
 }
 
 // Вывод статистики в stdout
 void ExecutionStats::print()
 {
-    std::cout << "\nTotal running time = "
-              << total_time << " ms\n" // Общее время работы
+    std::cout << "\nTotal schdeuling time = "
+              << scheduler_total_time << " ms\n" // Общее время работы
               << "Total processing time = "
-              << total_processing_time
+              << scheduler_processing_time
               << " ms (" // Общее время обслуживания пакетов и доля от общего времени
-              << 100 * (total_processing_time / total_time)
+              << 100 * (scheduler_processing_time / scheduler_total_time)
               << "% of all)\n"
               << "Total idle time = "
-              << total_idle_time
+              << scheduler_idle_time
               << " ms (" // Общее время простоя и доля от общего времени
-              << 100 * (total_idle_time / total_time)
+              << 100 * (scheduler_idle_time / scheduler_total_time)
               << "% of all)\n"
               << "Average packet processing time = "
-              << total_processing_time / packet_count
+              << scheduler_processing_time / packet_count
               << " ms\n" // Среднее время обслуживания пакета
               << "Average packet processing delay = "
               << average_delay_by_scheduler
@@ -77,40 +138,54 @@ void ExecutionStats::print()
 void ExecutionStats::evaluate()
 {
     evaluate_values();
-    evaluate_queue_total_processing_time_stats();
-    evaluate_queue_active_processing_time_stats();
+    evaluate_queue_total_time_stats();
+    evaluate_queue_processing_time_stats();
+    evaluate_queue_idle_time_stats();
     evaluate_delay_stats();
 }
 
 void ExecutionStats::evaluate_values()
 {
-    total_idle_time = total_time - total_processing_time;
+    scheduler_idle_time = scheduler_total_time - scheduler_processing_time;
 }
 
-void ExecutionStats::evaluate_queue_total_processing_time_stats()
+void ExecutionStats::evaluate_queue_total_time_stats()
 {
     double sum_of_all_queue_prcoessing_time = 0;
     // Подсчет общего времени работы всех очередей
-    for (auto &stats : total_processing_time_by_queue)
+    for (auto &stats : queue_total_time)
     {
         sum_of_all_queue_prcoessing_time += stats.second;
     }
 
-    average_total_processing_time_by_scheduler =
-        sum_of_all_queue_prcoessing_time / total_processing_time_by_queue.size();
+    scheduler_average_total_time =
+        sum_of_all_queue_prcoessing_time / queue_total_time.size();
 }
 
-void ExecutionStats::evaluate_queue_active_processing_time_stats()
+void ExecutionStats::evaluate_queue_processing_time_stats()
 {
     double sum_of_all_queue_prcoessing_time = 0;
     // Подсчет общего времени работы всех очередей
-    for (auto &stats : active_processing_time_by_queue)
+    for (auto &stats : queue_processing_time)
     {
         sum_of_all_queue_prcoessing_time += stats.second;
     }
 
-    average_active_processing_time_by_scheduler =
-        sum_of_all_queue_prcoessing_time / active_processing_time_by_queue.size();
+    scheduler_average_processing_time =
+        sum_of_all_queue_prcoessing_time / queue_processing_time.size();
+}
+
+void ExecutionStats::evaluate_queue_idle_time_stats()
+{
+    double sum_of_all_queue_prcoessing_time = 0;
+    // Подсчет общего времени работы всех очередей
+    for (auto &stats : queue_idle_time)
+    {
+        sum_of_all_queue_prcoessing_time += stats.second;
+    }
+
+    scheduler_average_idle_time =
+        sum_of_all_queue_prcoessing_time / queue_idle_time.size();
 }
 
 void ExecutionStats::evaluate_delay_stats()

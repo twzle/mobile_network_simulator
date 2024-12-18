@@ -52,7 +52,7 @@ void AverageStats::collect_history()
         this->average_delay_by_scheduler_history
             .push_back(stats.average_delay_by_scheduler);
         this->average_processing_time_by_scheduler_history
-            .push_back(stats.average_total_processing_time_by_scheduler);
+            .push_back(stats.scheduler_average_total_time);
 
         for (size_t queue_id = 0; queue_id < stats.average_delay_by_queue.size(); ++queue_id)
         {
@@ -61,11 +61,11 @@ void AverageStats::collect_history()
         }
 
         for (size_t queue_id = 0;
-             queue_id < stats.total_processing_time_by_queue.size();
+             queue_id < stats.queue_total_time.size();
              ++queue_id)
         {
             this->processing_time_by_queue_history[queue_id]
-                .push_back(stats.total_processing_time_by_queue[queue_id]);
+                .push_back(stats.queue_total_time[queue_id]);
         }
     }
 
@@ -82,10 +82,9 @@ void AverageStats::calculate_average_values()
 {
     for (auto &stats : stats_array)
     {
-        common_total_time += stats.total_time;
-        common_total_skip_time += stats.total_skip_time;
-        common_total_idle_time += stats.total_idle_time;
-        common_total_processing_time += stats.total_processing_time;
+        common_total_time += stats.scheduler_total_time;
+        common_total_idle_time += stats.scheduler_idle_time;
+        common_total_processing_time += stats.scheduler_processing_time;
         common_total_packet_count += stats.packet_count;
         common_total_lost_packet_count += stats.lost_packet_count;
         common_total_retried_packet_count += stats.retried_packet_count;
@@ -95,8 +94,6 @@ void AverageStats::calculate_average_values()
         common_total_time / stats_array.size();
     average_total_idle_time =
         common_total_idle_time / stats_array.size();
-    average_total_skip_time =
-        common_total_skip_time / stats_array.size();
     average_total_processing_time =
         common_total_processing_time / stats_array.size();
     average_total_packet_count =
@@ -132,8 +129,8 @@ void AverageStats::calculate_average_delays()
 
 void AverageStats::calculate_average_queue_processing_time()
 {
-    int queue_count = stats_array[0].total_processing_time_by_queue.size();
-    average_processing_time_by_queue.resize(queue_count);
+    int queue_count = stats_array[0].queue_total_time.size();
+    queue_average_processing_time.resize(queue_count);
 
     double total_average_processing_time = 0;
 
@@ -141,16 +138,16 @@ void AverageStats::calculate_average_queue_processing_time()
     {
         for (int i = 0; i < queue_count; ++i)
         {
-            average_processing_time_by_queue[i] +=
-                stats.total_processing_time_by_queue[i];
+            queue_average_processing_time[i] +=
+                stats.queue_total_time[i];
         }
         total_average_processing_time +=
-            stats.average_total_processing_time_by_scheduler;
+            stats.scheduler_average_total_time;
     }
 
     for (int i = 0; i < queue_count; ++i)
     {
-        average_processing_time_by_queue[i] /= stats_array.size();
+        queue_average_processing_time[i] /= stats_array.size();
     }
 
     total_average_processing_time_by_scheduler = total_average_processing_time / stats_array.size();
@@ -237,7 +234,7 @@ std::string AverageStats::write_yaml()
 
     // average_queue_processing_time
     out << YAML::Key << "average_queue_processing_time"
-        << YAML::Value << average_processing_time_by_queue;
+        << YAML::Value << queue_average_processing_time;
 
     // total_average_queue_processing_time
     out << YAML::Key << "total_average_queue_processing_time"

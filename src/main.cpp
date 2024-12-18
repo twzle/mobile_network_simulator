@@ -10,17 +10,17 @@ int main(){
     TimeGenerator::initialize();
     StandardManager::initialize();
 
-    int launches = 10; // Количество перезапусков
+    int launches = 2; // Количество перезапусков
     std::string standard_type = "LTE"; // Стандарт связи
     std::string tti_duration = "1ms"; // Длительность TTI
     std::string scheduler_type = "DefaultDRRScheduler";
     double bandwidth = 10; // Полоса пропускания в МГц
-    int packet_count = 10000; // Количество пакетов в очереди
+    int packet_count = 100; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
-    int queue_count = 4; // Количество очередей
+    int queue_count = 1; // Количество очередей
     int queue_quant = 1; // Квант времени (RB)
     int queue_limit = 10000; // Размер очереди
-    double time_lambda = 200; // Частота прихода пакетов
+    double time_lambda = 2; // Частота прихода пакетов
 
     Settings settings = 
         Settings(

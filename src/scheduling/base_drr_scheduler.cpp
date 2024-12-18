@@ -1,6 +1,5 @@
 #include "scheduling/base_drr_scheduler.hpp"
 
-
 BaseDRRScheduler::BaseDRRScheduler(double tti)
     : tti_duration(tti) {}
 
@@ -14,11 +13,13 @@ void BaseDRRScheduler::schedule(PacketQueue &&packet_queue)
     total_packets += packet_queue.size();
 }
 
-void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit){
+void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
+{
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
 }
 
-void BaseDRRScheduler::set_initial_queue(int new_initial_queue_id){
+void BaseDRRScheduler::set_initial_queue(int new_initial_queue_id)
+{
     this->current_initial_absolute_queue_id = new_initial_queue_id;
 }
 
@@ -42,23 +43,28 @@ size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
     }
 }
 
-void BaseDRRScheduler::increment_processed_packet_count(int increment){
+void BaseDRRScheduler::increment_processed_packet_count(int increment)
+{
     this->processed_packets += increment;
 }
 
-void BaseDRRScheduler::set_scheduling_start_time(double time){
+void BaseDRRScheduler::set_scheduling_start_time(double time)
+{
     this->scheduling_start = time;
 }
 
-void BaseDRRScheduler::set_scheduling_end_time(double time){
+void BaseDRRScheduler::set_scheduling_end_time(double time)
+{
     this->scheduling_end = time;
 }
 
-double BaseDRRScheduler::get_scheduling_start_time(){
+double BaseDRRScheduler::get_scheduling_start_time()
+{
     return this->scheduling_start;
 }
 
-double BaseDRRScheduler::get_scheduling_end_time(){
+double BaseDRRScheduler::get_scheduling_end_time()
+{
     return this->scheduling_end;
 }
 
@@ -67,7 +73,7 @@ double BaseDRRScheduler::get_scheduling_end_time(){
 */
 void BaseDRRScheduler::evaluate_stats()
 {
-    stats.total_time = scheduling_duration;
+    stats.scheduler_total_time = scheduling_end - scheduling_start;
     stats.packet_count = total_packets;
 
     for (auto &queue : scheduled_queues)
@@ -75,7 +81,6 @@ void BaseDRRScheduler::evaluate_stats()
         stats.lost_packet_count += queue.get_lost_packet_count();
     }
 }
-
 
 ExecutionStats &BaseDRRScheduler::get_stats()
 {
