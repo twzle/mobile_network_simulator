@@ -110,7 +110,7 @@ void FixedDRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        // Перебор в следующем TTI фиксированно c 0 очереди
+        // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
     }
 
@@ -121,6 +121,7 @@ void FixedDRRScheduler::run()
     evaluate_stats();
 }
 
+// Перебор в следующем TTI фиксированно c 0 очереди
 int FixedDRRScheduler::get_next_initial_queue()
 {
     return 0;

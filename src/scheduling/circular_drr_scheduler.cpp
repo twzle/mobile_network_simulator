@@ -109,7 +109,7 @@ void CircularDRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        // Перебор в следующем TTI с очереди следующей за текущей начальной
+        // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
     }
 
@@ -120,6 +120,7 @@ void CircularDRRScheduler::run()
     evaluate_stats();
 }
 
+// Перебор в следующем TTI с очереди следующей за текущей начальной
 int CircularDRRScheduler::get_next_initial_queue()
 {
     if (this->current_initial_absolute_queue_id == scheduled_queues.size() - 1)
@@ -127,7 +128,7 @@ int CircularDRRScheduler::get_next_initial_queue()
         return 0;
     }
     else
-    {   
+    {
         return ++this->current_initial_absolute_queue_id;
     }
 }

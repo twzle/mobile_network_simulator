@@ -11,12 +11,9 @@ void PacketQueue::add_packet(Packet &packet)
         double time = TimeGenerator::generate_time();
         packet.set_scheduled_at(time);
         packet_queue.push(packet);
-    } else {
-        ++lost_packet_count;
     }
 }
 
-int PacketQueue::get_lost_packet_count() const { return lost_packet_count; }
 int PacketQueue::get_quant() const { return quant; }
 int PacketQueue::get_deficit() const { return deficit; }
 void PacketQueue::set_deficit(int deficit) { this->deficit = deficit; }

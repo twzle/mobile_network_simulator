@@ -86,8 +86,6 @@ void AverageStats::calculate_average_values()
         common_total_idle_time += stats.scheduler_idle_time;
         common_total_processing_time += stats.scheduler_processing_time;
         common_total_packet_count += stats.packet_count;
-        common_total_lost_packet_count += stats.lost_packet_count;
-        common_total_retried_packet_count += stats.retried_packet_count;
     }
 
     average_total_time =
@@ -98,10 +96,6 @@ void AverageStats::calculate_average_values()
         common_total_processing_time / stats_array.size();
     average_total_packet_count =
         common_total_packet_count / stats_array.size();
-    average_total_lost_packet_count =
-        common_total_lost_packet_count / stats_array.size();
-    average_total_retried_packet_count =
-        common_total_retried_packet_count / stats_array.size();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
@@ -154,7 +148,8 @@ void AverageStats::calculate_average_queue_processing_time()
 }
 
 // Подсчет минимального числа запусков для уровня достоверности
-void AverageStats::calculate_execution_count_for_metric(const double &standard_deviation, const double &accuracy)
+void AverageStats::calculate_execution_count_for_metric(
+    const double &standard_deviation, const double &accuracy)
 {
     double credability_out_of_95 = 1.96;  // z
     double credability_out_of_99 = 2.576; // z
@@ -173,7 +168,8 @@ void AverageStats::calculate_execution_count_for_metric(const double &standard_d
 }
 
 // Подсчет стандартного отклонения величины
-double AverageStats::calculate_standard_deviation_for_metric(const std::vector<double> &values, const double &average)
+double AverageStats::calculate_standard_deviation_for_metric(
+    const std::vector<double> &values, const double &average)
 {
     // sum(Xi - X)^2
     double total_deviation = 0;
@@ -215,15 +211,7 @@ void AverageStats::show()
               << " ms\n" // Среднее время обслуживания пакета
               << "Average packet delay time = "
               << total_average_delay_by_scheduler
-              << " ms\n"                   // Среднее время обслуживания пакета
-              << "Retried packet count = " // Количество пакетов обслуженных не с первого раза и их доля
-              << average_total_retried_packet_count
-              << " (" << ((double)average_total_retried_packet_count / average_total_packet_count * 100)
-              << "% of all)\n"
-              << "Packet loss = " // Количество пакетов обслуженных не с первого раза и их доля
-              << average_total_lost_packet_count << " ("
-              << ((double)average_total_lost_packet_count / (average_total_packet_count + average_total_lost_packet_count) * 100)
-              << "% of all)\n\n";
+              << " ms\n";                   // Среднее время обслуживания пакета
 }
 
 std::string AverageStats::write_yaml()

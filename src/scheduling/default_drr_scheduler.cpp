@@ -113,7 +113,7 @@ void DefaultDRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        // Начало следующего TTI всегда с последней недообслуженной очереди
+        // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
     }
 
@@ -124,11 +124,13 @@ void DefaultDRRScheduler::run()
     evaluate_stats();
 }
 
+// Начало следующего TTI всегда с последней недообслуженной очереди
 int DefaultDRRScheduler::get_next_initial_queue()
 {
     return last_starving_queue;
 }
 
+// Сохранение последней недообслуженной очереди
 void DefaultDRRScheduler::set_last_starving_queue(int last_starving_queue)
 {
     this->last_starving_queue = last_starving_queue;

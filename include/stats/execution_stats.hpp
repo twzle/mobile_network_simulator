@@ -85,10 +85,12 @@ public:
         double tti_duration);
 
     void evaluate();
-    void evaluate_values();
-    void evaluate_queue_total_time_stats();
-    void evaluate_queue_processing_time_stats();
+
     void evaluate_queue_idle_time_stats();
+    void evaluate_queue_wait_time_stats();
+    void evaluate_queue_processing_time_stats();
+    void evaluate_queue_total_time_stats();
+
     void evaluate_delay_stats();
     void evaluate_scheduling_stats();
 
@@ -98,9 +100,7 @@ public:
     void draw_delay_plot();
     void draw_scheduling_plot();
 
-    int packet_count = 0;         // Общее число обслуженных пакетов
-    int retried_packet_count = 0; // Число обслуженных пакетов не с первого раза
-    int lost_packet_count = 0;    // Число потерянных пакетов
+    int packet_count = 0; // Общее число обслуженных пакетов
     std::map<int, std::vector<PacketStats>> queue_stats;
 
     std::vector<double> average_delay_by_queue; // Средние задержки обработки пакетов
