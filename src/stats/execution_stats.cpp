@@ -2,6 +2,60 @@
 #include "core/time_generator.hpp"
 #include <iostream>
 
+QueueState set_wait(QueueState previous_state)
+{
+    if (previous_state == QueueState::UNDEFINED)
+    {
+        return QueueState::WAIT;
+    }
+    return previous_state;
+}
+
+QueueState set_idle(QueueState previous_state)
+{
+    if (previous_state == QueueState::UNDEFINED)
+    {
+        return QueueState::IDLE;
+    }
+    return previous_state;
+}
+
+QueueState set_processing(QueueState previous_state)
+{
+    if (previous_state == QueueState::UNDEFINED)
+    {
+        return QueueState::PROCESSING;
+    }
+    return previous_state;
+}
+
+SchedulerState set_wait(SchedulerState previous_state)
+{
+    if (previous_state < SchedulerState::WAIT)
+    {
+        return SchedulerState::WAIT;
+    }
+    return previous_state;
+}
+
+SchedulerState set_idle(SchedulerState previous_state)
+{
+    if (previous_state < SchedulerState::IDLE)
+    {
+        return SchedulerState::IDLE;
+    }
+    return previous_state;
+}
+
+SchedulerState set_processing(SchedulerState previous_state)
+{
+    if (previous_state < SchedulerState::PROCESSING)
+    {
+        return SchedulerState::PROCESSING;
+    }
+    return previous_state;
+}
+
 double ExecutionStats::get_queue_total_time(size_t queue_id)
 {
     return queue_total_time[queue_id];
@@ -63,34 +117,68 @@ void ExecutionStats::increment_scheduler_idle_time(
     scheduler_idle_time += tti_duration;
 }
 
-void ExecutionStats::update_queue_time_stats(
-    int allocated_resource_blocks, 
-    size_t queue_id, 
+double ExecutionStats::get_queue_wait_time(size_t queue_id)
+{
+    return queue_wait_time[queue_id];
+}
+
+void ExecutionStats::set_queue_wait_time(
+    size_t queue_id, double wait_time)
+{
+    queue_wait_time[queue_id] = wait_time;
+}
+
+void ExecutionStats::increment_queue_wait_time(
+    size_t queue_id, double tti_duration)
+{
+    set_queue_wait_time(
+        queue_id,
+        get_queue_wait_time(queue_id) + tti_duration);
+}
+
+void ExecutionStats::increment_scheduler_wait_time(
     double tti_duration)
 {
-    if (allocated_resource_blocks > 0)
+    scheduler_wait_time += tti_duration;
+}
+
+void ExecutionStats::update_queue_time_stats(
+    QueueState queue_state,
+    size_t queue_id,
+    double tti_duration)
+{
+    if (queue_state == QueueState::PROCESSING)
     {
         increment_queue_processing_time(
             queue_id, tti_duration);
     }
-    else
+    else if (queue_state == QueueState::IDLE)
     {
         increment_queue_idle_time(
+            queue_id, tti_duration);
+    }
+    else if (queue_state == QueueState::WAIT)
+    {
+        increment_queue_wait_time(
             queue_id, tti_duration);
     }
 }
 
 void ExecutionStats::update_scheduler_time_stats(
-    int allocated_resource_blocks,  
+    SchedulerState scheduler_state,
     double tti_duration)
 {
-    if (allocated_resource_blocks > 0)
+    if (scheduler_state == SchedulerState::PROCESSING)
     {
         increment_scheduler_processing_time(tti_duration);
     }
-    else
+    else if (scheduler_state == SchedulerState::IDLE)
     {
         increment_scheduler_idle_time(tti_duration);
+    }
+    else if (scheduler_state == SchedulerState::WAIT)
+    {
+        increment_scheduler_wait_time(tti_duration);
     }
 }
 

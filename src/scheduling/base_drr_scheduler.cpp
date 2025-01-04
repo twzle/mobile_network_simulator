@@ -18,12 +18,12 @@ void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
 }
 
-void BaseDRRScheduler::set_initial_queue(int new_initial_queue_id)
+void BaseDRRScheduler::set_initial_queue(size_t new_initial_queue_id)
 {
     this->current_initial_absolute_queue_id = new_initial_queue_id;
 }
 
-int BaseDRRScheduler::get_initial_queue()
+size_t BaseDRRScheduler::get_initial_queue()
 {
     return this->current_initial_absolute_queue_id;
 }

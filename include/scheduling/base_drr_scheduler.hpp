@@ -5,15 +5,6 @@
 #include "core/packet_queue.hpp"
 #include "stats/execution_stats.hpp"
 
-// Тип TTI
-enum class TTI
-{
-    LTE = 1,
-};
-
-// Размер TTI в секундах
-extern std::map<TTI, double> tti_values;
-
 class BaseDRRScheduler
 {
 public:
@@ -41,13 +32,13 @@ public:
     void evaluate_stats();
 
     // Методы управления начальной очередью
-    virtual int get_initial_queue();
-    virtual void set_initial_queue(int new_initial_queue_id);
+    virtual size_t get_initial_queue();
+    virtual void set_initial_queue(size_t new_initial_queue_id);
 
 protected:
     double tti_duration = 0;                   // Длительность TTI в секундах
     int resource_blocks_per_tti = 0;           // Общее число RB на TTI
-    int current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
+    size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
 
     double scheduling_start = 0;    // Начало работы планировщика

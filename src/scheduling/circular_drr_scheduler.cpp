@@ -13,13 +13,15 @@ void CircularDRRScheduler::run()
     set_scheduling_start_time(0.0);
     double current_time = get_scheduling_start_time();
 
-    size_t initial_relative_queue_id_for_next_tti = 0;
-    set_initial_queue(initial_relative_queue_id_for_next_tti);
+    // Перебор очередей начиная с очереди с индексом 0
+    set_initial_queue(0);
 
     // Цикл до обслуживания всех пакетов во всех очередях
     while (this->processed_packets < this->total_packets)
     {
         // Начало TTI
+        SchedulerState scheduler_state = SchedulerState::UNDEFINED;
+
         int available_resource_blocks = this->resource_blocks_per_tti;
         int allocated_resource_blocks_for_tti = 0;
 
@@ -27,8 +29,10 @@ void CircularDRRScheduler::run()
              absolute_queue_id < scheduled_queues.size();
              ++absolute_queue_id)
         {
+            QueueState queue_state = QueueState::UNDEFINED;
+
             size_t relative_queue_id = get_relative_queue_id(absolute_queue_id);
-            
+
             PacketQueue &queue = scheduled_queues[relative_queue_id];
             queue.set_deficit(queue.get_deficit() + queue.get_quant());
 
@@ -38,51 +42,55 @@ void CircularDRRScheduler::run()
 
             if (queue.size() == 0)
             {
-                continue;
+                queue_state = set_wait(queue_state);
+                scheduler_state = set_wait(scheduler_state);
             }
-
-            while (queue.size() > 0)
+            else
             {
-                // Обслуживание первого в очереди пакета
-                Packet packet = queue.front();
-
-                if (current_time + epsilon < packet.get_scheduled_at())
+                while (queue.size() > 0)
                 {
-                    break;
-                }
+                    // Обслуживание первого в очереди пакета
+                    Packet packet = queue.front();
 
-                if (packet.get_size() > queue.get_deficit())
-                {
-                    break;
-                }
-
-                if (packet.get_size() > available_resource_blocks)
-                {
-                    break;
-                }
-
-                // Проверка достаточности дефицита на обслуживание пакета
-                if (packet.get_size() <= available_resource_blocks)
-                {
-                    // Обслуживание пакета
-                    queue.pop();
-                    queue.set_deficit(queue.get_deficit() - packet.get_size());
-                    increment_processed_packet_count(1);
-
-                    available_resource_blocks -= packet.get_size();
-                    allocated_resource_blocks_for_queue += packet.get_size();
-        
-
-                    stats.add_queue_packet_stats(
-                        relative_queue_id,
-                        packet.get_scheduled_at(),
-                        current_time);
-
-                    if (queue.size() == 0)
+                    if (current_time + epsilon < packet.get_scheduled_at())
                     {
-                        stats.set_queue_total_time(
+                        queue_state = set_wait(queue_state);
+                        scheduler_state = set_wait(scheduler_state);
+                        break;
+                    }
+
+                    if (packet.get_size() > queue.get_deficit())
+                    {
+                        queue_state = set_idle(queue_state);
+                        scheduler_state = set_idle(scheduler_state);
+                        break;
+                    }
+
+                    if (packet.get_size() > available_resource_blocks)
+                    {
+                        queue_state = set_idle(queue_state);
+                        scheduler_state = set_idle(scheduler_state);
+                        break;
+                    }
+
+                    // Проверка достаточности дефицита на обслуживание пакета
+                    if (packet.get_size() <= available_resource_blocks)
+                    {
+                        // Обслуживание пакета
+                        queue.pop();
+                        queue.set_deficit(queue.get_deficit() - packet.get_size());
+                        increment_processed_packet_count(1);
+
+                        available_resource_blocks -= packet.get_size();
+                        allocated_resource_blocks_for_queue += packet.get_size();
+
+                        stats.add_queue_packet_stats(
                             relative_queue_id,
+                            packet.get_scheduled_at(),
                             current_time);
+
+                        queue_state = set_processing(queue_state);
+                        scheduler_state = set_processing(scheduler_state);
                     }
                 }
             }
@@ -90,24 +98,19 @@ void CircularDRRScheduler::run()
             allocated_resource_blocks_for_tti += allocated_resource_blocks_for_queue;
 
             stats.update_queue_time_stats(
-                allocated_resource_blocks_for_queue,
+                queue_state,
                 relative_queue_id,
                 tti_duration);
         }
         // Конец TTI
-
-        if (initial_relative_queue_id_for_next_tti == scheduled_queues.size())
-        {
-            initial_relative_queue_id_for_next_tti = 0;
-        }
-        else
-        {
-            ++initial_relative_queue_id_for_next_tti;
-        }
-
-        set_initial_queue(initial_relative_queue_id_for_next_tti); // Начало следующего TTI всегда с последней недообслуженной очереди
-
         current_time += this->tti_duration;
+
+        stats.update_scheduler_time_stats(
+            scheduler_state,
+            tti_duration);
+
+        // Перебор в следующем TTI с очереди следующей за текущей начальной
+        set_initial_queue(get_next_initial_queue());
     }
 
     // Метка времени в момент завершения работы планировщика
@@ -115,4 +118,16 @@ void CircularDRRScheduler::run()
 
     // Подсчет статистики
     evaluate_stats();
+}
+
+int CircularDRRScheduler::get_next_initial_queue()
+{
+    if (this->current_initial_absolute_queue_id == scheduled_queues.size() - 1)
+    {
+        return 0;
+    }
+    else
+    {   
+        return ++this->current_initial_absolute_queue_id;
+    }
 }
