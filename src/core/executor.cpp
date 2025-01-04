@@ -46,15 +46,15 @@ void Executor::execute(){
 
     scheduler->run();
 
-    ExecutionStats& stats = scheduler->get_stats();
+    IterationStats& stats = scheduler->get_stats();
     stats.evaluate();
     stats.release_memory_resources();
     stats.print();
 
     // Запись статистики текущего запуска в массив
-    this->average_stats.stats_array.push_back(std::move(stats));
+    this->mean_stats.stats_array.push_back(std::move(stats));
 }
 
-AverageStats& Executor::get_stats(){
-    return this->average_stats;
+MeanStats& Executor::get_stats(){
+    return this->mean_stats;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/state.hpp"
+#include "core/time_generator.hpp"
 #include "packet.hpp"
 
 class PacketQueue

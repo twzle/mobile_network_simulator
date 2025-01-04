@@ -77,16 +77,16 @@ void BaseDRRScheduler::evaluate_stats()
     stats.packet_count = total_packets;
 
     for (size_t queue_id = 0; queue_id < scheduled_queues.size(); ++queue_id)
-    {   
-        double queue_total_time = stats.get_queue_processing_time(queue_id) + 
-            stats.get_queue_idle_time(queue_id) + 
-            stats.get_queue_wait_time(queue_id);
+    {
+        double queue_total_time = stats.get_queue_processing_time(queue_id) +
+                                  stats.get_queue_idle_time(queue_id) +
+                                  stats.get_queue_wait_time(queue_id);
 
         stats.set_queue_total_time(queue_id, queue_total_time);
     }
 }
 
-ExecutionStats &BaseDRRScheduler::get_stats()
+IterationStats &BaseDRRScheduler::get_stats()
 {
     return this->stats;
 }

@@ -1,11 +1,4 @@
-#include <vector>
-#include <algorithm>
 #include "settings.hpp"
-#include "scheduling/fixed_drr_scheduler.hpp"
-#include "scheduling/circular_drr_scheduler.hpp"
-#include "scheduling/default_drr_scheduler.hpp"
-#include "standard_info.hpp"
-
 
 #define RB_BANDWIDTH 0.180 // Ширина RB в МГц
 

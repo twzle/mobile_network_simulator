@@ -1,6 +1,3 @@
-#include <iostream>
-#include <cstdlib>
-#include <filesystem>
 #include "utils/plotter.hpp"
 
 Plotter::Plotter(const std::string& plotter_path){

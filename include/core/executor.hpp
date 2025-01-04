@@ -1,7 +1,7 @@
 #pragma once
 
 #include "settings.hpp"
-#include "stats/average_stats.hpp"
+#include "stats/mean_stats.hpp"
 
 class Executor
 {
@@ -9,9 +9,9 @@ class Executor
         Executor(Settings settings);
         void run();
         void execute();
-        AverageStats& get_stats();
+        MeanStats& get_stats();
     
     private:
         Settings settings; // Конфигурация запуска
-        AverageStats average_stats; // Статистика по всем запускам планировщика
+        MeanStats mean_stats; // Статистика по всем запускам планировщика
 };

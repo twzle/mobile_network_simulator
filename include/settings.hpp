@@ -2,7 +2,14 @@
 
 #include <stdexcept>
 #include <memory>
+#include <vector>
+#include <algorithm>
+
 #include "scheduling/base_drr_scheduler.hpp"
+#include "scheduling/fixed_drr_scheduler.hpp"
+#include "scheduling/circular_drr_scheduler.hpp"
+#include "scheduling/default_drr_scheduler.hpp"
+#include "standard_info.hpp"
 
 class Settings {
     public:

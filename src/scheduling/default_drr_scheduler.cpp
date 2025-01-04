@@ -1,4 +1,3 @@
-#include <string>
 #include "scheduling/default_drr_scheduler.hpp"
 
 DefaultDRRScheduler::DefaultDRRScheduler(double tti)
@@ -30,7 +29,7 @@ void DefaultDRRScheduler::run()
              absolute_queue_id < scheduled_queues.size();
              ++absolute_queue_id)
         {
-            QueueState queue_state = QueueState::UNDEFINED;
+            PacketQueueState queue_state = PacketQueueState::UNDEFINED;
 
             size_t relative_queue_id = get_relative_queue_id(absolute_queue_id);
 

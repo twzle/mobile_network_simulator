@@ -1,84 +1,28 @@
-#include "stats/execution_stats.hpp"
-#include "core/time_generator.hpp"
-#include <iostream>
+#include "stats/iteration_stats.hpp"
 
-QueueState set_wait(QueueState previous_state)
-{
-    if (previous_state == QueueState::UNDEFINED)
-    {
-        return QueueState::WAIT;
-    }
-    return previous_state;
-}
-
-QueueState set_idle(QueueState previous_state)
-{
-    if (previous_state == QueueState::UNDEFINED)
-    {
-        return QueueState::IDLE;
-    }
-    return previous_state;
-}
-
-QueueState set_processing(QueueState previous_state)
-{
-    if (previous_state == QueueState::UNDEFINED)
-    {
-        return QueueState::PROCESSING;
-    }
-    return previous_state;
-}
-
-SchedulerState set_wait(SchedulerState previous_state)
-{
-    if (previous_state < SchedulerState::WAIT)
-    {
-        return SchedulerState::WAIT;
-    }
-    return previous_state;
-}
-
-SchedulerState set_idle(SchedulerState previous_state)
-{
-    if (previous_state < SchedulerState::IDLE)
-    {
-        return SchedulerState::IDLE;
-    }
-    return previous_state;
-}
-
-SchedulerState set_processing(SchedulerState previous_state)
-{
-    if (previous_state < SchedulerState::PROCESSING)
-    {
-        return SchedulerState::PROCESSING;
-    }
-    return previous_state;
-}
-
-double ExecutionStats::get_queue_total_time(size_t queue_id)
+double IterationStats::get_queue_total_time(size_t queue_id)
 {
     return queue_total_time[queue_id];
 }
 
-void ExecutionStats::set_queue_total_time(
+void IterationStats::set_queue_total_time(
     size_t queue_id, double total_time)
 {
     queue_total_time[queue_id] = total_time;
 }
 
-double ExecutionStats::get_queue_processing_time(size_t queue_id)
+double IterationStats::get_queue_processing_time(size_t queue_id)
 {
     return queue_processing_time[queue_id];
 }
 
-void ExecutionStats::set_queue_processing_time(
+void IterationStats::set_queue_processing_time(
     size_t queue_id, double processing_time)
 {
     queue_processing_time[queue_id] = processing_time;
 }
 
-void ExecutionStats::increment_queue_processing_time(
+void IterationStats::increment_queue_processing_time(
     size_t queue_id, double tti_duration)
 {
     set_queue_processing_time(
@@ -86,24 +30,24 @@ void ExecutionStats::increment_queue_processing_time(
         get_queue_processing_time(queue_id) + tti_duration);
 }
 
-void ExecutionStats::increment_scheduler_processing_time(
+void IterationStats::increment_scheduler_processing_time(
     double tti_duration)
 {
     scheduler_processing_time += tti_duration;
 }
 
-double ExecutionStats::get_queue_idle_time(size_t queue_id)
+double IterationStats::get_queue_idle_time(size_t queue_id)
 {
     return queue_idle_time[queue_id];
 }
 
-void ExecutionStats::set_queue_idle_time(
+void IterationStats::set_queue_idle_time(
     size_t queue_id, double idle_time)
 {
     queue_idle_time[queue_id] = idle_time;
 }
 
-void ExecutionStats::increment_queue_idle_time(
+void IterationStats::increment_queue_idle_time(
     size_t queue_id, double tti_duration)
 {
     set_queue_idle_time(
@@ -111,24 +55,24 @@ void ExecutionStats::increment_queue_idle_time(
         get_queue_idle_time(queue_id) + tti_duration);
 }
 
-void ExecutionStats::increment_scheduler_idle_time(
+void IterationStats::increment_scheduler_idle_time(
     double tti_duration)
 {
     scheduler_idle_time += tti_duration;
 }
 
-double ExecutionStats::get_queue_wait_time(size_t queue_id)
+double IterationStats::get_queue_wait_time(size_t queue_id)
 {
     return queue_wait_time[queue_id];
 }
 
-void ExecutionStats::set_queue_wait_time(
+void IterationStats::set_queue_wait_time(
     size_t queue_id, double wait_time)
 {
     queue_wait_time[queue_id] = wait_time;
 }
 
-void ExecutionStats::increment_queue_wait_time(
+void IterationStats::increment_queue_wait_time(
     size_t queue_id, double tti_duration)
 {
     set_queue_wait_time(
@@ -136,35 +80,35 @@ void ExecutionStats::increment_queue_wait_time(
         get_queue_wait_time(queue_id) + tti_duration);
 }
 
-void ExecutionStats::increment_scheduler_wait_time(
+void IterationStats::increment_scheduler_wait_time(
     double tti_duration)
 {
     scheduler_wait_time += tti_duration;
 }
 
-void ExecutionStats::update_queue_time_stats(
-    QueueState queue_state,
+void IterationStats::update_queue_time_stats(
+    PacketQueueState queue_state,
     size_t queue_id,
     double tti_duration)
 {
-    if (queue_state == QueueState::PROCESSING)
+    if (queue_state == PacketQueueState::PROCESSING)
     {
         increment_queue_processing_time(
             queue_id, tti_duration);
     }
-    else if (queue_state == QueueState::IDLE)
+    else if (queue_state == PacketQueueState::IDLE)
     {
         increment_queue_idle_time(
             queue_id, tti_duration);
     }
-    else if (queue_state == QueueState::WAIT)
+    else if (queue_state == PacketQueueState::WAIT)
     {
         increment_queue_wait_time(
             queue_id, tti_duration);
     }
 }
 
-void ExecutionStats::update_scheduler_time_stats(
+void IterationStats::update_scheduler_time_stats(
     SchedulerState scheduler_state,
     double tti_duration)
 {
@@ -182,7 +126,7 @@ void ExecutionStats::update_scheduler_time_stats(
     }
 }
 
-void ExecutionStats::add_queue_packet_stats(
+void IterationStats::add_queue_packet_stats(
     size_t queue_id,
     double scheduled_at,
     double processed_at)
@@ -193,7 +137,7 @@ void ExecutionStats::add_queue_packet_stats(
 }
 
 // Вывод статистики в stdout
-void ExecutionStats::print()
+void IterationStats::print()
 {
     std::cout << "\nTotal schdeuling time = "
               << scheduler_total_time << " ms\n" // Общее время работы
@@ -215,7 +159,7 @@ void ExecutionStats::print()
               << " ms\n";                  // Среднее время задержки обслуживания пакета
 }
 
-void ExecutionStats::evaluate()
+void IterationStats::evaluate()
 {
     evaluate_queue_wait_time_stats();
     evaluate_queue_idle_time_stats();
@@ -225,7 +169,7 @@ void ExecutionStats::evaluate()
     evaluate_delay_stats();
 }
 
-void ExecutionStats::evaluate_queue_total_time_stats()
+void IterationStats::evaluate_queue_total_time_stats()
 {
     double sum_of_all_queue_total_time = 0;
     // Подсчет общего времени работы всех очередей
@@ -238,7 +182,7 @@ void ExecutionStats::evaluate_queue_total_time_stats()
         sum_of_all_queue_total_time / queue_total_time.size();
 }
 
-void ExecutionStats::evaluate_queue_processing_time_stats()
+void IterationStats::evaluate_queue_processing_time_stats()
 {
     double sum_of_all_queue_prcoessing_time = 0;
     // Подсчет общего времени работы всех очередей
@@ -251,7 +195,7 @@ void ExecutionStats::evaluate_queue_processing_time_stats()
         sum_of_all_queue_prcoessing_time / queue_processing_time.size();
 }
 
-void ExecutionStats::evaluate_queue_idle_time_stats()
+void IterationStats::evaluate_queue_idle_time_stats()
 {
     double sum_of_all_queue_idle_time = 0;
     // Подсчет общего времени работы всех очередей
@@ -264,7 +208,7 @@ void ExecutionStats::evaluate_queue_idle_time_stats()
         sum_of_all_queue_idle_time / queue_idle_time.size();
 }
 
-void ExecutionStats::evaluate_queue_wait_time_stats()
+void IterationStats::evaluate_queue_wait_time_stats()
 {
     double sum_of_all_queue_wait_time = 0;
     // Подсчет общего времени работы всех очередей
@@ -277,7 +221,7 @@ void ExecutionStats::evaluate_queue_wait_time_stats()
         sum_of_all_queue_wait_time / queue_wait_time.size();
 }
 
-void ExecutionStats::evaluate_delay_stats()
+void IterationStats::evaluate_delay_stats()
 {
     // Подсчет времени задержек обслуживания пакетов по очередям
     for (auto &stats : queue_stats)
@@ -297,7 +241,7 @@ void ExecutionStats::evaluate_delay_stats()
     average_delay_by_scheduler /= queue_stats.size();
 }
 
-void ExecutionStats::release_memory_resources()
+void IterationStats::release_memory_resources()
 {
     queue_stats.clear();
 }

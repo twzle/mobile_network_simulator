@@ -2,8 +2,11 @@
 
 #include <map>
 #include <vector>
+#include <string>
+
+#include "core/state.hpp"
 #include "core/packet_queue.hpp"
-#include "stats/execution_stats.hpp"
+#include "stats/iteration_stats.hpp"
 
 class BaseDRRScheduler
 {
@@ -28,7 +31,7 @@ public:
     void increment_processed_packet_count(int increment);
 
     // Получение статистики выполнения
-    ExecutionStats &get_stats();
+    IterationStats &get_stats();
     void evaluate_stats();
 
     // Методы управления начальной очередью
@@ -36,10 +39,10 @@ public:
     virtual void set_initial_queue(size_t new_initial_queue_id);
 
 protected:
-    double tti_duration = 0;                   // Длительность TTI в секундах
-    int resource_blocks_per_tti = 0;           // Общее число RB на TTI
+    double tti_duration = 0;                      // Длительность TTI в секундах
+    int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
-    std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
+    std::vector<PacketQueue> scheduled_queues;    // Очереди для обслуживания
 
     double scheduling_start = 0;    // Начало работы планировщика
     double scheduling_end = 0;      // Конец работы планировщика
@@ -47,7 +50,7 @@ protected:
     int processed_packets = 0;      // Общее число обслуженных пакетов
     int total_packets = 0;          // Общее число пакетов для обслуживания
 
-    ExecutionStats stats; // Статистика производительности планировщика
+    IterationStats stats; // Статистика производительности планировщика
 
     // Метод для получения относительного индекса очереди (может быть переопределен)
     virtual size_t get_relative_queue_id(size_t current_absolute_queue_id);

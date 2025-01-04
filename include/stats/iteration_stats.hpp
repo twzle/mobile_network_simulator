@@ -3,38 +3,18 @@
 #include <map>
 #include <vector>
 #include <stddef.h>
+#include <iostream>
+
+#include "core/time_generator.hpp"
+#include "core/state.hpp"
 #include "packet_stats.hpp"
 
-enum class QueueState
-{
-    UNDEFINED = 0,
-    WAIT = 1,
-    IDLE = 2,
-    PROCESSING = 3,
-};
-
-QueueState set_wait(QueueState previous_state);
-QueueState set_idle(QueueState previous_state);
-QueueState set_processing(QueueState previous_state);
-
-enum class SchedulerState
-{
-    UNDEFINED = 0,
-    WAIT = 1,
-    IDLE = 2,
-    PROCESSING = 3,
-};
-
-SchedulerState set_wait(SchedulerState previous_state);
-SchedulerState set_idle(SchedulerState previous_state);
-SchedulerState set_processing(SchedulerState previous_state);
-
-class ExecutionStats
+class IterationStats
 {
 public:
-    ExecutionStats() = default;
-    ExecutionStats(const ExecutionStats &) = delete;
-    ExecutionStats(ExecutionStats &&) = default;
+    IterationStats() = default;
+    IterationStats(const IterationStats &) = delete;
+    IterationStats(IterationStats &&) = default;
 
     double get_queue_processing_time(size_t queue_id);
     void set_queue_processing_time(
@@ -77,7 +57,7 @@ public:
         double processed_at);
 
     void update_queue_time_stats(
-        QueueState queue_state,
+        PacketQueueState queue_state,
         size_t queue_id,
         double tti_duration);
     void update_scheduler_time_stats(
