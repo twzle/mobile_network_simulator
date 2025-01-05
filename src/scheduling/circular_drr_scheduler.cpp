@@ -58,7 +58,7 @@ void CircularDRRScheduler::run()
                         break;
                     }
 
-                    if (packet.get_size() > queue.get_deficit())
+                    if (packet.get_size() > queue.get_deficit() + epsilon)
                     {
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);

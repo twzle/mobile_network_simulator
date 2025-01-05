@@ -13,22 +13,22 @@ void MeanStats::calculate()
     collect_history();
 
     // Общая задержка обработки пакетов
-    std::cout << "\nОбщая задержка обработки пакетов" << "\n";
-    double std_dev = calculate_standard_deviation_for_metric(
-        mean_delay_by_scheduler_history,
-        total_mean_delay_by_scheduler);
-    calculate_execution_count_for_metric(std_dev, 1);
+    // std::cout << "\nОбщая задержка обработки пакетов" << "\n";
+    // double std_dev = calculate_standard_deviation_for_metric(
+    //     mean_delay_by_scheduler_history,
+    //     total_mean_delay_by_scheduler);
+    // calculate_execution_count_for_metric(std_dev, 1);
 
-    // задержка обработки пакетов по очередям
-    std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
-    for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id)
-    {
-        std::cout << "Oчередь №" << queue_id << "\n";
-        double std_dev = calculate_standard_deviation_for_metric(
-            mean_delay_by_queue_history[queue_id],
-            mean_delays_by_queue[queue_id]);
-        calculate_execution_count_for_metric(std_dev, 1);
-    }
+    // // задержка обработки пакетов по очередям
+    // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
+    // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id)
+    // {
+    //     std::cout << "Oчередь №" << queue_id << "\n";
+    //     double std_dev = calculate_standard_deviation_for_metric(
+    //         mean_delay_by_queue_history[queue_id],
+    //         mean_delays_by_queue[queue_id]);
+    //     calculate_execution_count_for_metric(std_dev, 1);
+    // }
 
     // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id){
     //     std::cout << "Oчередь №" << queue_id << "\n";
@@ -65,12 +65,12 @@ void MeanStats::collect_history()
         }
     }
 
-    std::cout << "Delay history size: " << mean_delay_by_scheduler_history.size() << "\n";
-    std::cout << "Delay history queues: " << mean_delay_by_queue_history.size() << "\n";
-    std::cout << "Delay history queue size: " << mean_delay_by_queue_history[0].size() << "\n";
-    std::cout << "Proc time history size: " << mean_processing_time_by_scheduler_history.size() << "\n";
-    std::cout << "Proc time history queues: " << processing_time_by_queue_history.size() << "\n";
-    std::cout << "Proc time history queue size: " << processing_time_by_queue_history[0].size() << "\n";
+    // std::cout << "Delay history size: " << mean_delay_by_scheduler_history.size() << "\n";
+    // std::cout << "Delay history queues: " << mean_delay_by_queue_history.size() << "\n";
+    // std::cout << "Delay history queue size: " << mean_delay_by_queue_history[0].size() << "\n";
+    // std::cout << "Proc time history size: " << mean_processing_time_by_scheduler_history.size() << "\n";
+    // std::cout << "Proc time history queues: " << processing_time_by_queue_history.size() << "\n";
+    // std::cout << "Proc time history queue size: " << processing_time_by_queue_history[0].size() << "\n";
 }
 
 // Подсчет среднего арифметического базовых параметров работы планировщика

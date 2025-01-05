@@ -1,6 +1,6 @@
 #include "core/packet_queue.hpp"
 
-PacketQueue::PacketQueue(int quant, size_t limit = 1)
+PacketQueue::PacketQueue(double quant, size_t limit = 1)
     : quant(quant), deficit(0), limit(limit) {};
 
 void PacketQueue::add_packet(Packet &packet)
@@ -13,9 +13,9 @@ void PacketQueue::add_packet(Packet &packet)
     }
 }
 
-int PacketQueue::get_quant() const { return quant; }
-int PacketQueue::get_deficit() const { return deficit; }
-void PacketQueue::set_deficit(int deficit) { this->deficit = deficit; }
+double PacketQueue::get_quant() const { return quant; }
+double PacketQueue::get_deficit() const { return deficit; }
+void PacketQueue::set_deficit(double deficit) { this->deficit = deficit; }
 
 // Обертка над std::queue
 Packet PacketQueue::front() const { return this->packet_queue.top(); }

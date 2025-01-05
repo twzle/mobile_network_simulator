@@ -3,8 +3,6 @@
 #include "utils/plotter.hpp"
 #include "standard_info.hpp" 
 #include "settings.hpp"
-#include <iostream>
-#include <random>
 
 int main(){
     TimeGenerator::initialize();
@@ -15,12 +13,12 @@ int main(){
     std::string tti_duration = "1ms"; // Длительность TTI
     std::string scheduler_type = "DefaultDRRScheduler";
     double bandwidth = 10; // Полоса пропускания в МГц
-    int packet_count = 100; // Количество пакетов в очереди
+    int packet_count = 1000; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
-    int queue_count = 1; // Количество очередей
-    int queue_quant = 1; // Квант времени (RB)
+    int queue_count = 2; // Количество очередей
+    double queue_quant = 2; // Квант времени (RB)
     int queue_limit = 10000; // Размер очереди
-    double time_lambda = 2; // Частота прихода пакетов
+    double time_lambda = 200; // Частота прихода пакетов в мс (1/мс), среднее время между приходом пакетов (1/lambda)
 
     Settings settings = 
         Settings(
@@ -47,9 +45,9 @@ int main(){
     Executor executor = Executor(settings);
     executor.run();
 
-    AverageStats& stats = executor.get_stats();
+    MeanStats& stats = executor.get_stats();
     stats.calculate();
-    stats.show();
+    // stats.show();
 
     std::string stats_file_path = stats.write_yaml();
 

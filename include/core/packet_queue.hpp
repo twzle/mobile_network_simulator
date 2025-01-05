@@ -7,14 +7,14 @@
 class PacketQueue
 {
 public:
-    PacketQueue(int quant, size_t limit);
+    PacketQueue(double quant, size_t limit);
 
     void add_packet(Packet &packet);
     void add_delay(int delay);
 
-    int get_quant() const;
-    int get_deficit() const;
-    void set_deficit(int deficit);
+    double get_quant() const;
+    double get_deficit() const;
+    void set_deficit(double deficit);
 
     Packet front() const;
     int size() const;
@@ -24,8 +24,8 @@ public:
     void print();
 
 private:
-    int quant;                                                                    // Выделяемое очереди время в ресурсных блоках (RB)
-    int deficit;                                                                  // Накопленный дефицит в ресурсных блоках (RB)
+    double quant;                                                                    // Выделяемое очереди время в ресурсных блоках (RB)
+    double deficit;                                                                  // Накопленный дефицит в ресурсных блоках (RB)
     size_t limit;                                                                 // Размер очереди
     std::priority_queue<Packet, std::vector<Packet>, PacketGreater> packet_queue; // Очередь из обслуживаемых пакетов
 };

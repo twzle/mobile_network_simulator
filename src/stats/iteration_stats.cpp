@@ -151,12 +151,17 @@ void IterationStats::print()
               << " ms (" // Общее время простоя и доля от общего времени
               << 100 * (scheduler_idle_time / scheduler_total_time)
               << "% of all)\n"
+              << "Total wait time = "
+              << scheduler_wait_time
+              << " ms (" // Общее время простоя и доля от общего времени
+              << 100 * (scheduler_wait_time / scheduler_total_time)
+              << "% of all)\n"
               << "Average packet processing time = "
               << scheduler_processing_time / packet_count
               << " ms\n" // Среднее время обслуживания пакета
               << "Average packet processing delay = "
               << average_delay_by_scheduler
-              << " ms\n";                  // Среднее время задержки обслуживания пакета
+              << " ms\n\n";                  // Среднее время задержки обслуживания пакета
 }
 
 void IterationStats::evaluate()

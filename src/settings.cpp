@@ -8,7 +8,7 @@ Settings::Settings(
     std::string scheduler_type,
     double bandwidth, 
     int packet_count, int packet_size, 
-    int queue_count, int queue_quant, int queue_limit,
+    int queue_count, double queue_quant, int queue_limit,
     double time_lambda)
     {
         this->launches = launches;
@@ -81,8 +81,8 @@ void Settings::validate() {
         throw std::invalid_argument("Queue count should be greater than or equal to 1.");
     }
 
-    if (queue_quant < 1) {
-        throw std::invalid_argument("Queue quant should be greater than or equal to 1.");
+    if (queue_quant + epsilon < 0) {
+        throw std::invalid_argument("Queue quant should be greater than or equal to 0.");
     }
 
     if (time_lambda < 1) {
@@ -132,7 +132,7 @@ int Settings::get_queue_count(){
     return this->queue_count;
 }
 
-int Settings::get_queue_quant(){
+double Settings::get_queue_quant(){
     return this->queue_quant;
 }
 
