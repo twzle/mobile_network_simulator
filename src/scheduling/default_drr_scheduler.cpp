@@ -86,9 +86,10 @@ void DefaultDRRScheduler::run()
 
                         available_resource_blocks -= packet.get_size();
                         allocated_resource_blocks_for_queue += packet.get_size();
-
+                        
+                        
                         stats.add_queue_packet_stats(
-                            relative_queue_id,
+                            packet.get_queue(),
                             packet.get_scheduled_at(),
                             current_time);
 

@@ -15,7 +15,11 @@ void PacketQueue::add_packet(Packet &packet)
 
 double PacketQueue::get_quant() const { return quant; }
 double PacketQueue::get_deficit() const { return deficit; }
-void PacketQueue::set_deficit(double deficit) { this->deficit = deficit; }
+void PacketQueue::set_deficit(double deficit)
+{
+    if (deficit <= DEFICIT_MAX)
+        this->deficit = deficit;
+}
 
 // Обертка над std::queue
 Packet PacketQueue::front() const { return this->packet_queue.top(); }

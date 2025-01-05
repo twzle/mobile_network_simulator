@@ -46,14 +46,14 @@ void MeanStats::collect_history()
     for (auto &stats : stats_array)
     {
         this->mean_delay_by_scheduler_history
-            .push_back(stats.average_delay_by_scheduler);
+            .push_back(stats.scheduler_average_delay);
         this->mean_processing_time_by_scheduler_history
-            .push_back(stats.scheduler_average_total_time);
+            .push_back(stats.queue_average_total_time);
 
-        for (size_t queue_id = 0; queue_id < stats.average_delay_by_queue.size(); ++queue_id)
+        for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
         {
             this->mean_delay_by_queue_history[queue_id]
-                .push_back(stats.average_delay_by_queue[queue_id]);
+                .push_back(stats.queue_average_delay[queue_id]);
         }
 
         for (size_t queue_id = 0;
@@ -100,16 +100,16 @@ void MeanStats::calculate_mean_values()
 // Подсчет среднего арифметического задержек обработки пакетов
 void MeanStats::calculate_mean_delays()
 {
-    int queue_count = stats_array[0].average_delay_by_queue.size();
+    int queue_count = stats_array[0].queue_average_delay.size();
     mean_delays_by_queue.resize(queue_count);
 
     for (auto &stats : stats_array)
     {
         for (int i = 0; i < queue_count; ++i)
         {
-            mean_delays_by_queue[i] += stats.average_delay_by_queue[i];
+            mean_delays_by_queue[i] += stats.queue_average_delay[i];
         }
-        total_mean_delay_by_scheduler += stats.average_delay_by_scheduler;
+        total_mean_delay_by_scheduler += stats.scheduler_average_delay;
     }
 
     for (int i = 0; i < queue_count; ++i)
@@ -135,7 +135,7 @@ void MeanStats::calculate_mean_queue_processing_time()
                 stats.queue_total_time[i];
         }
         total_mean_processing_time +=
-            stats.scheduler_average_total_time;
+            stats.queue_average_total_time;
     }
 
     for (int i = 0; i < queue_count; ++i)

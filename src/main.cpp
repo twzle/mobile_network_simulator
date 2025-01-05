@@ -18,7 +18,7 @@ int main(){
     int queue_count = 2; // Количество очередей
     double queue_quant = 2; // Квант времени (RB)
     int queue_limit = 10000; // Размер очереди
-    double time_lambda = 200; // Частота прихода пакетов в мс (1/мс), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 10; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     Settings settings = 
         Settings(

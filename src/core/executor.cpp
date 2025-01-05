@@ -26,14 +26,14 @@ void Executor::execute(){
     auto scheduler = settings.get_scheduler_instance();
             
     // Наполнение очередей пакетами
-    for (int i = 0; i < settings.get_queue_count(); ++i){
+    for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id){
         PacketQueue queue(
             settings.get_queue_quant(), 
             settings.get_queue_limit()
         );
 
         for (int j = 0; j < settings.get_packet_count(); ++j){
-            Packet packet(settings.get_packet_size());
+            Packet packet(queue_id, settings.get_packet_size());
             queue.add_packet(packet);
         }
 

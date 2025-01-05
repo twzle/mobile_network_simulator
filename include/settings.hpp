@@ -10,7 +10,7 @@
 #include "scheduling/circular_drr_scheduler.hpp"
 #include "scheduling/default_drr_scheduler.hpp"
 #include "standard_info.hpp"
-#include "types.hpp"
+#include "const.hpp"
 
 class Settings {
     public:

@@ -44,6 +44,7 @@ protected:
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
     std::vector<PacketQueue> scheduled_queues;    // Очереди для обслуживания
 
+    // TODO: Внести в IterationStats
     double scheduling_start = 0;    // Начало работы планировщика
     double scheduling_end = 0;      // Конец работы планировщика
     double scheduling_duration = 0; // Общая длительность работы планировщика

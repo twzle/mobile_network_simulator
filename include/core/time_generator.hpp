@@ -1,7 +1,8 @@
 #pragma once
 
 #include <random>
-#include "types.hpp"
+
+#include "const.hpp"
 
 class TimeGenerator {
     public:

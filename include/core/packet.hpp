@@ -3,22 +3,27 @@
 #include <iostream>
 #include <queue>
 #include <thread>
-#include "types.hpp"
 
-class Packet {
-    public:
-        Packet(int size);
-        int get_size() const;
-        bool get_retry() const;
-        void set_retry();
+#include "const.hpp"
 
-        double get_scheduled_at() const;
-        void set_scheduled_at(double scheduled_at);
+class Packet
+{
+public:
+    Packet(int size, int queue);
 
-    private:
-        int size; // Размер пакета (время на обслуживание) в ресурсных блоках (RB)
-        double scheduled_at; // Время в которое для пакета было запланировано обслуживание
-        bool retry; // Превысил ли пакет дефицит
+    int get_size() const;
+    void set_size(int size);
+
+    int get_queue() const;
+    void set_queue(int queue);
+
+    double get_scheduled_at() const;
+    void set_scheduled_at(double scheduled_at);
+
+private:
+    int size;            // Размер пакета (время на обслуживание) в ресурсных блоках (RB)
+    double scheduled_at; // Время в которое для пакета было запланировано обслуживание
+    int queue;           // Очередь в которую поставлен пакет
 };
 
 struct PacketGreater

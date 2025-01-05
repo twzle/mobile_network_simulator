@@ -4,6 +4,8 @@
 #include "core/time_generator.hpp"
 #include "packet.hpp"
 
+const double DEFICIT_MAX = 1000;
+
 class PacketQueue
 {
 public:
@@ -24,8 +26,8 @@ public:
     void print();
 
 private:
-    double quant;                                                                    // Выделяемое очереди время в ресурсных блоках (RB)
-    double deficit;                                                                  // Накопленный дефицит в ресурсных блоках (RB)
-    size_t limit;                                                                 // Размер очереди
+    double quant; // Выделяемое очереди время в ресурсных блоках (RB)
+    double deficit; // Накопленный дефицит в ресурсных блоках (RB)
+    size_t limit; // Размер очереди
     std::priority_queue<Packet, std::vector<Packet>, PacketGreater> packet_queue; // Очередь из обслуживаемых пакетов
 };
