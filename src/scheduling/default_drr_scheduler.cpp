@@ -9,14 +9,14 @@ DefaultDRRScheduler::DefaultDRRScheduler(double tti)
 void DefaultDRRScheduler::run()
 {
     // Метка времени в момент запуска планировщика
-    set_scheduling_start_time(0.0);
-    double current_time = get_scheduling_start_time();
+    session.set_scheduling_start_time(0.0);
+    double current_time = session.get_scheduling_start_time();
 
     // Перебор очередей начиная с очереди с индексом 0
     set_initial_queue(0);
 
     // Цикл до обслуживания всех пакетов во всех очередях
-    while (this->processed_packets < this->total_packets)
+    while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
@@ -82,7 +82,7 @@ void DefaultDRRScheduler::run()
                         // Обслуживание пакета
                         queue.pop();
                         queue.set_deficit(queue.get_deficit() - packet.get_size());
-                        increment_processed_packet_count(1);
+                        session.increment_processed_packet_count(1);
 
                         available_resource_blocks -= packet.get_size();
                         allocated_resource_blocks_for_queue += packet.get_size();
@@ -118,7 +118,7 @@ void DefaultDRRScheduler::run()
     }
 
     // Метка времени в момент завершения работы планировщика
-    set_scheduling_end_time(current_time);
+    session.set_scheduling_end_time(current_time);
 
     // Подсчет статистики
     evaluate_stats();

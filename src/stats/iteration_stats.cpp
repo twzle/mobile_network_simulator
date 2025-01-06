@@ -142,24 +142,24 @@ void IterationStats::print()
 {
     std::cout << "\nPacket count = "
               << packet_count << "\n"
-              << "Total schdeuling time = "
+              << "Total scheduling time (total_time) = "
               << scheduler_total_time << " s\n" // Общее время работы
-              << "Total processing time = "
+              << "Total processing time (processing_time) = "
               << scheduler_processing_time
               << " s (" // Общее время обслуживания пакетов и доля от общего времени
               << 100 * (scheduler_processing_time / scheduler_total_time)
               << "% of all)\n"
-              << "Total idle time = "
+              << "Total idle time (idle_time) = "
               << scheduler_idle_time
               << " s (" // Общее время простоя и доля от общего времени
               << 100 * (scheduler_idle_time / scheduler_total_time)
               << "% of all)\n"
-              << "Total wait time = "
+              << "Total wait time (wait_time) = "
               << scheduler_wait_time
               << " s (" // Общее время простоя и доля от общего времени
               << 100 * (scheduler_wait_time / scheduler_total_time)
               << "% of all)\n"
-              << "Average packet processing time = "
+              << "Average packet processing time ((processing_time + idle_time) / packet_count) = "
               << ((scheduler_processing_time + scheduler_idle_time) / packet_count) * 1000
               << " ms\n" // Среднее время обслуживания пакета
               << "Average packet processing delay = "
