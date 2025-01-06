@@ -27,7 +27,14 @@ public:
 
     void calculate_execution_count_for_metric(
         const double &standard_deviation,
+        const double &accuracy);
+
+    void calculate_confidence_interval(
+        const std::vector<double> &values,
+        const double &mean,
         const double &accuracy = 1);
+
+    void evaluate_confidence_intervals();
 
     void collect_history();
 
@@ -38,23 +45,28 @@ public:
 
     std::string write_yaml();
 
-    double mean_total_time = 0;
-    double common_total_time = 0;
+    // История среднего суммарного времени работы планировщика по итерациям
+    std::vector<double> scheduler_total_time_history;
+    double mean_scheduler_total_time = 0;
+    double common_scheduler_total_time = 0;
 
-    double mean_total_idle_time = 0;
-    double common_total_idle_time = 0;
+    // История среднего суммарного времени работы планировщика по итерациям
+    std::vector<double> scheduler_idle_time_history;
+    double mean_scheduler_idle_time = 0;
+    double common_scheduler_idle_time = 0;
 
-    double mean_total_skip_time = 0;
-    double common_total_skip_time = 0;
+    // История среднего суммарного времени работы планировщика по итерациям
+    std::vector<double> scheduler_processing_time_history;
+    double mean_scheduler_processing_time = 0;
+    double common_scheduler_processing_time = 0;
 
-    double mean_total_processing_time = 0;
-    double common_total_processing_time = 0;
+    // История среднего суммарного времени работы планировщика по итерациям
+    std::vector<double> scheduler_wait_time_history;
+    double mean_scheduler_wait_time = 0;
+    double common_scheduler_wait_time = 0;
 
-    double mean_total_wait_time = 0;
-    double common_total_wait_time = 0;
-
-    double mean_total_packet_count = 0;
-    double common_total_packet_count = 0;
+    double mean_scheduler_packet_count = 0;
+    double common_scheduler_packet_count = 0;
 
     std::vector<double> queue_mean_processing_time; // TODO: поменять на std::map<int, double>
     double total_mean_processing_time_by_scheduler = 0;
@@ -67,12 +79,12 @@ public:
     std::vector<IterationStats> stats_array;
 
     // История ср. времени задержек обработки пакетов в очередях по запускам
-    std::map<int, std::vector<double>> mean_delay_by_queue_history;
+    std::map<int, std::vector<double>> mean_processing_delay_time_by_queue_history;
     // История ср. задержек обработки пакетов в планировщике (во всех очередях) по запускам
-    std::vector<double> mean_delay_by_scheduler_history;
+    std::vector<double> mean_processing_delay_time_by_scheduler_history;
 
     // История ср. времени работы каждой очереди по запускам
-    std::map<int, std::vector<double>> processing_time_by_queue_history;
+    std::map<int, std::vector<double>> mean_processing_time_by_queue_history;
     // История ср. времени работы планировщика по запускам
     std::vector<double> mean_processing_time_by_scheduler_history;
 };

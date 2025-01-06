@@ -1,5 +1,8 @@
 #include "stats/mean_stats.hpp"
 
+#include <chrono>
+#include <thread>
+
 #define DATA_DIR "data/"
 #define FILE_NAME "data.yaml"
 
@@ -11,13 +14,6 @@ void MeanStats::calculate()
     calculate_mean_queue_processing_time();
 
     collect_history();
-
-    // Общая задержка обработки пакетов
-    // std::cout << "\nОбщая задержка обработки пакетов" << "\n";
-    // double std_dev = calculate_standard_deviation_for_metric(
-    //     mean_delay_by_scheduler_history,
-    //     total_mean_delay_by_scheduler);
-    // calculate_execution_count_for_metric(std_dev, 1);
 
     // // задержка обработки пакетов по очередям
     // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
@@ -45,24 +41,28 @@ void MeanStats::collect_history()
 {
     for (auto &stats : stats_array)
     {
-        this->mean_delay_by_scheduler_history
-            .push_back(stats.scheduler_average_delay);
-        this->mean_processing_time_by_scheduler_history
-            .push_back(stats.queue_average_total_time);
+        this->scheduler_total_time_history.push_back(
+            stats.scheduler_total_time);
+        this->scheduler_processing_time_history.push_back(
+            stats.scheduler_processing_time);
+        this->scheduler_idle_time_history.push_back(
+            stats.scheduler_idle_time);
+        this->scheduler_wait_time_history.push_back(
+            stats.scheduler_wait_time);
 
-        for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
-        {
-            this->mean_delay_by_queue_history[queue_id]
-                .push_back(stats.queue_average_delay[queue_id]);
-        }
+        // for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
+        // {
+        //     this->mean_delay_by_queue_history[queue_id]
+        //         .push_back(stats.queue_average_delay[queue_id]);
+        // }
 
-        for (size_t queue_id = 0;
-             queue_id < stats.queue_total_time.size();
-             ++queue_id)
-        {
-            this->processing_time_by_queue_history[queue_id]
-                .push_back(stats.queue_total_time[queue_id]);
-        }
+        // for (size_t queue_id = 0;
+        //      queue_id < stats.queue_processing_time.size();
+        //      ++queue_id)
+        // {
+        //     this->mean_processing_time_by_queue_history[queue_id]
+        //         .push_back(stats.queue_processing_time[queue_id]);
+        // }
     }
 
     // std::cout << "Delay history size: " << mean_delay_by_scheduler_history.size() << "\n";
@@ -78,23 +78,23 @@ void MeanStats::calculate_mean_values()
 {
     for (auto &stats : stats_array)
     {
-        common_total_time += stats.scheduler_total_time;
-        common_total_idle_time += stats.scheduler_idle_time;
-        common_total_processing_time += stats.scheduler_processing_time;
-        common_total_wait_time += stats.scheduler_wait_time;
-        common_total_packet_count += stats.packet_count;
+        common_scheduler_total_time += stats.scheduler_total_time;
+        common_scheduler_idle_time += stats.scheduler_idle_time;
+        common_scheduler_processing_time += stats.scheduler_processing_time;
+        common_scheduler_wait_time += stats.scheduler_wait_time;
+        common_scheduler_packet_count += stats.packet_count;
     }
 
-    mean_total_time =
-        common_total_time / stats_array.size();
-    mean_total_idle_time =
-        common_total_idle_time / stats_array.size();
-    mean_total_processing_time =
-        common_total_processing_time / stats_array.size();
-    mean_total_wait_time =
-        common_total_wait_time / stats_array.size();
-    mean_total_packet_count =
-        common_total_packet_count / stats_array.size();
+    mean_scheduler_total_time =
+        common_scheduler_total_time / stats_array.size();
+    mean_scheduler_idle_time =
+        common_scheduler_idle_time / stats_array.size();
+    mean_scheduler_processing_time =
+        common_scheduler_processing_time / stats_array.size();
+    mean_scheduler_wait_time =
+        common_scheduler_wait_time / stats_array.size();
+    mean_scheduler_packet_count =
+        common_scheduler_packet_count / stats_array.size();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
@@ -146,18 +146,27 @@ void MeanStats::calculate_mean_queue_processing_time()
     total_mean_processing_time_by_scheduler = total_mean_processing_time / stats_array.size();
 }
 
-// Подсчет минимального числа запусков для уровня достоверности
+/*
+Подсчет минимального числа запусков для уровня достоверности
+Общая формула: n = (z * S / E)^2,
+n - кол-во запусков,
+z - коэф. доверия,
+S - среднекв. отклонение величины,
+E - точность
+*/
 void MeanStats::calculate_execution_count_for_metric(
     const double &standard_deviation, const double &accuracy)
 {
     double credability_out_of_95 = 1.96;  // z
     double credability_out_of_99 = 2.576; // z
 
-    // (z * S / E)^2
+    // Корень из количества запусков
+    // (z * S / E)
     double product_for_95 = (credability_out_of_95 * standard_deviation / accuracy);
-
     double product_for_99 = (credability_out_of_99 * standard_deviation / accuracy);
 
+    // Количество запусков
+    // (z * S / E)^2
     double launches_for_95 = std::pow(product_for_95, 2);
     double launches_for_99 = std::pow(product_for_99, 2);
 
@@ -166,50 +175,109 @@ void MeanStats::calculate_execution_count_for_metric(
     std::cout << "Количество запусков для достоверности 99% = " << launches_for_99 << "\n";
 }
 
-// Подсчет стандартного отклонения величины
+/*
+Подсчет стандартного отклонения величины
+Общая формула: S = sqrt(sum(Xi - X)^2 / (n - 1)),
+S - среднекв. отклонение,
+Xi - i-ый элемент выборки,
+X - среднее арифметическое выборки,
+n - размер выборки
+*/
 double MeanStats::calculate_standard_deviation_for_metric(
     const std::vector<double> &values, const double &mean)
 {
     // sum(Xi - X)^2
-    double total_deviation = 0;
+    // Сумма квадратов отклонений
+    double sum_of_squared_deviations = 0;
     for (auto &value : values)
     {
-        double difference = value - mean;
-        total_deviation += difference * difference;
+        // Отклонение от среднего для каждого значения из выборки
+        double value_deviation = value - mean;
+        sum_of_squared_deviations += value_deviation * value_deviation;
     }
 
     // sum(Xi - X)^2 / (n - 1)
-    double square_of_deviation = total_deviation / (stats_array.size() - 1);
+    // Квадрат среднеквадратического отклонения
+    double square_of_standard_deviation =
+        sum_of_squared_deviations / (stats_array.size() - 1);
 
     // sqrt(sum(Xi - X)^2 / (n - 1))
-    double standard_devaition = std::sqrt(square_of_deviation);
-    std::cout << "Стандартное отклонение величины = " << standard_devaition << "\n";
+    // Среднеквадратическое отклонение
+    double standard_deviation = std::sqrt(square_of_standard_deviation);
+    std::cout << "Стандартное отклонение величины = " << standard_deviation << "\n";
 
-    return standard_devaition;
+    return standard_deviation;
+}
+
+void MeanStats::calculate_confidence_interval(
+    const std::vector<double> &values, const double &mean, const double &accuracy)
+{
+    double std_dev = calculate_standard_deviation_for_metric(values, mean);
+    calculate_execution_count_for_metric(std_dev, accuracy);
+}
+
+void MeanStats::evaluate_confidence_intervals()
+{
+    std::cout << "\n------------\n";
+    std::cout << "Доверительные интервалы" << std::endl;
+
+    // Доверительный интервал для общего времени работы планировщика
+    std::cout << "\nОбщее время работы планировщика (scheduler_total_time)"
+              << std::endl;
+    calculate_confidence_interval(
+        scheduler_total_time_history,
+        mean_scheduler_total_time,
+        1);
+
+    // Доверительный интервал для времени работы планировщика в состоянии ожидания
+    std::cout << "\nВремя работы планировщика в состоянии ожидания (scheduler_wait_time)"
+              << std::endl;
+    calculate_confidence_interval(
+        scheduler_wait_time_history,
+        mean_scheduler_wait_time,
+        1);
+
+    // Доверительный интервал для времени работы планировщика в состоянии простоя
+    std::cout << "\nВремя работы планировщика в состоянии простоя (scheduler_idle_time)"
+              << std::endl;
+    calculate_confidence_interval(
+        scheduler_idle_time_history,
+        mean_scheduler_idle_time,
+        1);
+
+    // Доверительный интервал для времени работы планировщика в состоянии обслуживания
+    std::cout << "\nВремя работы планировщика в состоянии обслуживания (scheduler_processing_time)"
+              << std::endl;
+    calculate_confidence_interval(
+        scheduler_processing_time_history,
+        mean_scheduler_processing_time,
+        1);
 }
 
 // Вывод в stdout срденего арифметического по статистике работы планировщика
 void MeanStats::show()
 {
     std::cout << "--------------\n\n";
-    std::cout << "mean stats\n";
-    std::cout << "\nRunning time = "
-              << mean_total_time << " ms\n" // Общее время работы
-              << "Processing time = "
-              << mean_total_processing_time
-              << " ms (" // Общее время обслуживания пакетов и доля от общего времени
-              << 100 * (mean_total_processing_time / mean_total_time)
+    std::cout << "MEAN STATS\n";
+    std::cout << "\nMean total time = "
+              << mean_scheduler_total_time << " s\n" // Общее время работы
+              << "Mean processing time = "
+              << mean_scheduler_processing_time
+              << " s (" // Общее время обслуживания пакетов и доля от общего времени
+              << 100 * (mean_scheduler_processing_time / mean_scheduler_total_time)
               << "% of all)\n"
-              << "Common total idle time = "
-              << mean_total_idle_time
-              << " ms (" // Общее время простоя и доля от общего времени
-              << 100 * (mean_total_idle_time / mean_total_time)
+              << "Mean idle time = "
+              << mean_scheduler_idle_time
+              << " s (" // Общее время простоя и доля от общего времени
+              << 100 * (mean_scheduler_idle_time / mean_scheduler_total_time)
               << "% of all)\n"
-              << "mean packet processing time = "
-              << mean_total_processing_time / mean_total_packet_count
-              << " ms\n" // Среднее время обслуживания пакета
-              << "mean packet delay time = "
-              << total_mean_delay_by_scheduler
+              << "Mean wait time = "
+              << mean_scheduler_wait_time
+              << " s (" // Общее время простоя и доля от общего времени
+              << 100 * (mean_scheduler_wait_time / mean_scheduler_total_time)
+              << "% of all)\n"
+              << "Mean packet processing delay time = "
+              << total_mean_delay_by_scheduler * 1000
               << " ms\n"; // Среднее время обслуживания пакета
 }
 
