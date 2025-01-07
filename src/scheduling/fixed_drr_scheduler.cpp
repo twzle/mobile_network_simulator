@@ -19,10 +19,11 @@ void FixedDRRScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
+        TTIStats tti_stats = TTIStats(scheduled_queues.size());
+
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
         int available_resource_blocks = this->resource_blocks_per_tti;
-        int allocated_resource_blocks_for_tti = 0;
 
         for (size_t absolute_queue_id = 0;
              absolute_queue_id < scheduled_queues.size();
@@ -36,8 +37,6 @@ void FixedDRRScheduler::run()
             queue.set_deficit(queue.get_deficit() + queue.get_quant());
 
             // std::cout << "-> " << relative_queue_id << " ";
-
-            int allocated_resource_blocks_for_queue = 0;
 
             if (queue.size() == 0)
             {
@@ -81,7 +80,13 @@ void FixedDRRScheduler::run()
                         session.increment_processed_packet_count(1);
 
                         available_resource_blocks -= packet.get_size();
-                        allocated_resource_blocks_for_queue += packet.get_size();
+
+                        tti_stats.add_allocated_rb_to_queue(
+                            packet.get_queue(),
+                            packet.get_size());
+
+                        tti_stats.add_allocated_rb_to_total(
+                            packet.get_size());
 
                         stats.add_queue_packet_stats(
                             relative_queue_id,
@@ -93,8 +98,6 @@ void FixedDRRScheduler::run()
                     }
                 }
             }
-
-            allocated_resource_blocks_for_tti += allocated_resource_blocks_for_queue;
 
             stats.update_queue_time_stats(
                 queue_state,
@@ -108,6 +111,11 @@ void FixedDRRScheduler::run()
         stats.update_scheduler_time_stats(
             scheduler_state,
             tti_duration);
+
+        tti_stats.calculate_fairness_for_queues();
+        stats.update_scheduler_fairness_for_queues(
+            tti_stats.get_fairness_for_queues(),
+            tti_stats.is_valid_fairness_for_queues());
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());

@@ -65,6 +65,11 @@ public:
     double mean_scheduler_wait_time = 0;
     double common_scheduler_wait_time = 0;
 
+    // История средней суммарной справедливости распределения RB между очередями по итерациям
+    std::vector<double> scheduler_fairness_for_queues_history;
+    double mean_scheduler_fairness_for_queues = 0;
+    double common_scheduler_fairness_for_queues = 0;
+
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;
 

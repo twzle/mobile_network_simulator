@@ -126,6 +126,15 @@ void IterationStats::update_scheduler_time_stats(
     }
 }
 
+void IterationStats::update_scheduler_fairness_for_queues(
+    double fairness_for_queues,
+    bool is_valid
+) {
+    if (is_valid){
+        scheduler_fairness_for_queues.emplace_back(fairness_for_queues);
+    }
+}
+
 void IterationStats::add_queue_packet_stats(
     size_t queue_id,
     double scheduled_at,
@@ -175,6 +184,7 @@ void IterationStats::evaluate()
     evaluate_queue_total_time_stats();
 
     evaluate_delay_stats();
+    evaluate_fairness_for_queues_stats();
 }
 
 void IterationStats::evaluate_queue_total_time_stats()
@@ -227,6 +237,19 @@ void IterationStats::evaluate_queue_wait_time_stats()
 
     queue_average_wait_time =
         sum_of_all_queue_wait_time / queue_wait_time.size();
+}
+
+void IterationStats::evaluate_fairness_for_queues_stats()
+{
+    double sum_of_all_fairness_for_queues = 0;
+    // Подсчет суммы справедливостей за все время работы планировщика
+    for (auto &stats : scheduler_fairness_for_queues)
+    {
+        sum_of_all_fairness_for_queues += stats;
+    }
+
+    scheduler_average_fairness_for_queues =
+        sum_of_all_fairness_for_queues / scheduler_fairness_for_queues.size();
 }
 
 void IterationStats::evaluate_delay_stats()

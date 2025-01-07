@@ -7,6 +7,7 @@
 #include "core/state.hpp"
 #include "core/packet_queue.hpp"
 #include "stats/iteration_stats.hpp"
+#include "stats/tti_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
 
 class BaseDRRScheduler

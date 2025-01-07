@@ -63,6 +63,10 @@ public:
     void update_scheduler_time_stats(
         SchedulerState scheduler_state,
         double tti_duration);
+    void update_scheduler_fairness_for_queues(
+        double fairness_for_queues,
+        bool is_valid
+    );
 
     void evaluate();
 
@@ -71,7 +75,10 @@ public:
     void evaluate_queue_processing_time_stats();
     void evaluate_queue_total_time_stats();
 
+    void evaluate_fairness_for_queues_stats();
+
     void evaluate_delay_stats();
+
     void evaluate_scheduling_stats();
 
     void release_memory_resources();
@@ -82,6 +89,9 @@ public:
 
     int packet_count = 0; // Общее число обслуженных пакетов
     std::vector<PacketStats> queue_stats;
+
+    std::vector<double> scheduler_fairness_for_queues; // За каждый TTI
+    double scheduler_average_fairness_for_queues = 0; // Среднее за весь период работы
 
     std::map<int, double> queue_average_delay; // Средние задержки обработки пакетов
     double scheduler_average_delay = 0;

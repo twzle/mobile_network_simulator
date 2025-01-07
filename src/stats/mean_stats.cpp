@@ -30,6 +30,9 @@ void MeanStats::collect_history()
         this->scheduler_wait_time_history.push_back(
             stats.scheduler_wait_time);
 
+        this->scheduler_fairness_for_queues_history.push_back(
+            stats.scheduler_average_fairness_for_queues);
+
         // for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
         // {
         //     this->mean_delay_by_queue_history[queue_id]
@@ -55,6 +58,9 @@ void MeanStats::calculate_mean_values()
         common_scheduler_idle_time += stats.scheduler_idle_time;
         common_scheduler_processing_time += stats.scheduler_processing_time;
         common_scheduler_wait_time += stats.scheduler_wait_time;
+
+        common_scheduler_fairness_for_queues += stats.scheduler_average_fairness_for_queues;
+
         common_scheduler_packet_count += stats.packet_count;
     }
 
@@ -66,6 +72,10 @@ void MeanStats::calculate_mean_values()
         common_scheduler_processing_time / stats_array.size();
     mean_scheduler_wait_time =
         common_scheduler_wait_time / stats_array.size();
+
+    mean_scheduler_fairness_for_queues =
+        common_scheduler_fairness_for_queues / stats_array.size();
+    
     mean_scheduler_packet_count =
         common_scheduler_packet_count / stats_array.size();
 }
@@ -195,7 +205,8 @@ void MeanStats::evaluate_confidence_intervals()
     std::cout << "Доверительные интервалы" << std::endl;
 
     // Доверительный интервал для общего времени работы планировщика
-    std::cout << "\nОбщее время работы планировщика (scheduler_total_time)"
+    std::cout << "\nОбщее время работы планировщика"
+              << " (scheduler_total_time)"
               << std::endl;
     calculate_confidence_interval(
         scheduler_total_time_history,
@@ -203,27 +214,37 @@ void MeanStats::evaluate_confidence_intervals()
         1);
 
     // Доверительный интервал для времени работы планировщика в состоянии ожидания
-    std::cout << "\nВремя работы планировщика в состоянии ожидания (scheduler_wait_time)"
-              << std::endl;
+    std::cout << "\nВремя работы планировщика в состоянии ожидания"
+              << " (scheduler_wait_time)" << std::endl;
     calculate_confidence_interval(
         scheduler_wait_time_history,
         mean_scheduler_wait_time,
         1);
 
     // Доверительный интервал для времени работы планировщика в состоянии простоя
-    std::cout << "\nВремя работы планировщика в состоянии простоя (scheduler_idle_time)"
-              << std::endl;
+    std::cout << "\nВремя работы планировщика в состоянии простоя"
+              << " (scheduler_idle_time)" << std::endl;
     calculate_confidence_interval(
         scheduler_idle_time_history,
         mean_scheduler_idle_time,
         1);
 
     // Доверительный интервал для времени работы планировщика в состоянии обслуживания
-    std::cout << "\nВремя работы планировщика в состоянии обслуживания (scheduler_processing_time)"
-              << std::endl;
+    std::cout << "\nВремя работы планировщика в состоянии обслуживания"
+              << " (scheduler_processing_time)" << std::endl;
     calculate_confidence_interval(
         scheduler_processing_time_history,
         mean_scheduler_processing_time,
+        1);
+
+    // FAIRNESS
+
+    // Доверительный интервал для справделивости распределения RB между очередями
+    std::cout << "\nОбщая справедливость распределения RB между очередями"
+              << " (scheduler_fairness_for_queues)" << std::endl;
+    calculate_confidence_interval(
+        scheduler_fairness_for_queues_history,
+        mean_scheduler_fairness_for_queues,
         1);
 
     // // задержка обработки пакетов по очередям
