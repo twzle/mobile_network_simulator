@@ -9,6 +9,7 @@ Settings::Settings(
     double bandwidth, 
     int packet_count, int packet_size, 
     int queue_count, double queue_quant, int queue_limit,
+    int user_count,
     double time_lambda)
     {
         this->launches = launches;
@@ -21,6 +22,7 @@ Settings::Settings(
         this->queue_count = queue_count;
         this->queue_quant = queue_quant;
         this->queue_limit = queue_limit;
+        this->user_count = user_count;
         this->time_lambda = time_lambda;
     }
 
@@ -138,6 +140,10 @@ double Settings::get_queue_quant(){
 
 int Settings::get_queue_limit(){
     return this->queue_limit;
+}
+
+int Settings::get_user_count(){
+    return this->user_count;
 }
 
 double Settings::get_time_lambda(){

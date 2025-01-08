@@ -26,6 +26,7 @@ class Settings {
             int queue_count, 
             double queue_quant,
             int queue_limit,
+            int user_count,
             double time_lambda);
 
         void validate();
@@ -40,6 +41,7 @@ class Settings {
         int get_queue_count();
         double get_queue_quant();
         int get_queue_limit();
+        int get_user_count();
         double get_time_lambda();
         int get_resource_block_per_tti_limit();
 
@@ -49,10 +51,11 @@ class Settings {
         std::string tti_duration; // Длительность TTI
         std::string scheduler_type; // Тип планировщика
         double bandwidth; // Полоса пропускания в МГц
-        int packet_count; // Количество пакетов для каждого повтора
-        int packet_size; // Размеры пакетов для каждого повтора
-        int queue_count; // Количество очередей для каждого повтора
-        double queue_quant; // Квант времени очередей для каждого повтора
-        int queue_limit; // Размеры очередей для каждого повтора
+        int packet_count; // Количество пакетов
+        int packet_size; // Размеры пакетов
+        int queue_count; // Количество очередей
+        double queue_quant; // Квант времени очередей
+        int queue_limit; // Размеры очередей
+        int user_count; // Количество пользователей
         double time_lambda; // Частота прихода пакетов в единицу времени
 };

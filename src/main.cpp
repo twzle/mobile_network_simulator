@@ -1,4 +1,5 @@
 #include "core/time_generator.hpp"
+#include "core/user_generator.hpp"
 #include "core/executor.hpp"
 #include "utils/plotter.hpp"
 #include "standard_info.hpp"
@@ -8,17 +9,26 @@ int main()
 {
     TimeGenerator::initialize();
     StandardManager::initialize();
+    UserGenerator::initialize();
+    User::initialize();
+    
 
-    int launches = 100;                // Количество перезапусков
+    int launches = 1; // Количество перезапусков
+
     std::string standard_type = "LTE"; // Стандарт связи
-    std::string tti_duration = "1ms";  // Длительность TTI
+    std::string tti_duration = "1ms"; // Длительность TTI
     std::string scheduler_type = "DefaultDRRScheduler";
-    double bandwidth = 10;   // Полоса пропускания в МГц
-    int packet_count = 1000; // Количество пакетов в очереди
-    int packet_size = 10;    // Размер пакета (RB)
-    int queue_count = 2;     // Количество очередей
+    double bandwidth = 10; // Полоса пропускания в МГц
+    
+    int packet_count = 1; // Количество пакетов в очереди
+    int packet_size = 10; // Размер пакета (RB)
+
+    int queue_count = 2; // Количество очередей
     double queue_quant = 2;  // Квант времени (RB)
     int queue_limit = 10000; // Размер очереди
+
+    int user_count = 5; // Количество пользователей
+
     double time_lambda = 10; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     Settings settings =
@@ -33,6 +43,7 @@ int main()
             queue_count,
             queue_quant,
             queue_limit,
+            user_count,
             time_lambda);
 
     try

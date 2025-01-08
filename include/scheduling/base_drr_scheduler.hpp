@@ -6,6 +6,7 @@
 
 #include "core/state.hpp"
 #include "core/packet_queue.hpp"
+#include "core/user.hpp"
 #include "stats/iteration_stats.hpp"
 #include "stats/tti_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
@@ -21,6 +22,9 @@ public:
 
     // Добавление очередей для обслуживания
     void schedule(PacketQueue &&packet_queue);
+
+    // Подключение пользователей для обслуживания
+    void connect_users(int user_count);
 
     // Установка лимита ресурсных блоков на один TTI
     void set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit);
@@ -44,6 +48,7 @@ protected:
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
     
     std::vector<PacketQueue> scheduled_queues;    // Очереди для обслуживания
+    std::map<int, User> connected_users; // Подключенные пользователи
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов

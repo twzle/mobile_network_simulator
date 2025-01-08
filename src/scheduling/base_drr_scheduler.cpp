@@ -13,6 +13,15 @@ void BaseDRRScheduler::schedule(PacketQueue &&packet_queue)
     total_packets += packet_queue.size();
 }
 
+void BaseDRRScheduler::connect_users(int user_count)
+{
+    for (int i = 0; i < user_count; ++i)
+    {
+        User user;
+        connected_users.emplace(user.get_id(), std::move(user));
+    }
+}
+
 void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
 {
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
@@ -48,7 +57,7 @@ size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
 */
 void BaseDRRScheduler::evaluate_stats()
 {
-    stats.scheduler_total_time = 
+    stats.scheduler_total_time =
         session.get_scheduling_end_time() - session.get_scheduling_start_time();
     stats.packet_count = session.get_processed_packet_count();
 
