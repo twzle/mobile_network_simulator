@@ -154,8 +154,10 @@ void MeanStats::calculate_execution_count_for_metric(
     double launches_for_99 = std::pow(product_for_99, 2);
 
     std::cout << "E (допустимая погрешность) = " << accuracy << "\n";
-    std::cout << "Количество запусков для достоверности 95% = " << launches_for_95 << "\n";
-    std::cout << "Количество запусков для достоверности 99% = " << launches_for_99 << "\n";
+    std::cout << "Количество запусков для достоверности 95% = " 
+        << std::ceil(launches_for_95) << " (" << launches_for_95 << ")\n";
+    std::cout << "Количество запусков для достоверности 99% = " 
+        << std::ceil(launches_for_99) << " (" << launches_for_99 << ")\n";
 }
 
 /*
@@ -245,7 +247,7 @@ void MeanStats::evaluate_confidence_intervals()
     calculate_confidence_interval(
         scheduler_fairness_for_queues_history,
         mean_scheduler_fairness_for_queues,
-        1);
+        0.001);
 
     // // задержка обработки пакетов по очередям
     // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
