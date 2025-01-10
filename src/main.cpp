@@ -20,7 +20,7 @@ int main()
     std::string scheduler_type = "DefaultDRRScheduler";
     double bandwidth = 10; // Полоса пропускания в МГц
     
-    int packet_count = 1; // Количество пакетов в очереди
+    int packet_count = 5; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
 
     int queue_count = 2; // Количество очередей

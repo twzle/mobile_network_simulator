@@ -34,14 +34,20 @@ void Executor::execute()
     // Наполнение очередей пакетами
     for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id)
     {
+        TimeGenerator::reset_time();
+        
         PacketQueue queue(
             settings.get_queue_quant(),
             settings.get_queue_limit());
 
         for (int j = 0; j < settings.get_packet_count(); ++j)
         {
-            Packet packet(queue_id, settings.get_packet_size());
-            queue.add_packet(packet);
+            User *user = scheduler->get_user_ptr(UserGenerator::generate_user_id());
+            if (user != nullptr)
+            {
+                Packet packet(queue_id, settings.get_packet_size(), user);
+                queue.add_packet(packet);
+            }
         }
 
         // Планирование обслуживания очереди

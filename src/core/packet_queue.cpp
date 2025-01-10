@@ -29,11 +29,27 @@ void PacketQueue::push(const Packet &packet) { return this->packet_queue.push(pa
 
 void PacketQueue::print()
 {
+    int i = 0;
+
+    std::priority_queue<Packet, std::vector<Packet>, PacketGreater> tmp;
+
     while (!this->packet_queue.empty())
-    {
+    {   
         Packet packet = this->front();
-        double schedule_time = packet.get_scheduled_at();
-        std::cout << schedule_time << "\n";
+        std::cout << "PACKET = " << i << "\n"
+                  << "SCHEDULE TIME = " << packet.get_scheduled_at() << "\n"
+                  << "USER = " << packet.get_user_ptr()->get_id() << "\n\n";
         this->packet_queue.pop(); // Удаляем элемент после его обработки
+        tmp.push(packet);
+
+        ++i;
+    }
+
+    while (!tmp.empty())
+    {   
+        Packet packet = tmp.top();
+        
+        tmp.pop(); // Удаляем элемент после его обработки
+        this->packet_queue.push(packet);
     }
 }

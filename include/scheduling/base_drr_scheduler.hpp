@@ -25,6 +25,7 @@ public:
 
     // Подключение пользователей для обслуживания
     void connect_users(int user_count);
+    User* get_user_ptr(int user_id);
 
     // Установка лимита ресурсных блоков на один TTI
     void set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit);

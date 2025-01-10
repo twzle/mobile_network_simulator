@@ -22,6 +22,19 @@ void BaseDRRScheduler::connect_users(int user_count)
     }
 }
 
+User* BaseDRRScheduler::get_user_ptr(int user_id)
+{
+    auto it = connected_users.find(user_id);
+    if (it != connected_users.end())
+    {
+        // Получаем указатель на пользователя
+        User *user_ptr = &it->second;
+        return user_ptr;
+    }
+
+    return nullptr;
+}
+
 void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
 {
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
