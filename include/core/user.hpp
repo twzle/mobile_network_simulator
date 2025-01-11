@@ -10,6 +10,7 @@ public:
     User();
 
     static void initialize();
+    static void reset_last_id();
 
     int get_id() const;
 

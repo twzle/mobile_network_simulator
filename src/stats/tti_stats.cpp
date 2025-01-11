@@ -1,11 +1,11 @@
 #include "stats/tti_stats.hpp"
 
-TTIStats::TTIStats(size_t queue_count, size_t user_count) 
-: total_allocated_rb_count(0), 
-queue_count(queue_count),
-fairness_of_rb_allocation_for_queues(0), _is_valid_fairness_for_queues(false),
-user_count(user_count), 
-fairness_of_rb_allocation_for_users(0), _is_valid_fairness_for_users(false)
+TTIStats::TTIStats(size_t queue_count, size_t user_count)
+    : total_allocated_rb_count(0),
+      queue_count(queue_count),
+      fairness_of_rb_allocation_for_queues(0), _is_valid_fairness_for_queues(false),
+      user_count(user_count),
+      fairness_of_rb_allocation_for_users(0), _is_valid_fairness_for_users(false)
 {
     initialize_queue_stats();
     initialize_user_stats();
@@ -27,9 +27,10 @@ void TTIStats::initialize_queue_stats()
     }
 }
 
-void TTIStats::add_allocated_rb_to_user(User* user, int rb_count)
+void TTIStats::add_allocated_rb_to_user(User *user, int rb_count)
 {
-    if (user != nullptr){
+    if (user != nullptr)
+    {
         int user_id = user->get_id();
         allocated_rb_count_per_user[user_id] += rb_count;
     }
@@ -61,15 +62,15 @@ void TTIStats::calculate_fairness_for_queues()
         int sum_of_squared_allocated_rb_count_by_queue = 0;
         for (auto &queue : allocated_rb_count_per_queue)
         {
-            int squared_allocated_rb_count_by_queue = queue.second;
+            int squared_allocated_rb_count_by_queue = std::pow(queue.second, 2);
             sum_of_squared_allocated_rb_count_by_queue +=
                 squared_allocated_rb_count_by_queue;
         }
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_rb_allocation_for_queues =
-            squared_sum_of_allocated_rb_count /
-            (queue_count * sum_of_squared_allocated_rb_count_by_queue);
+            (double) squared_sum_of_allocated_rb_count /
+            (double) (queue_count * sum_of_squared_allocated_rb_count_by_queue);
 
         _is_valid_fairness_for_queues = true;
     }
@@ -96,15 +97,15 @@ void TTIStats::calculate_fairness_for_users()
         int sum_of_squared_allocated_rb_count_by_user = 0;
         for (auto &user : allocated_rb_count_per_user)
         {
-            int squared_allocated_rb_count_by_user = user.second;
+            int squared_allocated_rb_count_by_user = std::pow(user.second, 2);
             sum_of_squared_allocated_rb_count_by_user +=
                 squared_allocated_rb_count_by_user;
         }
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_rb_allocation_for_users =
-            squared_sum_of_allocated_rb_count /
-            (user_count * sum_of_squared_allocated_rb_count_by_user);
+            (double) squared_sum_of_allocated_rb_count /
+            (double) (user_count * sum_of_squared_allocated_rb_count_by_user);
 
         _is_valid_fairness_for_users = true;
     }

@@ -20,6 +20,7 @@ void Executor::run()
     for (int i = 0; i < settings.get_launches(); ++i)
     {
         TimeGenerator::reset_time();
+        User::reset_last_id();
 
         std::cout << "Running scheduler #" << i + 1 << "...\n";
         this->execute();

@@ -184,7 +184,11 @@ void IterationStats::print()
               << " ms\n" // Среднее время обслуживания пакета
               << "Average packet processing delay = "
               << scheduler_average_delay * 1000
-              << " ms\n\n"; // Среднее время задержки обслуживания пакета
+              << " ms\n" // Среднее время задержки обслуживания пакета
+              << "Average fairness for queues = "
+              << scheduler_average_fairness_for_queues << "\n"
+              << "Average fairness for users = "
+              << scheduler_average_fairness_for_users << "\n\n";
 }
 
 void IterationStats::evaluate()
