@@ -65,8 +65,10 @@ public:
         double tti_duration);
     void update_scheduler_fairness_for_queues(
         double fairness_for_queues,
-        bool is_valid
-    );
+        bool is_valid);
+    void update_scheduler_fairness_for_users(
+        double fairness_for_users,
+        bool is_valid);
 
     void evaluate();
 
@@ -76,6 +78,7 @@ public:
     void evaluate_queue_total_time_stats();
 
     void evaluate_fairness_for_queues_stats();
+    void evaluate_fairness_for_users_stats();
 
     void evaluate_delay_stats();
 
@@ -91,7 +94,10 @@ public:
     std::vector<PacketStats> queue_stats;
 
     std::vector<double> scheduler_fairness_for_queues; // За каждый TTI
-    double scheduler_average_fairness_for_queues = 0; // Среднее за весь период работы
+    double scheduler_average_fairness_for_queues = 0;  // Среднее за весь период работы
+
+    std::vector<double> scheduler_fairness_for_users; // За каждый TTI
+    double scheduler_average_fairness_for_users = 0;  // Среднее за весь период работы
 
     std::map<int, double> queue_average_delay; // Средние задержки обработки пакетов
     double scheduler_average_delay = 0;
@@ -99,20 +105,20 @@ public:
     // Общее время работы (сумма processing, idle, wait)
     std::map<int, double> queue_total_time;
     double queue_average_total_time = 0; // Среднее время работы на очередь
-    double scheduler_total_time = 0;         // Общее время работы планировщика
+    double scheduler_total_time = 0;     // Общее время работы планировщика
 
     // Время в которое производилось обслуживание не менее одного пакета любого размера
     std::map<int, double> queue_processing_time;
     double queue_average_processing_time = 0; // Среднее время облуживания на очередь
-    double scheduler_processing_time = 0;         // Общее время обслуживания планировщика
+    double scheduler_processing_time = 0;     // Общее время обслуживания планировщика
 
     // Время в которое пакеты были готовы к обслуживанию, но не было ресурсов (вынужденный пропуск)
     std::map<int, double> queue_idle_time;
     double queue_average_idle_time = 0; // Среднее время простоя на очередь
-    double scheduler_idle_time = 0;         // Общее время простоя планировщики
+    double scheduler_idle_time = 0;     // Общее время простоя планировщики
 
     // Время в которое пакетов не было в очередях или время их обслуживания не пришло (бездействие)
     std::map<int, double> queue_wait_time;
     double queue_average_wait_time = 0; // Среднее время бездействия на очередь
-    double scheduler_wait_time = 0;         // Общее время бездействия планировщика
+    double scheduler_wait_time = 0;     // Общее время бездействия планировщика
 };

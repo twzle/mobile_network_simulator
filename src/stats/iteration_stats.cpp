@@ -128,10 +128,21 @@ void IterationStats::update_scheduler_time_stats(
 
 void IterationStats::update_scheduler_fairness_for_queues(
     double fairness_for_queues,
-    bool is_valid
-) {
-    if (is_valid){
+    bool is_valid)
+{
+    if (is_valid)
+    {
         scheduler_fairness_for_queues.emplace_back(fairness_for_queues);
+    }
+}
+
+void IterationStats::update_scheduler_fairness_for_users(
+    double fairness_for_users,
+    bool is_valid)
+{
+    if (is_valid)
+    {
+        scheduler_fairness_for_users.emplace_back(fairness_for_users);
     }
 }
 
@@ -185,6 +196,7 @@ void IterationStats::evaluate()
 
     evaluate_delay_stats();
     evaluate_fairness_for_queues_stats();
+    evaluate_fairness_for_users_stats();
 }
 
 void IterationStats::evaluate_queue_total_time_stats()
@@ -250,6 +262,19 @@ void IterationStats::evaluate_fairness_for_queues_stats()
 
     scheduler_average_fairness_for_queues =
         sum_of_all_fairness_for_queues / scheduler_fairness_for_queues.size();
+}
+
+void IterationStats::evaluate_fairness_for_users_stats()
+{
+    double sum_of_all_fairness_for_users = 0;
+    // Подсчет суммы справедливостей за все время работы планировщика
+    for (auto &stats : scheduler_fairness_for_users)
+    {
+        sum_of_all_fairness_for_users += stats;
+    }
+
+    scheduler_average_fairness_for_users =
+        sum_of_all_fairness_for_users / scheduler_fairness_for_users.size();
 }
 
 void IterationStats::evaluate_delay_stats()

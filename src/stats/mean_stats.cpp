@@ -32,6 +32,8 @@ void MeanStats::collect_history()
 
         this->scheduler_fairness_for_queues_history.push_back(
             stats.scheduler_average_fairness_for_queues);
+        this->scheduler_fairness_for_users_history.push_back(
+            stats.scheduler_average_fairness_for_users);
 
         // for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
         // {
@@ -60,6 +62,7 @@ void MeanStats::calculate_mean_values()
         common_scheduler_wait_time += stats.scheduler_wait_time;
 
         common_scheduler_fairness_for_queues += stats.scheduler_average_fairness_for_queues;
+        common_scheduler_fairness_for_users += stats.scheduler_average_fairness_for_users;
 
         common_scheduler_packet_count += stats.packet_count;
     }
@@ -75,7 +78,9 @@ void MeanStats::calculate_mean_values()
 
     mean_scheduler_fairness_for_queues =
         common_scheduler_fairness_for_queues / stats_array.size();
-    
+    mean_scheduler_fairness_for_users =
+        common_scheduler_fairness_for_users / stats_array.size();
+
     mean_scheduler_packet_count =
         common_scheduler_packet_count / stats_array.size();
 }
@@ -154,10 +159,10 @@ void MeanStats::calculate_execution_count_for_metric(
     double launches_for_99 = std::pow(product_for_99, 2);
 
     std::cout << "E (допустимая погрешность) = " << accuracy << "\n";
-    std::cout << "Количество запусков для достоверности 95% = " 
-        << std::ceil(launches_for_95) << " (" << launches_for_95 << ")\n";
-    std::cout << "Количество запусков для достоверности 99% = " 
-        << std::ceil(launches_for_99) << " (" << launches_for_99 << ")\n";
+    std::cout << "Количество запусков для достоверности 95% = "
+              << std::ceil(launches_for_95) << " (" << launches_for_95 << ")\n";
+    std::cout << "Количество запусков для достоверности 99% = "
+              << std::ceil(launches_for_99) << " (" << launches_for_99 << ")\n";
 }
 
 /*
@@ -249,6 +254,14 @@ void MeanStats::evaluate_confidence_intervals()
         mean_scheduler_fairness_for_queues,
         0.001);
 
+    // Доверительный интервал для справделивости распределения RB между очередями
+    std::cout << "\nОбщая справедливость распределения RB между пользователями"
+              << " (scheduler_fairness_for_users)" << std::endl;
+    calculate_confidence_interval(
+        scheduler_fairness_for_users_history,
+        mean_scheduler_fairness_for_users,
+        0.001);
+
     // // задержка обработки пакетов по очередям
     // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
     // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id)
@@ -294,7 +307,13 @@ void MeanStats::show()
               << "% of all)\n"
               << "Mean packet processing delay time = "
               << total_mean_delay_by_scheduler * 1000
-              << " ms\n"; // Среднее время обслуживания пакета
+              << " ms\n" // Среднее время обслуживания пакета
+              << "Mean fairness of RB allocation for queues = "
+              << mean_scheduler_fairness_for_queues
+              << "\n" // Средняя справедливость распределения RB по очередям
+              << "Mean fairness of RB allocation for users = "
+              << mean_scheduler_fairness_for_users
+              << "\n"; // Средняя справедливость распределения RB по пользователям
 }
 
 std::string MeanStats::write_yaml()

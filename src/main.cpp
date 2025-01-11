@@ -13,14 +13,14 @@ int main()
     User::initialize();
     
 
-    int launches = 1; // Количество перезапусков
+    int launches = 10; // Количество перезапусков
 
     std::string standard_type = "LTE"; // Стандарт связи
     std::string tti_duration = "1ms"; // Длительность TTI
     std::string scheduler_type = "DefaultDRRScheduler";
     double bandwidth = 10; // Полоса пропускания в МГц
     
-    int packet_count = 5; // Количество пакетов в очереди
+    int packet_count = 100; // Количество пакетов в очереди
     int packet_size = 10; // Размер пакета (RB)
 
     int queue_count = 2; // Количество очередей

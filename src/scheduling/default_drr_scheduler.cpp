@@ -19,7 +19,9 @@ void DefaultDRRScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
-        TTIStats tti_stats = TTIStats(scheduled_queues.size());
+        TTIStats tti_stats = TTIStats(
+            scheduled_queues.size(),
+            connected_users.size());
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
@@ -89,6 +91,10 @@ void DefaultDRRScheduler::run()
                             packet.get_queue(),
                             packet.get_size());
 
+                        tti_stats.add_allocated_rb_to_user(
+                            packet.get_user_ptr(),
+                            packet.get_size());
+
                         tti_stats.add_allocated_rb_to_total(
                             packet.get_size());
 
@@ -114,12 +120,16 @@ void DefaultDRRScheduler::run()
         stats.update_scheduler_time_stats(
             scheduler_state,
             tti_duration);
-        
+
         tti_stats.calculate_fairness_for_queues();
         stats.update_scheduler_fairness_for_queues(
             tti_stats.get_fairness_for_queues(),
-            tti_stats.is_valid_fairness_for_queues()
-        );
+            tti_stats.is_valid_fairness_for_queues());
+
+        tti_stats.calculate_fairness_for_users();
+        stats.update_scheduler_fairness_for_users(
+            tti_stats.get_fairness_for_users(),
+            tti_stats.is_valid_fairness_for_users());
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());

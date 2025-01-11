@@ -70,6 +70,11 @@ public:
     double mean_scheduler_fairness_for_queues = 0;
     double common_scheduler_fairness_for_queues = 0;
 
+    // История средней суммарной справедливости распределения RB между пользователями по итерациям
+    std::vector<double> scheduler_fairness_for_users_history;
+    double mean_scheduler_fairness_for_users = 0;
+    double common_scheduler_fairness_for_users = 0;
+
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;
 
@@ -84,12 +89,12 @@ public:
     std::vector<IterationStats> stats_array;
 
     // История ср. времени задержек обработки пакетов в очередях по запускам
-    std::map<int, std::vector<double>> mean_processing_delay_time_by_queue_history;
+    std::map<int, std::vector<double> > mean_processing_delay_time_by_queue_history;
     // История ср. задержек обработки пакетов в планировщике (во всех очередях) по запускам
     std::vector<double> mean_processing_delay_time_by_scheduler_history;
 
     // История ср. времени работы каждой очереди по запускам
-    std::map<int, std::vector<double>> mean_processing_time_by_queue_history;
+    std::map<int, std::vector<double> > mean_processing_time_by_queue_history;
     // История ср. времени работы планировщика по запускам
     std::vector<double> mean_processing_time_by_scheduler_history;
 };
