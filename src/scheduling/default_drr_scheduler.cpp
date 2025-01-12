@@ -64,9 +64,11 @@ void DefaultDRRScheduler::run()
                     {
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
+
+                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         break;
                     }
-
+                    // Либо здесь дать пользователю/очереди один статус
                     if (packet.get_size() > available_resource_blocks)
                     {
                         // Последняя очередь на которую не хватило RB
@@ -74,6 +76,10 @@ void DefaultDRRScheduler::run()
 
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
+
+                        // Либо здесь дать пользователю/очереди отдельный статус
+                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
@@ -87,10 +93,16 @@ void DefaultDRRScheduler::run()
 
                         available_resource_blocks -= packet.get_size();
 
+                        // Либо здесь дать пользователю/очереди отдельный статус
+                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+
+                        // TODO: Учитывать только нуждающиеся в RB очереди (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
                         tti_stats.add_allocated_rb_to_queue(
                             packet.get_queue(),
                             packet.get_size());
 
+                        // TODO: Учитывать только нуждающихся в RB пользователей (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
                         tti_stats.add_allocated_rb_to_user(
                             packet.get_user_ptr(),
                             packet.get_size());
