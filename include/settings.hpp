@@ -18,6 +18,7 @@ class Settings {
         Settings(
             int launches,
             std::string standard_type,
+            std::string modulation_scheme,
             std::string tti_duration,
             std::string scheduler_type,
             double bandwidth, 
@@ -33,6 +34,7 @@ class Settings {
 
         int get_launches();
         std::string get_standard_type();
+        std::string get_modulation_scheme();
         std::string get_tti_duration();
         std::unique_ptr<BaseDRRScheduler> get_scheduler_instance();
         double get_bandwidth();
@@ -44,10 +46,12 @@ class Settings {
         int get_user_count();
         double get_time_lambda();
         int get_resource_block_per_tti_limit();
+        int get_packet_size_limit();
 
     private:
         int launches; // Количество повторов
         std::string standard_type; // Стандарт передачи данных
+        std::string modulation_scheme; // Схема модуляции канала
         std::string tti_duration; // Длительность TTI
         std::string scheduler_type; // Тип планировщика
         double bandwidth; // Полоса пропускания в МГц

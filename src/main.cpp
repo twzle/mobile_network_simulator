@@ -16,7 +16,8 @@ int main()
 
     std::string standard_type = "LTE"; // Стандарт связи
     std::string tti_duration = "1ms";  // Длительность TTI
-    std::string scheduler_type = "DefaultDRRScheduler";
+    std::string modulation_scheme = "QPSK"; // Схема модуляции канала
+    std::string scheduler_type = "DefaultDRRScheduler"; // Тип планировщика
     double bandwidth = 10; // Полоса пропускания в МГц
 
     int packet_count = 1000; // Количество пакетов в очереди
@@ -28,12 +29,13 @@ int main()
 
     int user_count = 5; // Количество пользователей
 
-    double time_lambda = 22; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 23; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     Settings settings =
         Settings(
             launches,
             standard_type,
+            modulation_scheme,
             tti_duration,
             scheduler_type,
             bandwidth,

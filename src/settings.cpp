@@ -4,7 +4,9 @@
 
 Settings::Settings(
     int launches, 
-    std::string standard_type, std::string tti_duration,
+    std::string standard_type, 
+    std::string modulation_scheme,
+    std::string tti_duration,
     std::string scheduler_type,
     double bandwidth, 
     int packet_count, int packet_size, 
@@ -14,6 +16,7 @@ Settings::Settings(
     {
         this->launches = launches;
         this->standard_type = standard_type;
+        this->modulation_scheme = modulation_scheme;
         this->tti_duration = tti_duration;
         this->scheduler_type = scheduler_type;
         this->bandwidth = bandwidth;
@@ -40,9 +43,15 @@ void Settings::validate() {
     }
 
     try {
-        StandardManager::get_tti(tti_duration);
+        StandardManager::get_tti(standard_type, tti_duration);
     } catch (const std::out_of_range& e) {
         throw std::invalid_argument("Invalid TTI.");
+    }
+
+    try {
+        StandardManager::get_modulation_scheme(standard_type, modulation_scheme);
+    } catch (const std::out_of_range& e) {
+        throw std::invalid_argument("Invalid modulation scheme.");
     }
 
     auto is_allowed_scheduler_type = 
@@ -90,6 +99,8 @@ void Settings::validate() {
     if (time_lambda < 1) {
         throw std::invalid_argument("Time lambda should be greater than or equal to 1.");
     }
+
+    get_packet_size_limit();
 }
 
 
@@ -106,7 +117,7 @@ std::string Settings::get_tti_duration(){
 }
 
 std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance(){
-    double tti = StandardManager::get_tti(tti_duration);
+    double tti = StandardManager::get_tti(standard_type, tti_duration);
 
     if (this->scheduler_type == "FixedDRRScheduler") {
         return std::make_unique<FixedDRRScheduler>(tti);
@@ -154,3 +165,18 @@ int Settings::get_resource_block_per_tti_limit(){
     int resource_block_per_tti_limit = this->bandwidth/RB_BANDWIDTH;
     return resource_block_per_tti_limit;
 }
+
+int Settings::get_packet_size_limit(){
+    int rb_per_tti_limit = get_resource_block_per_tti_limit();
+
+    uint8_t bit_per_re = StandardManager::get_modulation_scheme(
+        standard_type, modulation_scheme);
+    uint8_t re_per_rb = StandardManager::get_resource_elements(
+        standard_type);
+    
+    int bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
+    int byte_per_tti_limit = bit_per_tti_limit/8;
+
+    return byte_per_tti_limit;
+}
+
