@@ -12,7 +12,7 @@ int main()
     UserGenerator::initialize();
     User::initialize();
 
-    int launches = 100; // Количество перезапусков
+    int launches = 10; // Количество перезапусков
 
     std::string standard_type = "LTE"; // Стандарт связи
     std::string tti_duration = "1ms";  // Длительность TTI
@@ -28,7 +28,7 @@ int main()
 
     int user_count = 5; // Количество пользователей
 
-    double time_lambda = 20; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 22; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     Settings settings =
         Settings(

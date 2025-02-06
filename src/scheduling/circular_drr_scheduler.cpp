@@ -106,6 +106,9 @@ void CircularDRRScheduler::run()
                 }
             }
 
+            check_queue_remaining_scheduled_packets(
+                queue, current_time, tti_stats);
+
             stats.update_queue_time_stats(
                 queue_state,
                 relative_queue_id,

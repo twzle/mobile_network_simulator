@@ -15,6 +15,7 @@ void PacketQueue::add_packet(Packet &packet)
 
 double PacketQueue::get_quant() const { return quant; }
 double PacketQueue::get_deficit() const { return deficit; }
+size_t PacketQueue::get_limit() const { return limit; }
 void PacketQueue::set_deficit(double deficit)
 {
     if (deficit <= DEFICIT_MAX)

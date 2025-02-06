@@ -105,6 +105,9 @@ void FixedDRRScheduler::run()
                 }
             }
 
+            check_queue_remaining_scheduled_packets(
+                queue, current_time, tti_stats);
+
             stats.update_queue_time_stats(
                 queue_state,
                 relative_queue_id,
@@ -127,7 +130,7 @@ void FixedDRRScheduler::run()
         stats.update_scheduler_fairness_for_users(
             tti_stats.get_fairness_for_users(),
             tti_stats.is_valid_fairness_for_users());
-            
+
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
     }

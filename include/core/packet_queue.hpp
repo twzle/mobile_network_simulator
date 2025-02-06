@@ -15,6 +15,7 @@ public:
     void add_delay(int delay);
 
     double get_quant() const;
+    size_t get_limit() const;
     double get_deficit() const;
     void set_deficit(double deficit);
 

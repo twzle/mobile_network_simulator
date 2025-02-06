@@ -25,7 +25,7 @@ public:
 
     // Подключение пользователей для обслуживания
     void connect_users(int user_count);
-    User* get_user_ptr(int user_id);
+    User *get_user_ptr(int user_id);
 
     // Установка лимита ресурсных блоков на один TTI
     void set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit);
@@ -42,14 +42,19 @@ protected:
     // Метод для получения относительного индекса очереди (может быть переопределен)
     virtual size_t get_relative_queue_id(size_t current_absolute_queue_id);
 
+    void check_queue_remaining_scheduled_packets(
+        PacketQueue &queue,
+        double current_time,
+        TTIStats &tti_stats);
+
 protected:
     int total_packets = 0;                        // Общее число пакетов для обслуживания
     double tti_duration = 0;                      // Длительность TTI в секундах
     int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
-    
-    std::vector<PacketQueue> scheduled_queues;    // Очереди для обслуживания
-    std::map<int, User> connected_users; // Подключенные пользователи
+
+    std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
+    std::map<int, User> connected_users;       // Подключенные пользователи
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов

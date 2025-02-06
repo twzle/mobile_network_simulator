@@ -22,7 +22,7 @@ void BaseDRRScheduler::connect_users(int user_count)
     }
 }
 
-User* BaseDRRScheduler::get_user_ptr(int user_id)
+User *BaseDRRScheduler::get_user_ptr(int user_id)
 {
     auto it = connected_users.find(user_id);
     if (it != connected_users.end())
@@ -62,6 +62,58 @@ size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
     else
     {
         return current_relative_queue_id;
+    }
+}
+
+void BaseDRRScheduler::check_queue_remaining_scheduled_packets(
+    PacketQueue &queue, double current_time, TTIStats &tti_stats)
+{
+    PacketQueue tmp(queue.get_quant(), queue.get_limit());
+
+    int packet_count = 0;
+
+    // Проверка пакетов исходной очереди на факт доступности
+    while (queue.size() > 0)
+    {
+        Packet packet = queue.front();
+
+        // Если пакет не пришел, его время больше текущего
+        if (current_time + epsilon < packet.get_scheduled_at())
+        {
+            // Конец перебора при встрече первого непришедшего пакета
+            break;
+        }
+
+        // Если пакет уже был доступен по времени
+        if (packet.get_scheduled_at() < current_time - epsilon)
+        {
+            // Первый непришедший пакет учтен DRR, остальные нет
+            if (packet_count > 0)
+            {
+                // Отметка пользователя как активного претендента на ресурсы
+                tti_stats.mark_user_as_resource_candidate(
+                    packet.get_user_ptr());
+            }
+        }
+
+
+        // Удаление первого элемента для доступа к следующим
+        queue.pop();
+        // Сохранение во временной очереди пакета для восстановления
+        tmp.push(packet);
+
+        ++packet_count;
+    }
+
+    // Восстановление пакетов в исходной очереди из временной
+    while (tmp.size() > 0)
+    {
+        Packet packet = tmp.front();
+
+        // Удаление первого элемента для доступа к следующим
+        tmp.pop();
+        // Восстановление пакета из временной очереди
+        queue.push(packet);
     }
 }
 
