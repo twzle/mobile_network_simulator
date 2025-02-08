@@ -27,7 +27,7 @@ public:
     void print();
 
 private:
-    double quant; // Выделяемое очереди время в ресурсных блоках (RB)
+    double quant; // Выделяемое очереди время/частоты в ресурсных блоках (RB)
     double deficit; // Накопленный дефицит в ресурсных блоках (RB)
     size_t limit; // Размер очереди
     std::priority_queue<Packet, std::vector<Packet>, PacketGreater> packet_queue; // Очередь из обслуживаемых пакетов

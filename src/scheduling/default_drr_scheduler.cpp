@@ -1,7 +1,7 @@
 #include "scheduling/default_drr_scheduler.hpp"
 
-DefaultDRRScheduler::DefaultDRRScheduler(double tti)
-    : BaseDRRScheduler(tti) {};
+DefaultDRRScheduler::DefaultDRRScheduler(double tti, int rb_effective_data_size)
+    : BaseDRRScheduler(tti, rb_effective_data_size) {};
 
 /*
 Логика работы планировщика
@@ -50,26 +50,34 @@ void DefaultDRRScheduler::run()
             {
                 while (queue.size() > 0)
                 {
-                    // Обслуживание первого в очереди пакета
+                    // Проверка первого пакета в очереди
                     Packet packet = queue.front();
+                    int packet_size_in_bytes = packet.get_size();
+                    int packet_size_in_rb =
+                        convert_packet_size_to_rb_number(packet_size_in_bytes);
 
-                    if (current_time + epsilon < packet.get_scheduled_at())
+                    // Если пакет пришел позже текущего времени, то переход к следующей очереди
+                    if (packet.get_scheduled_at() > current_time + epsilon)
                     {
                         queue_state = set_wait(queue_state);
                         scheduler_state = set_wait(scheduler_state);
                         break;
                     }
 
-                    if (packet.get_size() > queue.get_deficit())
+                    // Если размер пакета больше, чем дефицит, то переход к следующей очереди
+                    if (packet_size_in_rb > queue.get_deficit() + epsilon)
                     {
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
+                        // Кандидаты на получение ресурсов только пользователь,
+                        // Очередь без дефицита не кандидат
                         tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         break;
                     }
-                    // Либо здесь дать пользователю/очереди один статус
-                    if (packet.get_size() > available_resource_blocks)
+
+                    // Если размер пакета больше, чем реальное кол-во RB, то переход к следующей очереди
+                    if (packet_size_in_rb > available_resource_blocks)
                     {
                         // Последняя очередь на которую не хватило RB
                         set_last_starving_queue(relative_queue_id);
@@ -77,38 +85,36 @@ void DefaultDRRScheduler::run()
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
-                        // Либо здесь дать пользователю/очереди отдельный статус
+                        // Кандидаты на получение ресурсов пользователь и очередь
                         tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
-                    // Проверка достаточности дефицита на обслуживание пакета
-                    if (packet.get_size() <= available_resource_blocks)
+                    // Если размер пакета меньше, чем реальное кол-во RB, то обслуживаем пакет
+                    if (packet_size_in_rb <= available_resource_blocks)
                     {
                         // Обслуживание пакета
                         queue.pop();
-                        queue.set_deficit(queue.get_deficit() - packet.get_size());
+                        queue.set_deficit(queue.get_deficit() - packet_size_in_rb);
                         session.increment_processed_packet_count(1);
 
-                        available_resource_blocks -= packet.get_size();
+                        available_resource_blocks -= packet_size_in_rb;
 
-                        // Либо здесь дать пользователю/очереди отдельный статус
+                        // Кандидаты на получение ресурсов пользователь и очередь
                         tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
 
-                        // TODO: Учитывать только нуждающиеся в RB очереди (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
                         tti_stats.add_allocated_rb_to_queue(
                             packet.get_queue(),
-                            packet.get_size());
+                            packet_size_in_rb);
 
-                        // TODO: Учитывать только нуждающихся в RB пользователей (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
                         tti_stats.add_allocated_rb_to_user(
                             packet.get_user_ptr(),
-                            packet.get_size());
+                            packet_size_in_rb);
 
                         tti_stats.add_allocated_rb_to_total(
-                            packet.get_size());
+                            packet_size_in_rb);
 
                         stats.add_queue_packet_stats(
                             packet.get_queue(),

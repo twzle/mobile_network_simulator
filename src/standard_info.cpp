@@ -35,6 +35,34 @@ uint8_t StandardManager::get_resource_elements(
     return standard_info.resource_elements;
 }
 
+
+int StandardManager::get_resource_block_effective_data_size(
+    const std::string &standard_name,
+    const std::string &modulation_scheme_name)
+{
+    const int effective_bits_per_resource_element = 
+        static_cast<int>(
+            StandardManager::get_modulation_scheme(
+                standard_name, 
+                modulation_scheme_name
+            )
+        );
+    
+    const int resource_elements_per_resource_block = 
+        static_cast<int>(
+            StandardManager::get_resource_elements(
+                standard_name
+            )
+        );
+
+    // Используем int для предотвращения переполнения
+    const int effective_bits_per_resource_block = 
+        effective_bits_per_resource_element * resource_elements_per_resource_block;
+
+    // Округление вниз — деление на 8 отбрасывает остаток
+    return effective_bits_per_resource_block / 8;
+}
+
 // Инициализация данных
 void StandardManager::initialize()
 {

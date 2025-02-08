@@ -1,7 +1,7 @@
 #include "scheduling/base_drr_scheduler.hpp"
 
-BaseDRRScheduler::BaseDRRScheduler(double tti)
-    : tti_duration(tti) {}
+BaseDRRScheduler::BaseDRRScheduler(double tti, int rb_effective_data_size)
+    : tti_duration(tti), resource_block_effective_data_size(rb_effective_data_size) {}
 
 /*
 Планирование очереди через запись в массив очередей
@@ -96,7 +96,6 @@ void BaseDRRScheduler::check_queue_remaining_scheduled_packets(
             }
         }
 
-
         // Удаление первого элемента для доступа к следующим
         queue.pop();
         // Сохранение во временной очереди пакета для восстановления
@@ -134,6 +133,17 @@ void BaseDRRScheduler::evaluate_stats()
 
         stats.set_queue_total_time(queue_id, queue_total_time);
     }
+}
+
+// Перевод размера пакета из байтов в ресурсные блоки согласно размеру полезных данных в одном RB
+int BaseDRRScheduler::convert_packet_size_to_rb_number(int packet_size)
+{
+    int rb_count =
+        static_cast<int>(
+            std::ceil(
+                static_cast<double>(packet_size) / resource_block_effective_data_size));
+
+    return rb_count;
 }
 
 IterationStats &BaseDRRScheduler::get_stats()

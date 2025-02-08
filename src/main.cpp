@@ -17,11 +17,11 @@ int main()
     std::string standard_type = "LTE"; // Стандарт связи
     std::string tti_duration = "1ms";  // Длительность TTI
     std::string modulation_scheme = "QPSK"; // Схема модуляции канала
-    std::string scheduler_type = "DefaultDRRScheduler"; // Тип планировщика
+    std::string scheduler_type = "FixedDRRScheduler"; // Тип планировщика
     double bandwidth = 10; // Полоса пропускания в МГц
 
     int packet_count = 1000; // Количество пакетов в очереди
-    int packet_size = 40;    // Размер пакета (RB)
+    int packet_size = 1155;    // Размер пакета в байтах
 
     int queue_count = 4;     // Количество очередей
     double queue_quant = 1;  // Квант времени (RB)

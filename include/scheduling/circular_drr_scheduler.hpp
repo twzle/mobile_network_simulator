@@ -5,7 +5,7 @@
 class CircularDRRScheduler : public BaseDRRScheduler
 {
 public:
-    explicit CircularDRRScheduler(double tti);
+    explicit CircularDRRScheduler(double tti, int rb_effective_data_size);
     void run() override;
 
     int get_next_initial_queue();

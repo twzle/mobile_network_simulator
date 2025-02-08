@@ -5,7 +5,7 @@
 class DefaultDRRScheduler : public BaseDRRScheduler
 {
 public:
-    explicit DefaultDRRScheduler(double tti);
+    explicit DefaultDRRScheduler(double tti, int rb_effective_data_size);
     void run() override;
 
     int get_next_initial_queue();

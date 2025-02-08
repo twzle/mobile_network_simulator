@@ -14,7 +14,7 @@
 class BaseDRRScheduler
 {
 public:
-    explicit BaseDRRScheduler(double tti);
+    explicit BaseDRRScheduler(double tti, int rb_effective_data_size);
     virtual ~BaseDRRScheduler() = default;
 
     // Основной метод запуска планировщика
@@ -46,10 +46,13 @@ protected:
         PacketQueue &queue,
         double current_time,
         TTIStats &tti_stats);
+    
+    int convert_packet_size_to_rb_number(int packet_size);
 
 protected:
     int total_packets = 0;                        // Общее число пакетов для обслуживания
     double tti_duration = 0;                      // Длительность TTI в секундах
+    int resource_block_effective_data_size = 0;   // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
 
