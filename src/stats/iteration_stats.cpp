@@ -146,6 +146,16 @@ void IterationStats::update_scheduler_fairness_for_users(
     }
 }
 
+void IterationStats::update_scheduler_throughput(
+    double throughput,
+    bool is_valid)
+{
+    if (is_valid)
+    {
+        scheduler_throughput.emplace_back(throughput);
+    }
+}
+
 void IterationStats::add_queue_packet_stats(
     size_t queue_id,
     double scheduled_at,
@@ -188,7 +198,10 @@ void IterationStats::print()
               << "Average fairness for queues = "
               << scheduler_average_fairness_for_queues << "\n"
               << "Average fairness for users = "
-              << scheduler_average_fairness_for_users << "\n\n";
+              << scheduler_average_fairness_for_users << "\n"
+              << "Average scheduler throughput = " 
+              << scheduler_average_throughput << " bytes/ms, " 
+              << scheduler_average_throughput * 1000 / 1024 << " Kbytes/s\n\n";
 }
 
 void IterationStats::evaluate()
@@ -201,6 +214,8 @@ void IterationStats::evaluate()
     evaluate_delay_stats();
     evaluate_fairness_for_queues_stats();
     evaluate_fairness_for_users_stats();
+
+    evaluate_throughput_stats();
 }
 
 void IterationStats::evaluate_queue_total_time_stats()
@@ -279,6 +294,19 @@ void IterationStats::evaluate_fairness_for_users_stats()
 
     scheduler_average_fairness_for_users =
         sum_of_all_fairness_for_users / scheduler_fairness_for_users.size();
+}
+
+void IterationStats::evaluate_throughput_stats()
+{
+    double sum_of_all_throughputs = 0;
+    // Подсчет суммы справедливостей за все время работы планировщика
+    for (auto &stats : scheduler_throughput)
+    {
+        sum_of_all_throughputs += stats;
+    }
+
+    scheduler_average_throughput =
+        sum_of_all_throughputs / scheduler_throughput.size();
 }
 
 void IterationStats::evaluate_delay_stats()

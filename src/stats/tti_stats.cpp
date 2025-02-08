@@ -1,11 +1,15 @@
 #include "stats/tti_stats.hpp"
 
-TTIStats::TTIStats(size_t queue_count, size_t user_count)
-    : total_allocated_rb_count(0),
+TTIStats::TTIStats(
+    size_t queue_count, size_t user_count,
+    double tti_duration, int rb_effective_data_size)
+    : total_allocated_rb_count(0), tti_duration(tti_duration),
+      resource_block_effective_data_size(rb_effective_data_size),
       queue_count(queue_count), candidate_queue_count(0),
       fairness_of_rb_allocation_for_queues(0), _is_valid_fairness_for_queues(false),
       user_count(user_count), candidate_user_count(0),
-      fairness_of_rb_allocation_for_users(0), _is_valid_fairness_for_users(false)
+      fairness_of_rb_allocation_for_users(0), _is_valid_fairness_for_users(false),
+      throughput_for_scheduler(0), _is_valid_throughput_for_scheduler(false)
 {
     initialize_queue_stats();
     initialize_user_stats();
@@ -27,7 +31,6 @@ void TTIStats::initialize_queue_stats()
     }
 }
 
-// TODO: Учитывать только нуждающихся в RB пользователей (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
 void TTIStats::mark_user_as_resource_candidate(User *user)
 {
     if (user != nullptr)
@@ -37,13 +40,11 @@ void TTIStats::mark_user_as_resource_candidate(User *user)
     }
 }
 
-// TODO: Учитывать только нуждающиеся в RB очереди (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
 void TTIStats::mark_queue_as_resource_candidate(size_t queue_id)
 {
     queue_statuses[queue_id].is_resource_candidate = true;
 }
 
-// TODO: Учитывать только нуждающихся в RB пользователей (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
 void TTIStats::add_allocated_rb_to_user(User *user, int rb_count)
 {
     if (user != nullptr)
@@ -53,10 +54,14 @@ void TTIStats::add_allocated_rb_to_user(User *user, int rb_count)
     }
 }
 
-// TODO: Учитывать только нуждающиеся в RB очереди (есть дефицит, но не выделено RB или был выделен хоть 1 RB)
 void TTIStats::add_allocated_rb_to_queue(size_t queue_id, int rb_count)
 {
     queue_statuses[queue_id].allocated_rb_count += rb_count;
+}
+
+void TTIStats::add_allocated_rb_to_total(int rb_count)
+{
+    total_allocated_rb_count += rb_count;
 }
 
 /*
@@ -125,7 +130,7 @@ void TTIStats::calculate_fairness_for_users()
             {
                 candidate_user_count += 1;
 
-                int squared_allocated_rb_count_by_user = 
+                int squared_allocated_rb_count_by_user =
                     std::pow(user.second.allocated_rb_count, 2);
                 sum_of_squared_allocated_rb_count_by_user +=
                     squared_allocated_rb_count_by_user;
@@ -161,7 +166,39 @@ bool TTIStats::is_valid_fairness_for_users()
     return _is_valid_fairness_for_users;
 }
 
-void TTIStats::add_allocated_rb_to_total(int rb_count)
+/*
+Пропускная способность планировщика (байт/мс)
+
+Общая формула: THROUGHPUT = (sum(RB_i) * S_RB)/(T_tti)
+RB_i - кол-во RB выделенных пользователю i,
+S_RB - размер полезных данных (байт) в одном RB,
+T_tti - интервал времени TTI (секунды)
+*/
+
+void TTIStats::calculate_throughput_for_scheduler()
 {
-    total_allocated_rb_count += rb_count;
+    _is_valid_throughput_for_scheduler = false;
+
+    if (total_allocated_rb_count > 0)
+    {
+        /* 
+        Пропускная способность (байт/мс) 
+        */
+        throughput_for_scheduler =
+            (total_allocated_rb_count * resource_block_effective_data_size) 
+            / (tti_duration * 1000);
+
+
+        _is_valid_throughput_for_scheduler = true;
+    }
+}
+
+double TTIStats::get_throughput_for_scheduler()
+{
+    return throughput_for_scheduler;
+}
+
+bool TTIStats::is_valid_throughput_for_scheduler()
+{
+    return _is_valid_throughput_for_scheduler;
 }

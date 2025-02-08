@@ -139,8 +139,6 @@ std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance()
         StandardManager::get_resource_block_effective_data_size(
             standard_type, 
             modulation_scheme);
-    
-    std::cout << "RB EFFECTIVE DATA SIZE = " << rb_effective_data_size << "\n";
 
     if (this->scheduler_type == "FixedDRRScheduler")
     {

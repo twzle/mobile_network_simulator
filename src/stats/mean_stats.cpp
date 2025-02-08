@@ -34,6 +34,8 @@ void MeanStats::collect_history()
             stats.scheduler_average_fairness_for_queues);
         this->scheduler_fairness_for_users_history.push_back(
             stats.scheduler_average_fairness_for_users);
+        this->scheduler_throughput_history.push_back(
+            stats.scheduler_average_throughput);
 
         // for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
         // {
@@ -63,6 +65,7 @@ void MeanStats::calculate_mean_values()
 
         common_scheduler_fairness_for_queues += stats.scheduler_average_fairness_for_queues;
         common_scheduler_fairness_for_users += stats.scheduler_average_fairness_for_users;
+        common_scheduler_throughput += stats.scheduler_average_throughput;
 
         common_scheduler_packet_count += stats.packet_count;
     }
@@ -80,6 +83,8 @@ void MeanStats::calculate_mean_values()
         common_scheduler_fairness_for_queues / stats_array.size();
     mean_scheduler_fairness_for_users =
         common_scheduler_fairness_for_users / stats_array.size();
+    mean_scheduler_throughput =
+        common_scheduler_throughput / stats_array.size();
 
     mean_scheduler_packet_count =
         common_scheduler_packet_count / stats_array.size();
@@ -262,6 +267,14 @@ void MeanStats::evaluate_confidence_intervals()
         mean_scheduler_fairness_for_users,
         0.001);
 
+    // Доверительный интервал для справделивости распределения RB между очередями
+    std::cout << "\nОбщая пропускная способность"
+              << " (scheduler_throughput)" << std::endl;
+    calculate_confidence_interval(
+        scheduler_throughput_history,
+        mean_scheduler_throughput,
+        1);
+
     // // задержка обработки пакетов по очередям
     // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
     // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id)
@@ -313,7 +326,12 @@ void MeanStats::show()
               << "\n" // Средняя справедливость распределения RB по очередям
               << "Mean fairness of RB allocation for users = "
               << mean_scheduler_fairness_for_users
-              << "\n"; // Средняя справедливость распределения RB по пользователям
+              << "\n" // Средняя справедливость распределения RB по пользователям
+              << "Mean scheduler throughput = "
+              << mean_scheduler_throughput
+              << " bytes/ms, " // Средняя пропускная способность (байт/мс)
+              << mean_scheduler_throughput * 1000 / 1024
+              << " Kbytes/s\n"; // Средняя пропускная способность (Kбайт/с)
 }
 
 std::string MeanStats::write_yaml()

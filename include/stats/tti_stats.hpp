@@ -25,7 +25,9 @@ private:
     };
 
 public:
-    TTIStats(size_t queue_count, size_t user_count);
+    TTIStats(
+        size_t queue_count, size_t user_count, 
+        double tti_duration, int rb_effective_data_size);
 
     void initialize_queue_stats();
     void initialize_user_stats();
@@ -45,8 +47,15 @@ public:
     double get_fairness_for_users();
     bool is_valid_fairness_for_users();
 
+    void calculate_throughput_for_scheduler();
+    double get_throughput_for_scheduler();
+    bool is_valid_throughput_for_scheduler();
+
 private:
     int total_allocated_rb_count; // Общее число выделенных RB за TTI
+    double tti_duration;          // Интервал времени TTI (секунды)
+    // TODO: Перенести в UserStatus (для каждого пользователя может быть своя модуляция и размер)
+    int resource_block_effective_data_size; // Размер полезных данных в ресурсном блоке (байты)
 
     size_t queue_count;                          // Общее количество очередей
     size_t candidate_queue_count;                // Количество очередей нуждающихся в RB
@@ -59,4 +68,7 @@ private:
     std::map<int, UserStatus> user_statuses;    // Число выделенных RB по пользователям
     double fairness_of_rb_allocation_for_users; // Справедливость выделения RB относительно пользователей
     bool _is_valid_fairness_for_users;          // Стоит ли учитывать справедливость в расчетах
+
+    double throughput_for_scheduler;         // Пропускная способность планировщиках
+    bool _is_valid_throughput_for_scheduler; // Стоит ли учитывать пропускную сп-ность в расчетах
 };

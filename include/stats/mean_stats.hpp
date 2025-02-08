@@ -75,6 +75,11 @@ public:
     double mean_scheduler_fairness_for_users = 0;
     double common_scheduler_fairness_for_users = 0;
 
+    // История средней суммарной пропускной способности по итерациям
+    std::vector<double> scheduler_throughput_history;
+    double mean_scheduler_throughput = 0;
+    double common_scheduler_throughput = 0;
+
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;
 

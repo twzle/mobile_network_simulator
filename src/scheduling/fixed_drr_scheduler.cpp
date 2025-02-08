@@ -21,7 +21,9 @@ void FixedDRRScheduler::run()
         // Начало TTI
         TTIStats tti_stats = TTIStats(
             scheduled_queues.size(),
-            connected_users.size());
+            connected_users.size(),
+            tti_duration,
+            resource_block_effective_data_size);
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 

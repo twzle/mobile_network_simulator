@@ -69,6 +69,9 @@ public:
     void update_scheduler_fairness_for_users(
         double fairness_for_users,
         bool is_valid);
+    void update_scheduler_throughput(
+        double throughput,
+        bool is_valid);
 
     void evaluate();
 
@@ -84,6 +87,8 @@ public:
 
     void evaluate_scheduling_stats();
 
+    void evaluate_throughput_stats();
+
     void release_memory_resources();
 
     void print();
@@ -92,6 +97,9 @@ public:
 
     int packet_count = 0; // Общее число обслуженных пакетов
     std::vector<PacketStats> queue_stats;
+
+    std::vector<double> scheduler_throughput; // За каждый TTI
+    double scheduler_average_throughput = 0;  // Среднее за весь период работы
 
     std::vector<double> scheduler_fairness_for_queues; // За каждый TTI
     double scheduler_average_fairness_for_queues = 0;  // Среднее за весь период работы

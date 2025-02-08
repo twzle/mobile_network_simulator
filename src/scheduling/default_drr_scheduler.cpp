@@ -21,7 +21,9 @@ void DefaultDRRScheduler::run()
         // Начало TTI
         TTIStats tti_stats = TTIStats(
             scheduled_queues.size(),
-            connected_users.size());
+            connected_users.size(),
+            tti_duration,
+            resource_block_effective_data_size);
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
@@ -151,6 +153,11 @@ void DefaultDRRScheduler::run()
         stats.update_scheduler_fairness_for_users(
             tti_stats.get_fairness_for_users(),
             tti_stats.is_valid_fairness_for_users());
+
+        tti_stats.calculate_throughput_for_scheduler();
+        stats.update_scheduler_throughput(
+            tti_stats.get_throughput_for_scheduler(),
+            tti_stats.is_valid_throughput_for_scheduler());
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
