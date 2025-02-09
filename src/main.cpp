@@ -14,22 +14,23 @@ int main()
 
     int launches = 10; // Количество перезапусков
 
-    std::string standard_type = "LTE"; // Стандарт связи
-    std::string tti_duration = "1ms";  // Длительность TTI
-    std::string modulation_scheme = "256-QAM"; // Схема модуляции канала
+    std::string standard_type = "LTE";                  // Стандарт связи
+    std::string tti_duration = "1ms";                   // Длительность TTI
+    std::string channel_sync_interval = "5ms";          // Интервал синхронизации канала
+    std::string modulation_scheme = "256-QAM";          // Схема модуляции канала
     std::string scheduler_type = "DefaultDRRScheduler"; // Тип планировщика
-    double bandwidth = 20; // Полоса пропускания в МГц
+    double bandwidth = 20;                              // Полоса пропускания в МГц
 
     int packet_count = 1000; // Количество пакетов в очереди
-    int packet_size = 18648;    // Размер пакета в байтах
+    int packet_size = 1000; // Размер пакета в байтах
 
-    int queue_count = 4;     // Количество очередей
-    double queue_quant = 100;  // Квант времени (RB)
-    int queue_limit = 10000; // Размер очереди
+    int queue_count = 4;      // Количество очередей
+    double queue_quant = 100; // Квант времени (RB)
+    int queue_limit = 10000;  // Размер очереди
 
     int user_count = 5; // Количество пользователей
 
-    double time_lambda = 5000; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 50; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     Settings settings =
         Settings(
@@ -37,6 +38,7 @@ int main()
             standard_type,
             modulation_scheme,
             tti_duration,
+            channel_sync_interval,
             scheduler_type,
             bandwidth,
             packet_count,

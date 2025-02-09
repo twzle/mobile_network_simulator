@@ -14,7 +14,10 @@
 class BaseDRRScheduler
 {
 public:
-    explicit BaseDRRScheduler(double tti, int rb_effective_data_size);
+    explicit BaseDRRScheduler(
+        std::string standard_name, double tti,
+        double channel_sync_interval,
+        std::string base_modulation_scheme);
     virtual ~BaseDRRScheduler() = default;
 
     // Основной метод запуска планировщика
@@ -46,12 +49,16 @@ protected:
         PacketQueue &queue,
         double current_time,
         TTIStats &tti_stats);
-    
-    int convert_packet_size_to_rb_number(int packet_size);
+
+    int convert_packet_size_to_rb_number(User* user, int packet_size);
+    void sync_user_channels();
 
 protected:
     int total_packets = 0;                        // Общее число пакетов для обслуживания
+    std::string standard_name = "LTE";            // Название стандарта
     double tti_duration = 0;                      // Длительность TTI в секундах
+    double channel_sync_interval = 0;             // Интервал синхронизации канала в секундах
+    std::string base_modulation_scheme = "QPSK";  // Название базовой схемы модуляции
     int resource_block_effective_data_size = 0;   // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди

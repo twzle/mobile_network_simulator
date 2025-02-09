@@ -1,7 +1,13 @@
 #include "scheduling/fixed_drr_scheduler.hpp"
 
-FixedDRRScheduler::FixedDRRScheduler(double tti, int rb_effective_data_size)
-    : BaseDRRScheduler(tti, rb_effective_data_size) {};
+FixedDRRScheduler::FixedDRRScheduler(
+    std::string standard_name, double tti,
+    double channel_sync_interval,
+    std::string base_modulation_scheme)
+    : BaseDRRScheduler(
+          standard_name, tti,
+          channel_sync_interval,
+          base_modulation_scheme) {};
 
 /*
 Логика работы планировщика
@@ -20,10 +26,12 @@ void FixedDRRScheduler::run()
     {
         // Начало TTI
         TTIStats tti_stats = TTIStats(
+            standard_name,
             scheduled_queues.size(),
             connected_users.size(),
-            tti_duration,
-            resource_block_effective_data_size);
+            tti_duration);
+
+        sync_user_channels();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
@@ -55,7 +63,8 @@ void FixedDRRScheduler::run()
                     Packet packet = queue.front();
                     int packet_size_in_bytes = packet.get_size();
                     int packet_size_in_rb =
-                        convert_packet_size_to_rb_number(packet_size_in_bytes);
+                        convert_packet_size_to_rb_number(
+                            packet.get_user_ptr(), packet_size_in_bytes);
 
                     // Если пакет пришел позже текущего времени, то переход к следующей очереди
                     if (packet.get_scheduled_at() > current_time + epsilon)
@@ -103,15 +112,17 @@ void FixedDRRScheduler::run()
                         tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
 
-                        tti_stats.add_allocated_rb_to_queue(
+                        tti_stats.add_allocated_effective_data_to_queue(
+                            packet.get_user_ptr(),
                             packet.get_queue(),
                             packet_size_in_rb);
 
-                        tti_stats.add_allocated_rb_to_user(
+                        tti_stats.add_allocated_effective_data_to_user(
                             packet.get_user_ptr(),
                             packet_size_in_rb);
 
-                        tti_stats.add_allocated_rb_to_total(
+                        tti_stats.add_allocated_effective_data_to_total(
+                            packet.get_user_ptr(),
                             packet_size_in_rb);
 
                         stats.add_queue_packet_stats(

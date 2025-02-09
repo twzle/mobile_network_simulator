@@ -1,7 +1,12 @@
 #include "scheduling/base_drr_scheduler.hpp"
 
-BaseDRRScheduler::BaseDRRScheduler(double tti, int rb_effective_data_size)
-    : tti_duration(tti), resource_block_effective_data_size(rb_effective_data_size) {}
+BaseDRRScheduler::BaseDRRScheduler(
+    std::string standard_name, double tti,
+    double channel_sync_interval,
+    std::string base_modulation_scheme)
+    : standard_name(standard_name), tti_duration(tti),
+      channel_sync_interval(channel_sync_interval),
+      base_modulation_scheme(base_modulation_scheme) {}
 
 /*
 Планирование очереди через запись в массив очередей
@@ -17,7 +22,7 @@ void BaseDRRScheduler::connect_users(int user_count)
 {
     for (int i = 0; i < user_count; ++i)
     {
-        User user;
+        User user(base_modulation_scheme);
         connected_users.emplace(user.get_id(), std::move(user));
     }
 }
@@ -136,14 +141,42 @@ void BaseDRRScheduler::evaluate_stats()
 }
 
 // Перевод размера пакета из байтов в ресурсные блоки согласно размеру полезных данных в одном RB
-int BaseDRRScheduler::convert_packet_size_to_rb_number(int packet_size)
+int BaseDRRScheduler::convert_packet_size_to_rb_number(
+    User *user, int packet_size)
 {
+    int effective_data_size_per_rb_for_user_in_bytes =
+        (StandardManager::get_modulation_scheme(
+            standard_name, user->get_modulation_scheme()) *
+        StandardManager::get_resource_elements_in_resource_block(
+            standard_name)) / 8;
+
     int rb_count =
         static_cast<int>(
             std::ceil(
-                static_cast<double>(packet_size) / resource_block_effective_data_size));
+                static_cast<double>(packet_size) / 
+                effective_data_size_per_rb_for_user_in_bytes));
 
     return rb_count;
+}
+
+void BaseDRRScheduler::sync_user_channels()
+{
+    for (auto &user_info : connected_users)
+    {
+        User &user = user_info.second;
+        double channel_out_of_sync_for = user.get_out_of_channel_sync_for();
+        double new_out_of_sync = channel_out_of_sync_for + tti_duration;
+
+        if (std::abs(new_out_of_sync - channel_sync_interval) < epsilon)
+        {
+            user.set_out_of_channel_sync_for(0);
+            user.set_modulation_scheme(base_modulation_scheme);
+        }
+        else
+        {
+            user.set_out_of_channel_sync_for(new_out_of_sync);
+        }
+    }
 }
 
 IterationStats &BaseDRRScheduler::get_stats()

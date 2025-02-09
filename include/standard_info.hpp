@@ -7,13 +7,14 @@
 
 struct StandardInfo
 {
-    std::string name;                                  // Название стандарта
-    std::string description;                           // Краткое описание
-    std::map<std::string, double> ttis;                // Доступные интервалы TTI (строковое обозначение к числу секунд)
-    std::map<std::string, uint8_t> modulation_schemes; // Схемы модуляции (строковое обозначение к числу бит полезных данных в RB)
-    std::vector<double> bandwidths;                    // Доступные полосы пропускания (в МГц)
-    std::vector<std::string> schedulers;               // Доступные планировщики
-    uint8_t resource_elements;                         // Количество доступных OFDMA-символов в одном ресурсном блоке (RB)
+    std::string name;                                     // Название стандарта
+    std::string description;                              // Краткое описание
+    std::map<std::string, double> ttis;                   // Доступные интервалы TTI (строковое обозначение к числу секунд)
+    std::map<std::string, double> channel_sync_intervals; // Доступные интервалы синхронизации канала (строковое обозначение к числу секунд)
+    std::map<std::string, uint8_t> modulation_schemes;    // Схемы модуляции (строковое обозначение к числу бит полезных данных в OFDMA-символе (RE))
+    std::vector<double> bandwidths;                       // Доступные полосы пропускания (в МГц)
+    std::vector<std::string> schedulers;                  // Доступные планировщики
+    uint8_t resource_elements;                            // Количество доступных OFDMA-символов в одном ресурсном блоке (RB)
 };
 
 class StandardManager
@@ -33,12 +34,16 @@ public:
         const std::string &modulation_scheme_name);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
-    static uint8_t get_resource_elements(
+    static uint8_t get_resource_elements_in_resource_block(
         const std::string &standard_name);
 
     static int get_resource_block_effective_data_size(
         const std::string &standard_name,
         const std::string &modulation_scheme_name);
+
+    static double get_channel_sync_interval(
+        const std::string &standard_name,
+        const std::string &channel_sync_interval_name);
 
     // Статическая функция для инициализации данных
     static void initialize();

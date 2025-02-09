@@ -5,7 +5,10 @@
 class DefaultDRRScheduler : public BaseDRRScheduler
 {
 public:
-    explicit DefaultDRRScheduler(double tti, int rb_effective_data_size);
+    explicit DefaultDRRScheduler(
+        std::string standard_name, double tti,
+        double channel_sync_interval,
+        std::string base_modulation_scheme);
     void run() override;
 
     int get_next_initial_queue();

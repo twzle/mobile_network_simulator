@@ -8,6 +8,7 @@ Settings::Settings(
     std::string standard_type,
     std::string modulation_scheme,
     std::string tti_duration,
+    std::string channel_sync_interval,
     std::string scheduler_type,
     double bandwidth,
     int packet_count, int packet_size,
@@ -19,6 +20,7 @@ Settings::Settings(
     this->standard_type = standard_type;
     this->modulation_scheme = modulation_scheme;
     this->tti_duration = tti_duration;
+    this->channel_sync_interval = channel_sync_interval;
     this->scheduler_type = scheduler_type;
     this->bandwidth = bandwidth;
     this->packet_count = packet_count;
@@ -54,6 +56,15 @@ void Settings::validate()
     catch (const std::out_of_range &e)
     {
         throw std::invalid_argument("Invalid TTI.");
+    }
+
+    try
+    {
+        StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
+    }
+    catch (const std::out_of_range &e)
+    {
+        throw std::invalid_argument("Invalid channel sync interval.");
     }
 
     try
@@ -132,25 +143,32 @@ std::string Settings::get_tti_duration()
     return this->tti_duration;
 }
 
+std::string Settings::get_channel_sync_interval()
+{
+    return this->channel_sync_interval;
+}
+
 std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance()
 {
-    double tti = StandardManager::get_tti(standard_type, tti_duration);
-    int rb_effective_data_size = 
-        StandardManager::get_resource_block_effective_data_size(
-            standard_type, 
-            modulation_scheme);
+    double tti_value = 
+        StandardManager::get_tti(standard_type, tti_duration);
+    double channel_sync_interval_value =
+        StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
 
     if (this->scheduler_type == "FixedDRRScheduler")
     {
-        return std::make_unique<FixedDRRScheduler>(tti, rb_effective_data_size);
+        return std::make_unique<FixedDRRScheduler>(
+            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
     }
     else if (this->scheduler_type == "CircularDRRScheduler")
     {
-        return std::make_unique<CircularDRRScheduler>(tti, rb_effective_data_size);
+        return std::make_unique<CircularDRRScheduler>(
+            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
-        return std::make_unique<DefaultDRRScheduler>(tti, rb_effective_data_size);
+        return std::make_unique<DefaultDRRScheduler>(
+            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
     }
     return nullptr;
 }
@@ -207,7 +225,7 @@ int Settings::get_packet_size_limit()
 
     uint8_t bit_per_re = StandardManager::get_modulation_scheme(
         standard_type, modulation_scheme);
-    uint8_t re_per_rb = StandardManager::get_resource_elements(
+    uint8_t re_per_rb = StandardManager::get_resource_elements_in_resource_block(
         standard_type);
 
     int bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
