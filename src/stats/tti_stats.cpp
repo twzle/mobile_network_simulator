@@ -116,18 +116,18 @@ void TTIStats::calculate_fairness_for_queues()
     if (total_allocated_effective_data_size > 0)
     {
         // sum(RB_i))^2
-        int squared_sum_of_allocated_effective_data_size =
+        long long squared_sum_of_allocated_effective_data_size =
             std::pow(total_allocated_effective_data_size, 2);
 
         // sum(RB_i^2)
-        int sum_of_squared_allocated_effective_data_size_by_queue = 0;
+        long long sum_of_squared_allocated_effective_data_size_by_queue = 0;
         for (auto &queue : queue_statuses)
         {
             if (queue.second.is_resource_candidate)
             {
                 candidate_queue_count += 1;
 
-                int squared_allocated_effective_data_size_by_queue =
+                long long squared_allocated_effective_data_size_by_queue =
                     std::pow(queue.second.allocated_effective_data_size, 2);
                 sum_of_squared_allocated_effective_data_size_by_queue +=
                     squared_allocated_effective_data_size_by_queue;
@@ -136,8 +136,8 @@ void TTIStats::calculate_fairness_for_queues()
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_effective_data_allocation_for_queues =
-            (double)squared_sum_of_allocated_effective_data_size /
-            (double)(candidate_queue_count *
+            (double) squared_sum_of_allocated_effective_data_size /
+            (double) (candidate_queue_count *
                      sum_of_squared_allocated_effective_data_size_by_queue);
 
         _is_valid_fairness_for_queues = true;
@@ -159,18 +159,18 @@ void TTIStats::calculate_fairness_for_users()
     if (total_allocated_effective_data_size > 0)
     {
         // sum(RB_i))^2
-        int squared_sum_of_allocated_effective_data_size =
+        long long squared_sum_of_allocated_effective_data_size =
             std::pow(total_allocated_effective_data_size, 2);
 
         // sum(RB_i^2)
-        int sum_of_squared_allocated_effective_data_size_by_user = 0;
+        long long sum_of_squared_allocated_effective_data_size_by_user = 0;
         for (auto &user : user_statuses)
         {
             if (user.second.is_resource_candidate)
             {
                 candidate_user_count += 1;
 
-                int squared_allocated_effective_data_size_by_user =
+                long long squared_allocated_effective_data_size_by_user =
                     std::pow(user.second.allocated_effective_data_size, 2);
                 sum_of_squared_allocated_effective_data_size_by_user +=
                     squared_allocated_effective_data_size_by_user;
@@ -179,8 +179,8 @@ void TTIStats::calculate_fairness_for_users()
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_effective_data_allocation_for_users =
-            (double)squared_sum_of_allocated_effective_data_size /
-            (double)(candidate_user_count *
+            (double) squared_sum_of_allocated_effective_data_size /
+            (double) (candidate_user_count *
                      sum_of_squared_allocated_effective_data_size_by_user);
 
         _is_valid_fairness_for_users = true;
@@ -223,10 +223,14 @@ void TTIStats::calculate_throughput_for_scheduler()
     if (total_allocated_effective_data_size > 0)
     {
         /*
-        Пропускная способность (байт/мс)
+        Пропускная способность (Кбайт/мс) = 
+        ((Размер данных выделенных за TTI (бит) / 8) / 1024) (Кбайт)
+        / 
+        (Длительность TTI (секунды) * 1000) (миллисекунды)
         */
         throughput_for_scheduler =
-            (total_allocated_effective_data_size) / (tti_duration * 1000);
+            (((double) total_allocated_effective_data_size / (double) 8) / (double) 1024) 
+            / (double)(tti_duration * 1000);
 
         _is_valid_throughput_for_scheduler = true;
     }

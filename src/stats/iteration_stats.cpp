@@ -200,8 +200,8 @@ void IterationStats::print()
               << "Average fairness for users = "
               << scheduler_average_fairness_for_users << "\n"
               << "Average scheduler throughput = "
-              << scheduler_average_throughput << " bytes/ms, "
-              << scheduler_average_throughput * 1000 / 1024 << " Kbytes/s\n\n";
+              << scheduler_average_throughput << " Kbytes/ms, "
+              << scheduler_average_throughput * 1024 * 1000 << " bytes/s\n\n";
 }
 
 void IterationStats::evaluate()

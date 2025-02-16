@@ -77,8 +77,8 @@ public:
 
     // История средней суммарной пропускной способности по итерациям
     std::vector<double> scheduler_throughput_history;
-    double mean_scheduler_throughput = 0;
-    double common_scheduler_throughput = 0;
+    double mean_scheduler_throughput = 0; // (Кбайт/мс)
+    double common_scheduler_throughput = 0; // (Кбайт/мс)
 
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;

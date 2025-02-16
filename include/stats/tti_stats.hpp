@@ -59,7 +59,7 @@ public:
 private:
     std::string standard_name = "LTE"; // Название cтандарта
 
-    int total_allocated_effective_data_size; // Общее число выделенных RB за TTI
+    int total_allocated_effective_data_size; // Общий размер полезных данных за TTI (бит)
     double tti_duration;                     // Интервал времени TTI (секунды)
 
     size_t queue_count;                                      // Общее количество очередей
@@ -74,6 +74,6 @@ private:
     double fairness_of_effective_data_allocation_for_users; // Справедливость выделения RB относительно пользователей
     bool _is_valid_fairness_for_users;                      // Стоит ли учитывать справедливость в расчетах
 
-    double throughput_for_scheduler;         // Пропускная способность планировщиках
+    double throughput_for_scheduler;         // Пропускная способность планировщиках (Кбайт/мс)
     bool _is_valid_throughput_for_scheduler; // Стоит ли учитывать пропускную сп-ность в расчетах
 };

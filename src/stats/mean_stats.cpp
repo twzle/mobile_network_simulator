@@ -331,9 +331,9 @@ void MeanStats::show()
               << "\n" // Средняя справедливость распределения RB по пользователям
               << "Mean scheduler throughput = "
               << mean_scheduler_throughput
-              << " bytes/ms, " // Средняя пропускная способность (байт/мс)
-              << mean_scheduler_throughput * 1000 / 1024
-              << " Kbytes/s\n"; // Средняя пропускная способность (Kбайт/с)
+              << " Kbytes/ms, " // Средняя пропускная способность (Кбайт/мс)
+              << mean_scheduler_throughput * 1024 * 1000
+              << " bytes/s\n"; // Средняя пропускная способность (байт/с)
 }
 
 std::string MeanStats::write_yaml()
