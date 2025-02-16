@@ -11,14 +11,14 @@
 #include "stats/tti_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
 
-class BaseDRRScheduler
+class BaseRRScheduler
 {
 public:
-    explicit BaseDRRScheduler(
+    explicit BaseRRScheduler(
         std::string standard_name, double tti,
         double channel_sync_interval,
         std::string base_modulation_scheme);
-    virtual ~BaseDRRScheduler() = default;
+    virtual ~BaseRRScheduler() = default;
 
     // Основной метод запуска планировщика
     virtual void run() = 0;

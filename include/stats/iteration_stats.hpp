@@ -107,8 +107,8 @@ public:
     std::vector<double> scheduler_fairness_for_users; // За каждый TTI
     double scheduler_average_fairness_for_users = 0;  // Среднее за весь период работы
 
-    std::map<int, double> queue_average_delay; // Средние задержки обработки пакетов
-    double scheduler_average_delay = 0;
+    std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов
+    double scheduler_average_packet_processing_delay = 0;
 
     // Общее время работы (сумма processing, idle, wait)
     std::map<int, double> queue_total_time;

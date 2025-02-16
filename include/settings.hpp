@@ -5,9 +5,10 @@
 #include <vector>
 #include <algorithm>
 
-#include "scheduling/base_drr_scheduler.hpp"
+#include "scheduling/base_rr_scheduler.hpp"
+#include "scheduling/default_rr_scheduler.hpp"
 #include "scheduling/fixed_drr_scheduler.hpp"
-#include "scheduling/circular_drr_scheduler.hpp"
+#include "scheduling/cyclic_drr_scheduler.hpp"
 #include "scheduling/default_drr_scheduler.hpp"
 #include "standard_info.hpp"
 #include "const.hpp"
@@ -39,7 +40,7 @@ public:
     std::string get_modulation_scheme();
     std::string get_tti_duration();
     std::string get_channel_sync_interval();
-    std::unique_ptr<BaseDRRScheduler> get_scheduler_instance();
+    std::unique_ptr<BaseRRScheduler> get_scheduler_instance();
     double get_bandwidth();
     int get_packet_count();
     int get_packet_size();

@@ -1,6 +1,6 @@
-#include "scheduling/fixed_drr_scheduler.hpp"
+#include "scheduling/cyclic_drr_scheduler.hpp"
 
-FixedDRRScheduler::FixedDRRScheduler(
+CyclicDRRScheduler::CyclicDRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
     std::string base_modulation_scheme)
@@ -12,13 +12,13 @@ FixedDRRScheduler::FixedDRRScheduler(
 /*
 Логика работы планировщика
 */
-void FixedDRRScheduler::run()
+void CyclicDRRScheduler::run()
 {
-    // Метка времени в момент запуска планировщика
+    // Начало планирования
     session.set_scheduling_start_time(0.0);
     double current_time = session.get_scheduling_start_time();
 
-    // Начало следующего TTI всегда с 0 очереди
+    // Перебор очередей начиная с очереди с индексом 0
     set_initial_queue(0);
 
     // Цикл до обслуживания всех пакетов во всех очередях
@@ -74,7 +74,6 @@ void FixedDRRScheduler::run()
                         break;
                     }
 
-                    // Если размер пакета больше, чем дефицит, то переход к следующей очереди
                     if (packet_size_in_rb > queue.get_deficit() + epsilon)
                     {
                         queue_state = set_idle(queue_state);
@@ -86,7 +85,6 @@ void FixedDRRScheduler::run()
                         break;
                     }
 
-                    // Если размер пакета больше, чем реальное кол-во RB, то переход к следующей очереди
                     if (packet_size_in_rb > available_resource_blocks)
                     {
                         queue_state = set_idle(queue_state);
@@ -98,7 +96,7 @@ void FixedDRRScheduler::run()
                         break;
                     }
 
-                    // Если размер пакета меньше, чем реальное кол-во RB, то обслуживаем пакет
+                    // Проверка достаточности дефицита на обслуживание пакета
                     if (packet_size_in_rb <= available_resource_blocks)
                     {
                         // Обслуживание пакета
@@ -144,7 +142,6 @@ void FixedDRRScheduler::run()
                 relative_queue_id,
                 tti_duration);
         }
-
         // Конец TTI
         current_time += this->tti_duration;
 
@@ -173,8 +170,15 @@ void FixedDRRScheduler::run()
     evaluate_stats();
 }
 
-// Перебор в следующем TTI фиксированно c 0 очереди
-int FixedDRRScheduler::get_next_initial_queue()
+// Перебор в следующем TTI с очереди следующей за текущей начальной
+int CyclicDRRScheduler::get_next_initial_queue()
 {
-    return 0;
+    if (this->current_initial_absolute_queue_id == scheduled_queues.size() - 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return ++this->current_initial_absolute_queue_id;
+    }
 }

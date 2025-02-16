@@ -4,7 +4,7 @@ DefaultDRRScheduler::DefaultDRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
     std::string base_modulation_scheme)
-    : BaseDRRScheduler(
+    : BaseRRScheduler(
           standard_name, tti,
           channel_sync_interval,
           base_modulation_scheme) {};
@@ -14,10 +14,6 @@ DefaultDRRScheduler::DefaultDRRScheduler(
 */
 void DefaultDRRScheduler::run()
 {
-
-    // std::cout << "ST: " << standard_name << "\n";
-    // std::cout << "SYNC: " << channel_sync_interval << "\n";
-    // std::cout << "MOD: " << base_modulation_scheme << "\n";
     // Метка времени в момент запуска планировщика
     session.set_scheduling_start_time(0.0);
     double current_time = session.get_scheduling_start_time();

@@ -93,16 +93,18 @@ void MeanStats::calculate_mean_values()
 // Подсчет среднего арифметического задержек обработки пакетов
 void MeanStats::calculate_mean_delays()
 {
-    int queue_count = stats_array[0].queue_average_delay.size();
+    int queue_count = stats_array[0].queue_average_packet_processing_delay.size();
     mean_delays_by_queue.resize(queue_count);
 
     for (auto &stats : stats_array)
     {
         for (int i = 0; i < queue_count; ++i)
         {
-            mean_delays_by_queue[i] += stats.queue_average_delay[i];
+            mean_delays_by_queue[i] +=
+                stats.queue_average_packet_processing_delay[i];
         }
-        total_mean_delay_by_scheduler += stats.scheduler_average_delay;
+        total_mean_delay_by_scheduler +=
+            stats.scheduler_average_packet_processing_delay;
     }
 
     for (int i = 0; i < queue_count; ++i)

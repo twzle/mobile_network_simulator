@@ -1,6 +1,6 @@
-#include "scheduling/base_drr_scheduler.hpp"
+#include "scheduling/base_rr_scheduler.hpp"
 
-BaseDRRScheduler::BaseDRRScheduler(
+BaseRRScheduler::BaseRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
     std::string base_modulation_scheme)
@@ -12,13 +12,13 @@ BaseDRRScheduler::BaseDRRScheduler(
 Планирование очереди через запись в массив очередей
 и вычисление новой суммы общего количества пакетов
 */
-void BaseDRRScheduler::schedule(PacketQueue &&packet_queue)
+void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
 {
     scheduled_queues.push_back(packet_queue);
     total_packets += packet_queue.size();
 }
 
-void BaseDRRScheduler::connect_users(int user_count)
+void BaseRRScheduler::connect_users(int user_count)
 {
     for (int i = 0; i < user_count; ++i)
     {
@@ -27,7 +27,7 @@ void BaseDRRScheduler::connect_users(int user_count)
     }
 }
 
-User *BaseDRRScheduler::get_user_ptr(int user_id)
+User *BaseRRScheduler::get_user_ptr(int user_id)
 {
     auto it = connected_users.find(user_id);
     if (it != connected_users.end())
@@ -40,22 +40,22 @@ User *BaseDRRScheduler::get_user_ptr(int user_id)
     return nullptr;
 }
 
-void BaseDRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
+void BaseRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
 {
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
 }
 
-void BaseDRRScheduler::set_initial_queue(size_t new_initial_queue_id)
+void BaseRRScheduler::set_initial_queue(size_t new_initial_queue_id)
 {
     this->current_initial_absolute_queue_id = new_initial_queue_id;
 }
 
-size_t BaseDRRScheduler::get_initial_queue()
+size_t BaseRRScheduler::get_initial_queue()
 {
     return this->current_initial_absolute_queue_id;
 }
 
-size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
+size_t BaseRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
 {
     size_t bias = this->current_initial_absolute_queue_id;
     size_t current_relative_queue_id = current_absolute_queue_id + bias;
@@ -70,7 +70,7 @@ size_t BaseDRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
     }
 }
 
-void BaseDRRScheduler::check_queue_remaining_scheduled_packets(
+void BaseRRScheduler::check_queue_remaining_scheduled_packets(
     PacketQueue &queue, double current_time, TTIStats &tti_stats)
 {
     PacketQueue tmp(queue.get_quant(), queue.get_limit());
@@ -124,7 +124,7 @@ void BaseDRRScheduler::check_queue_remaining_scheduled_packets(
 /*
 Подсчет статистики по результатам работы планировщика
 */
-void BaseDRRScheduler::evaluate_stats()
+void BaseRRScheduler::evaluate_stats()
 {
     stats.scheduler_total_time =
         session.get_scheduling_end_time() - session.get_scheduling_start_time();
@@ -141,7 +141,7 @@ void BaseDRRScheduler::evaluate_stats()
 }
 
 // Перевод размера пакета из байтов в ресурсные блоки согласно размеру полезных данных в одном RB
-int BaseDRRScheduler::convert_packet_size_to_rb_number(
+int BaseRRScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
     int effective_data_size_per_rb_for_user_in_bytes =
@@ -159,7 +159,7 @@ int BaseDRRScheduler::convert_packet_size_to_rb_number(
     return rb_count;
 }
 
-void BaseDRRScheduler::sync_user_channels()
+void BaseRRScheduler::sync_user_channels()
 {
     for (auto &user_info : connected_users)
     {
@@ -179,7 +179,7 @@ void BaseDRRScheduler::sync_user_channels()
     }
 }
 
-IterationStats &BaseDRRScheduler::get_stats()
+IterationStats &BaseRRScheduler::get_stats()
 {
     return this->stats;
 }

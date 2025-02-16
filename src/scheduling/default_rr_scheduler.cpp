@@ -1,10 +1,10 @@
-#include "scheduling/circular_drr_scheduler.hpp"
+#include "scheduling/default_rr_scheduler.hpp"
 
-CircularDRRScheduler::CircularDRRScheduler(
+DefaultRRScheduler::DefaultRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
     std::string base_modulation_scheme)
-    : BaseDRRScheduler(
+    : BaseRRScheduler(
           standard_name, tti,
           channel_sync_interval,
           base_modulation_scheme) {};
@@ -12,9 +12,9 @@ CircularDRRScheduler::CircularDRRScheduler(
 /*
 Логика работы планировщика
 */
-void CircularDRRScheduler::run()
+void DefaultRRScheduler::run()
 {
-    // Начало планирования
+    // Метка времени в момент запуска планировщика
     session.set_scheduling_start_time(0.0);
     double current_time = session.get_scheduling_start_time();
 
@@ -36,6 +36,7 @@ void CircularDRRScheduler::run()
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
         int available_resource_blocks = this->resource_blocks_per_tti;
+        set_last_starving_queue(0); // Последняя недообслуженная очередь
 
         for (size_t absolute_queue_id = 0;
              absolute_queue_id < scheduled_queues.size();
@@ -46,7 +47,6 @@ void CircularDRRScheduler::run()
             size_t relative_queue_id = get_relative_queue_id(absolute_queue_id);
 
             PacketQueue &queue = scheduled_queues[relative_queue_id];
-            queue.set_deficit(queue.get_deficit() + queue.get_quant());
 
             // std::cout << "-> " << relative_queue_id << " ";
 
@@ -74,19 +74,12 @@ void CircularDRRScheduler::run()
                         break;
                     }
 
-                    if (packet_size_in_rb > queue.get_deficit() + epsilon)
-                    {
-                        queue_state = set_idle(queue_state);
-                        scheduler_state = set_idle(scheduler_state);
-
-                        // Кандидаты на получение ресурсов только пользователь,
-                        // Очередь без дефицита не кандидат
-                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        break;
-                    }
-
+                    // Если размер пакета больше, чем реальное кол-во RB, то переход к следующей очереди
                     if (packet_size_in_rb > available_resource_blocks)
                     {
+                        // Последняя очередь на которую не хватило RB
+                        set_last_starving_queue(relative_queue_id);
+
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
@@ -96,12 +89,11 @@ void CircularDRRScheduler::run()
                         break;
                     }
 
-                    // Проверка достаточности дефицита на обслуживание пакета
+                    // Если размер пакета меньше, чем реальное кол-во RB, то обслуживаем пакет
                     if (packet_size_in_rb <= available_resource_blocks)
                     {
                         // Обслуживание пакета
                         queue.pop();
-                        queue.set_deficit(queue.get_deficit() - packet_size_in_rb);
                         session.increment_processed_packet_count(1);
 
                         available_resource_blocks -= packet_size_in_rb;
@@ -124,7 +116,7 @@ void CircularDRRScheduler::run()
                             packet_size_in_rb);
 
                         stats.add_queue_packet_stats(
-                            relative_queue_id,
+                            packet.get_queue(),
                             packet.get_scheduled_at(),
                             current_time);
 
@@ -159,6 +151,11 @@ void CircularDRRScheduler::run()
             tti_stats.get_fairness_for_users(),
             tti_stats.is_valid_fairness_for_users());
 
+        tti_stats.calculate_throughput_for_scheduler();
+        stats.update_scheduler_throughput(
+            tti_stats.get_throughput_for_scheduler(),
+            tti_stats.is_valid_throughput_for_scheduler());
+
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
     }
@@ -170,15 +167,14 @@ void CircularDRRScheduler::run()
     evaluate_stats();
 }
 
-// Перебор в следующем TTI с очереди следующей за текущей начальной
-int CircularDRRScheduler::get_next_initial_queue()
+// Начало следующего TTI всегда с последней недообслуженной очереди
+int DefaultRRScheduler::get_next_initial_queue()
 {
-    if (this->current_initial_absolute_queue_id == scheduled_queues.size() - 1)
-    {
-        return 0;
-    }
-    else
-    {
-        return ++this->current_initial_absolute_queue_id;
-    }
+    return last_starving_queue;
+}
+
+// Сохранение последней недообслуженной очереди
+void DefaultRRScheduler::set_last_starving_queue(int last_starving_queue)
+{
+    this->last_starving_queue = last_starving_queue;
 }

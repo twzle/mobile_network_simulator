@@ -1,8 +1,8 @@
 #pragma once
 
-#include "base_drr_scheduler.hpp"
+#include "base_rr_scheduler.hpp"
 
-class FixedDRRScheduler : public BaseDRRScheduler
+class FixedDRRScheduler : public BaseRRScheduler
 {
 public:
     explicit FixedDRRScheduler(

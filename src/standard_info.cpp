@@ -73,14 +73,36 @@ void StandardManager::initialize()
         {
             "LTE",
             {
-                "LTE", "Long-Term Evolution", {{"1ms", 0.001}}, {{"5ms", 0.005}, {"10ms", 0.010}}, {{"Dynamic", 0}, {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}, {"256-QAM", 16}}, {1.4, 3, 5, 10, 15, 20}, {"FixedDRRScheduler", "CircularDRRScheduler", "DefaultDRRScheduler"},
+                "LTE", 
+                "Long-Term Evolution", 
+                {{"1ms", 0.001}}, 
+                {{"5ms", 0.005}, {"10ms", 0.010}}, 
+                {{"Dynamic", 0}, {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}, {"256-QAM", 16}}, 
+                {1.4, 3, 5, 10, 15, 20}, 
+                {
+                    "DefaultRRScheduler", 
+                    "FixedDRRScheduler", 
+                    "CyclicDRRScheduler", 
+                    "DefaultDRRScheduler"
+                },
                 84, // 12 поднесущих * 7 OFDMA-символов
             },
         },
         {
             "NR_5G",
             {
-                "5G NR", "5G New Radio", {{"1ms", 0.001}, {"2ms", 0.002}, {"0.5ms", 0.0005}}, {{"5ms", 0.005}, {"10ms", 0.010}}, {{"Dynamic", 0}, {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}, {"256-QAM", 16}}, {10, 20, 50}, {"FixedDRRScheduler", "DefaultDRRScheduler"},
+                "5G NR", 
+                "5G New Radio", 
+                {{"1ms", 0.001}, {"2ms", 0.002}, {"0.5ms", 0.0005}}, 
+                {{"5ms", 0.005}, {"10ms", 0.010}}, 
+                {{"Dynamic", 0}, {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}, {"256-QAM", 16}}, 
+                {10, 20, 50}, 
+                {
+                    "DefaultRRScheduler", 
+                    "FixedDRRScheduler", 
+                    "CyclicDRRScheduler", 
+                    "DefaultDRRScheduler"
+                },
                 84, // 12 поднесущих * 7 OFDMA-символов
             },
         }};

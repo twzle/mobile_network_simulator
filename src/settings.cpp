@@ -148,21 +148,26 @@ std::string Settings::get_channel_sync_interval()
     return this->channel_sync_interval;
 }
 
-std::unique_ptr<BaseDRRScheduler> Settings::get_scheduler_instance()
+std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
 {
     double tti_value = 
         StandardManager::get_tti(standard_type, tti_duration);
     double channel_sync_interval_value =
         StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
 
-    if (this->scheduler_type == "FixedDRRScheduler")
+    if (this->scheduler_type == "DefaultRRScheduler")
+    {
+        return std::make_unique<DefaultRRScheduler>(
+            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
+    }
+    else if (this->scheduler_type == "FixedDRRScheduler")
     {
         return std::make_unique<FixedDRRScheduler>(
             standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
     }
-    else if (this->scheduler_type == "CircularDRRScheduler")
+    else if (this->scheduler_type == "CyclicDRRScheduler")
     {
-        return std::make_unique<CircularDRRScheduler>(
+        return std::make_unique<CyclicDRRScheduler>(
             standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
