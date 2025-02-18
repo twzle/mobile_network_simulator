@@ -158,13 +158,11 @@ void IterationStats::update_scheduler_throughput(
 
 void IterationStats::add_queue_packet_stats(
     size_t queue_id,
-    double scheduled_at,
-    double processed_at)
+    double processing_delay)
 {
     queue_stats.emplace_back(
         queue_id,
-        scheduled_at,
-        processed_at - scheduled_at);
+        processing_delay);
 }
 
 // Вывод статистики в stdout
@@ -192,16 +190,25 @@ void IterationStats::print()
               << "Average packet processing time ((processing_time + idle_time) / packet_count) = "
               << ((scheduler_processing_time + scheduler_idle_time) / packet_count) * 1000
               << " ms\n" // Среднее время обслуживания пакета
-              << "Average packet processing delay = "
-              << scheduler_average_packet_processing_delay * 1000
-              << " ms\n" // Среднее время задержки обслуживания пакета
               << "Average fairness for queues = "
               << scheduler_average_fairness_for_queues << "\n"
               << "Average fairness for users = "
               << scheduler_average_fairness_for_users << "\n"
               << "Average scheduler throughput = "
               << scheduler_average_throughput << " Kbytes/ms, "
-              << scheduler_average_throughput * 1024 * 1000 << " bytes/s\n\n";
+              << scheduler_average_throughput * 1024 * 1000 << " bytes/s\n"
+              << "Average scheduler packet processing delay = "
+              << scheduler_average_packet_processing_delay * 1000
+              << " ms\n"; // Среднее время задержки обслуживания пакета
+
+    for (size_t queue_id = 0;
+         queue_id < queue_average_packet_processing_delay.size();
+         ++queue_id)
+    {
+        std::cout << "Average queue packet processing delay time "
+                  << "(Queue #" << queue_id << ") = "
+                  << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
+    }
 }
 
 void IterationStats::evaluate()
@@ -311,35 +318,36 @@ void IterationStats::evaluate_throughput_stats()
 
 void IterationStats::evaluate_delay_stats()
 {
-    std::map<int, double> total_packet_processing_delay_by_queue;
-    std::map<int, double> total_processed_packets_by_queue;
-    double average_packet_processing_delay_by_scheduler = 0;
+    std::map<int, double> total_queue_packet_processing_delay;
+    std::map<int, double> total_queue_processed_packets;
 
     // Подсчет времени задержек обслуживания пакетов по очередям
     for (auto &stats : queue_stats)
     {
-        total_packet_processing_delay_by_queue[stats.queue_id] +=
+        total_queue_packet_processing_delay[stats.queue_id] +=
             stats.processing_delay;
-        total_processed_packets_by_queue[stats.queue_id] += 1;
+        total_queue_processed_packets[stats.queue_id] += 1;
     }
 
-    for (auto &queue_delay_stats : total_packet_processing_delay_by_queue)
+    double total_average_scheduler_packet_processing_delay = 0;
+
+    for (auto &queue_delay_stats : total_queue_packet_processing_delay)
     {
         double total_packet_processing_delay_in_queue =
-            total_packet_processing_delay_by_queue[queue_delay_stats.first];
-        size_t packet_count =
-            total_processed_packets_by_queue[queue_delay_stats.first];
+            total_queue_packet_processing_delay[queue_delay_stats.first];
+        size_t total_packet_count_in_queue =
+            total_queue_processed_packets[queue_delay_stats.first];
 
         this->queue_average_packet_processing_delay[queue_delay_stats.first] =
-            total_packet_processing_delay_in_queue / packet_count;
+            total_packet_processing_delay_in_queue / total_packet_count_in_queue;
 
-        average_packet_processing_delay_by_scheduler +=
+        total_average_scheduler_packet_processing_delay +=
             this->queue_average_packet_processing_delay[queue_delay_stats.first];
     }
 
-    size_t queue_count = total_packet_processing_delay_by_queue.size();
+    size_t queue_count = total_queue_packet_processing_delay.size();
     this->scheduler_average_packet_processing_delay =
-        average_packet_processing_delay_by_scheduler / queue_count;
+        total_average_scheduler_packet_processing_delay / queue_count;
 }
 
 void IterationStats::release_memory_resources()

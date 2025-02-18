@@ -35,8 +35,10 @@ public:
         const double &accuracy = 1);
 
     void evaluate_confidence_intervals();
+    void evaluate_confidence_queue_processing_delay_intervals();
 
     void collect_history();
+    void collect_queue_processing_delay_history();
 
     void show();
     void draw_delay_plot();
@@ -77,7 +79,7 @@ public:
 
     // История средней суммарной пропускной способности по итерациям
     std::vector<double> scheduler_throughput_history;
-    double mean_scheduler_throughput = 0; // (Кбайт/мс)
+    double mean_scheduler_throughput = 0;   // (Кбайт/мс)
     double common_scheduler_throughput = 0; // (Кбайт/мс)
 
     double mean_scheduler_packet_count = 0;
@@ -86,20 +88,17 @@ public:
     std::vector<double> queue_mean_processing_time; // TODO: поменять на std::map<int, double>
     double total_mean_processing_time_by_scheduler = 0;
 
-    std::vector<double> mean_delays_by_queue; // TODO: поменять на std::map<int, double>
-    double total_mean_delay_by_scheduler = 0;
-    double standard_devaition_delay_by_scheduler = 0;
-    double execution_count_for_delay_credability = 0;
+    // История ср. времени задержек обработки пакетов в очередях по запускам
+    std::map<int, std::vector<double>> queue_processing_delay_history;
+    std::map<int, double> mean_queue_processing_delay;
+    // История ср. задержек обработки пакетов в планировщике (во всех очередях) по запускам
+    std::vector<double> scheduler_processing_delay_history;
+    double mean_scheduler_processing_delay = 0;
 
     std::vector<IterationStats> stats_array;
 
-    // История ср. времени задержек обработки пакетов в очередях по запускам
-    std::map<int, std::vector<double> > mean_processing_delay_time_by_queue_history;
-    // История ср. задержек обработки пакетов в планировщике (во всех очередях) по запускам
-    std::vector<double> mean_processing_delay_time_by_scheduler_history;
-
     // История ср. времени работы каждой очереди по запускам
-    std::map<int, std::vector<double> > mean_processing_time_by_queue_history;
+    std::map<int, std::vector<double>> mean_processing_time_by_queue_history;
     // История ср. времени работы планировщика по запускам
     std::vector<double> mean_processing_time_by_scheduler_history;
 };

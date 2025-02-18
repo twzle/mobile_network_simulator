@@ -117,8 +117,7 @@ void DefaultRRScheduler::run()
 
                         stats.add_queue_packet_stats(
                             packet.get_queue(),
-                            packet.get_scheduled_at(),
-                            current_time);
+                            current_time - packet.get_scheduled_at());
 
                         queue_state = set_processing(queue_state);
                         scheduler_state = set_processing(scheduler_state);

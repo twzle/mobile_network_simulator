@@ -53,8 +53,7 @@ public:
 
     void add_queue_packet_stats(
         size_t queue_id,
-        double scheduled_at,
-        double processed_at);
+        double processing_delay);
 
     void update_queue_time_stats(
         PacketQueueState queue_state,
@@ -96,7 +95,6 @@ public:
     void draw_scheduling_plot();
 
     int packet_count = 0; // Общее число обслуженных пакетов
-    std::vector<PacketStats> queue_stats;
 
     std::vector<double> scheduler_throughput; // За каждый TTI (Кбайт/мс)
     double scheduler_average_throughput = 0;  // Среднее за весь период работы (Кбайт/мс)
@@ -107,8 +105,9 @@ public:
     std::vector<double> scheduler_fairness_for_users; // За каждый TTI
     double scheduler_average_fairness_for_users = 0;  // Среднее за весь период работы
 
-    std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов
-    double scheduler_average_packet_processing_delay = 0;
+    std::vector<PacketStats> queue_stats;
+    std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов (секунды)
+    double scheduler_average_packet_processing_delay = 0; // Общее среднее время задержки обработки пакетов (секунды)
 
     // Общее время работы (сумма processing, idle, wait)
     std::map<int, double> queue_total_time;

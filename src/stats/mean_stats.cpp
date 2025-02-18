@@ -10,9 +10,6 @@
 void MeanStats::calculate()
 {
     calculate_mean_values();
-    calculate_mean_delays();
-    calculate_mean_queue_processing_time();
-
     collect_history();
 }
 
@@ -37,11 +34,10 @@ void MeanStats::collect_history()
         this->scheduler_throughput_history.push_back(
             stats.scheduler_average_throughput);
 
-        // for (size_t queue_id = 0; queue_id < stats.queue_average_delay.size(); ++queue_id)
-        // {
-        //     this->mean_delay_by_queue_history[queue_id]
-        //         .push_back(stats.queue_average_delay[queue_id]);
-        // }
+        this->scheduler_processing_delay_history.push_back(
+            stats.scheduler_average_packet_processing_delay);
+
+        collect_queue_processing_delay_history();
 
         // for (size_t queue_id = 0;
         //      queue_id < stats.queue_processing_time.size();
@@ -50,6 +46,20 @@ void MeanStats::collect_history()
         //     this->mean_processing_time_by_queue_history[queue_id]
         //         .push_back(stats.queue_processing_time[queue_id]);
         // }
+    }
+}
+
+void MeanStats::collect_queue_processing_delay_history()
+{
+    for (auto &stats : stats_array)
+    {
+        for (size_t queue_id = 0;
+             queue_id < stats.queue_average_packet_processing_delay.size();
+             ++queue_id)
+        {
+            this->queue_processing_delay_history[queue_id]
+                .push_back(stats.queue_average_packet_processing_delay[queue_id]);
+        }
     }
 }
 
@@ -88,31 +98,39 @@ void MeanStats::calculate_mean_values()
 
     mean_scheduler_packet_count =
         common_scheduler_packet_count / stats_array.size();
+
+    calculate_mean_delays();
+    // calculate_mean_queue_processing_time();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
 void MeanStats::calculate_mean_delays()
 {
     int queue_count = stats_array[0].queue_average_packet_processing_delay.size();
-    mean_delays_by_queue.resize(queue_count);
+
+    for (int i = 0; i < queue_count; ++i)
+    {
+        mean_queue_processing_delay[i] = 0;
+    }
 
     for (auto &stats : stats_array)
     {
         for (int i = 0; i < queue_count; ++i)
         {
-            mean_delays_by_queue[i] +=
+            mean_queue_processing_delay[i] +=
                 stats.queue_average_packet_processing_delay[i];
         }
-        total_mean_delay_by_scheduler +=
+
+        mean_scheduler_processing_delay +=
             stats.scheduler_average_packet_processing_delay;
     }
 
     for (int i = 0; i < queue_count; ++i)
     {
-        mean_delays_by_queue[i] /= stats_array.size();
+        mean_queue_processing_delay[i] /= stats_array.size();
     }
 
-    total_mean_delay_by_scheduler /= stats_array.size();
+    mean_scheduler_processing_delay /= stats_array.size();
 }
 
 void MeanStats::calculate_mean_queue_processing_time()
@@ -189,14 +207,32 @@ double MeanStats::calculate_standard_deviation_for_metric(
     for (auto &value : values)
     {
         // Отклонение от среднего для каждого значения из выборки
-        double value_deviation = value - mean;
+        double value_deviation = 0;
+        if (values.size() == 1)
+        {
+            value_deviation = mean;
+        }
+        else if (values.size() > 1)
+        {
+            value_deviation = value - mean;
+        }
+
         sum_of_squared_deviations += value_deviation * value_deviation;
     }
 
     // sum(Xi - X)^2 / (n - 1)
     // Квадрат среднеквадратического отклонения
-    double square_of_standard_deviation =
-        sum_of_squared_deviations / (stats_array.size() - 1);
+    double square_of_standard_deviation = 0;
+    if (values.size() == 1)
+    {
+        square_of_standard_deviation =
+            sum_of_squared_deviations / (stats_array.size());
+    }
+    else if (values.size() > 1)
+    {
+        square_of_standard_deviation =
+            sum_of_squared_deviations / (stats_array.size() - 1);
+    }
 
     // sqrt(sum(Xi - X)^2 / (n - 1))
     // Среднеквадратическое отклонение
@@ -275,18 +311,15 @@ void MeanStats::evaluate_confidence_intervals()
     calculate_confidence_interval(
         scheduler_throughput_history,
         mean_scheduler_throughput,
-        1);
+        0.001);
 
-    // // задержка обработки пакетов по очередям
-    // std::cout << "\nЗадержка обработки пакетов по очередям" << "\n";
-    // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id)
-    // {
-    //     std::cout << "Oчередь №" << queue_id << "\n";
-    //     double std_dev = calculate_standard_deviation_for_metric(
-    //         mean_delay_by_queue_history[queue_id],
-    //         mean_delays_by_queue[queue_id]);
-    //     calculate_execution_count_for_metric(std_dev, 1);
-    // }
+    // Доверительный интервал для справделивости распределения RB между очередями
+    std::cout << "\nОбщая средняя задержка обслуживания пакетов"
+              << " (scheduler_processing_delay)" << std::endl;
+    calculate_confidence_interval(
+        scheduler_processing_delay_history,
+        mean_scheduler_processing_delay,
+        0.00001);
 
     // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id){
     //     std::cout << "Oчередь №" << queue_id << "\n";
@@ -296,6 +329,25 @@ void MeanStats::evaluate_confidence_intervals()
     //     }
     //     std::cout << "\n";
     // }
+
+    evaluate_confidence_queue_processing_delay_intervals();
+}
+
+void MeanStats::evaluate_confidence_queue_processing_delay_intervals()
+{
+    for (size_t queue_id = 0;
+         queue_id < queue_processing_delay_history.size();
+         ++queue_id)
+    {
+        // задержка обработки пакетов по очередям
+        std::cout << "\nОбщая средняя задержка обслуживания пакетов в очереди №"
+                  << queue_id
+                  << " (queue_processing_delay)" << std::endl;
+        calculate_confidence_interval(
+            queue_processing_delay_history[queue_id],
+            mean_queue_processing_delay[queue_id],
+            0.00001);
+    }
 }
 
 // Вывод в stdout срденего арифметического по статистике работы планировщика
@@ -320,9 +372,6 @@ void MeanStats::show()
               << " s (" // Общее время простоя и доля от общего времени
               << 100 * (mean_scheduler_wait_time / mean_scheduler_total_time)
               << "% of all)\n"
-              << "Mean packet processing delay time = "
-              << total_mean_delay_by_scheduler * 1000
-              << " ms\n" // Среднее время обслуживания пакета
               << "Mean fairness of RB allocation for queues = "
               << mean_scheduler_fairness_for_queues
               << "\n" // Средняя справедливость распределения RB по очередям
@@ -333,7 +382,19 @@ void MeanStats::show()
               << mean_scheduler_throughput
               << " Kbytes/ms, " // Средняя пропускная способность (Кбайт/мс)
               << mean_scheduler_throughput * 1024 * 1000
-              << " bytes/s\n"; // Средняя пропускная способность (байт/с)
+              << " bytes/s\n" // Средняя пропускная способность (байт/с)
+              << "Mean scheduler packet processing delay time = "
+              << mean_scheduler_processing_delay * 1000
+              << " ms\n"; // Среднее время обслуживания пакета
+
+    for (size_t queue_id = 0;
+         queue_id < queue_processing_delay_history.size();
+         ++queue_id)
+    {
+        std::cout << "Mean queue packet processing delay time "
+                  << "(Queue #" << queue_id << ") = "
+                  << mean_queue_processing_delay[queue_id] * 1000 << " ms\n";
+    }
 }
 
 std::string MeanStats::write_yaml()
@@ -351,12 +412,12 @@ std::string MeanStats::write_yaml()
         << YAML::Value << total_mean_processing_time_by_scheduler;
 
     // mean_delays
-    out << YAML::Key << "mean_delays"
-        << YAML::Value << mean_delays_by_queue;
+    out << YAML::Key << "queue_mean_delays"
+        << YAML::Value << mean_queue_processing_delay;
 
     // total_mean_delay
-    out << YAML::Key << "total_mean_delay"
-        << YAML::Value << total_mean_delay_by_scheduler;
+    out << YAML::Key << "scheduler_mean_delay"
+        << YAML::Value << mean_scheduler_processing_delay;
 
     out << YAML::EndMap;
 

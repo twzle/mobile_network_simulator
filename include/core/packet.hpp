@@ -25,10 +25,10 @@ public:
     void set_scheduled_at(double scheduled_at);
 
 private:
-    int size;            // Размер пакета в байтах
-    double scheduled_at; // Время в которое для пакета было запланировано обслуживание
-    int queue;           // Очередь в которую поставлен пакет
-    User *user;          // Пользователь которому принадлежит пакет
+    int size;            // Размер пакета (байты)
+    double scheduled_at; // Время прихода пакета в систему (секунды)
+    int queue;           // Очередь в которую пришел пакет
+    User *user;          // Пользователь создавший пакет
 };
 
 struct PacketGreater

@@ -124,9 +124,8 @@ void CyclicDRRScheduler::run()
                             packet_size_in_rb);
 
                         stats.add_queue_packet_stats(
-                            relative_queue_id,
-                            packet.get_scheduled_at(),
-                            current_time);
+                            packet.get_queue(),
+                            current_time - packet.get_scheduled_at());
 
                         queue_state = set_processing(queue_state);
                         scheduler_state = set_processing(scheduler_state);
@@ -158,6 +157,11 @@ void CyclicDRRScheduler::run()
         stats.update_scheduler_fairness_for_users(
             tti_stats.get_fairness_for_users(),
             tti_stats.is_valid_fairness_for_users());
+
+        tti_stats.calculate_throughput_for_scheduler();
+        stats.update_scheduler_throughput(
+            tti_stats.get_throughput_for_scheduler(),
+            tti_stats.is_valid_throughput_for_scheduler());
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
