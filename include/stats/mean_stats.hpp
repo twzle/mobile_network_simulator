@@ -37,7 +37,10 @@ public:
     void evaluate_confidence_intervals();
     void evaluate_confidence_queue_processing_delay_intervals();
 
-    void collect_history();
+    void init_history();
+    void init_queue_processing_delay_history();
+
+        void collect_history();
     void collect_queue_processing_delay_history();
 
     void show();

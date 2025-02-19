@@ -13,9 +13,40 @@ void MeanStats::calculate()
     collect_history();
 }
 
+void MeanStats::init_history()
+{
+    int iterations_count = stats_array.size();
+
+    this->scheduler_total_time_history.reserve(iterations_count);
+    this->scheduler_processing_time_history.reserve(iterations_count);
+    this->scheduler_idle_time_history.reserve(iterations_count);
+    this->scheduler_wait_time_history.reserve(iterations_count);
+
+    this->scheduler_fairness_for_queues_history.reserve(iterations_count);
+    this->scheduler_fairness_for_users_history.reserve(iterations_count);
+    this->scheduler_throughput_history.reserve(iterations_count);
+
+    this->scheduler_processing_delay_history.reserve(iterations_count);
+
+    init_queue_processing_delay_history();
+}
+
+void MeanStats::init_queue_processing_delay_history()
+{
+    int iterations_count = stats_array.size();
+    for (size_t queue_id = 0;
+         queue_id < stats_array[0].queue_average_packet_processing_delay.size();
+         ++queue_id)
+    {
+        this->queue_processing_delay_history[queue_id].reserve(iterations_count);
+    }
+}
+
 // Сбор исторических данных по запускам для оптимизации доступа к данным
 void MeanStats::collect_history()
 {
+    init_history();
+
     for (auto &stats : stats_array)
     {
         this->scheduler_total_time_history.push_back(
@@ -37,8 +68,6 @@ void MeanStats::collect_history()
         this->scheduler_processing_delay_history.push_back(
             stats.scheduler_average_packet_processing_delay);
 
-        collect_queue_processing_delay_history();
-
         // for (size_t queue_id = 0;
         //      queue_id < stats.queue_processing_time.size();
         //      ++queue_id)
@@ -47,6 +76,8 @@ void MeanStats::collect_history()
         //         .push_back(stats.queue_processing_time[queue_id]);
         // }
     }
+
+    collect_queue_processing_delay_history();
 }
 
 void MeanStats::collect_queue_processing_delay_history()
@@ -313,13 +344,15 @@ void MeanStats::evaluate_confidence_intervals()
         mean_scheduler_throughput,
         0.001);
 
-    // Доверительный интервал для справделивости распределения RB между очередями
+    // Доверительный интервал для средней задержки обслуживания пакетов
     std::cout << "\nОбщая средняя задержка обслуживания пакетов"
               << " (scheduler_processing_delay)" << std::endl;
     calculate_confidence_interval(
         scheduler_processing_delay_history,
         mean_scheduler_processing_delay,
         0.00001);
+
+    evaluate_confidence_queue_processing_delay_intervals();
 
     // for (size_t queue_id = 0; queue_id < mean_delay_by_queue_history.size(); ++queue_id){
     //     std::cout << "Oчередь №" << queue_id << "\n";
@@ -329,8 +362,6 @@ void MeanStats::evaluate_confidence_intervals()
     //     }
     //     std::cout << "\n";
     // }
-
-    evaluate_confidence_queue_processing_delay_intervals();
 }
 
 void MeanStats::evaluate_confidence_queue_processing_delay_intervals()

@@ -12,13 +12,13 @@ int main()
     UserGenerator::initialize();
     User::initialize();
 
-    int launches = 12000; // Количество перезапусков
+    int launches = 2000; // Количество перезапусков
 
     std::string standard_type = "LTE";                  // Стандарт связи
     std::string tti_duration = "1ms";                   // Длительность TTI
     std::string channel_sync_interval = "5ms";          // Интервал синхронизации канала
     std::string modulation_scheme = "QPSK";          // Схема модуляции канала
-    std::string scheduler_type = "DefaultRRScheduler"; // Тип планировщика
+    std::string scheduler_type = "CyclicDRRScheduler"; // Тип планировщика
     double bandwidth = 5;                              // Полоса пропускания в МГц
 
     int packet_count = 1000; // Количество пакетов в очереди
