@@ -17,7 +17,7 @@ public:
     explicit BaseRRScheduler(
         std::string standard_name, double tti,
         double channel_sync_interval,
-        std::string base_modulation_scheme);
+        uint8_t base_cqi);
     virtual ~BaseRRScheduler() = default;
 
     // Основной метод запуска планировщика
@@ -50,7 +50,7 @@ protected:
         double current_time,
         TTIStats &tti_stats);
 
-    int convert_packet_size_to_rb_number(User* user, int packet_size);
+    int convert_packet_size_to_rb_number(User *user, int packet_size);
     void sync_user_channels();
 
 protected:
@@ -58,7 +58,7 @@ protected:
     std::string standard_name = "LTE";            // Название стандарта
     double tti_duration = 0;                      // Длительность TTI в секундах
     double channel_sync_interval = 0;             // Интервал синхронизации канала в секундах
-    std::string base_modulation_scheme = "QPSK";  // Название базовой схемы модуляции
+    uint8_t base_cqi = 0;                         // Базовый CQI
     int resource_block_effective_data_size = 0;   // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди

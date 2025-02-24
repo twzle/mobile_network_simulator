@@ -8,7 +8,7 @@ public:
     explicit CyclicDRRScheduler(
         std::string standard_name, double tti,
         double channel_sync_interval,
-        std::string base_modulation_scheme);
+        uint8_t base_cqi);
     void run() override;
 
     int get_next_initial_queue();

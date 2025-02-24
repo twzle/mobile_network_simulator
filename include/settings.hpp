@@ -20,7 +20,7 @@ public:
     Settings(
         int launches,
         std::string standard_type,
-        std::string modulation_scheme,
+        uint8_t cqi,
         std::string tti_duration,
         std::string channel_sync_interval,
         std::string scheduler_type,
@@ -37,7 +37,7 @@ public:
 
     int get_launches();
     std::string get_standard_type();
-    std::string get_modulation_scheme();
+    uint8_t get_cqi();
     std::string get_tti_duration();
     std::string get_channel_sync_interval();
     std::unique_ptr<BaseRRScheduler> get_scheduler_instance();
@@ -55,7 +55,7 @@ public:
 private:
     int launches;                      // Количество повторов
     std::string standard_type;         // Стандарт передачи данных
-    std::string modulation_scheme;     // Схема модуляции канала
+    uint8_t cqi;                       // CQI
     std::string tti_duration;          // Длительность TTI
     std::string channel_sync_interval; // Интервал синхронизации канала
     std::string scheduler_type;        // Тип планировщика

@@ -3,10 +3,10 @@
 BaseRRScheduler::BaseRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
-    std::string base_modulation_scheme)
+    uint8_t base_cqi)
     : standard_name(standard_name), tti_duration(tti),
       channel_sync_interval(channel_sync_interval),
-      base_modulation_scheme(base_modulation_scheme) {}
+      base_cqi(base_cqi) {}
 
 /*
 Планирование очереди через запись в массив очередей
@@ -22,7 +22,7 @@ void BaseRRScheduler::connect_users(int user_count)
 {
     for (int i = 0; i < user_count; ++i)
     {
-        User user(base_modulation_scheme);
+        User user(base_cqi);
         connected_users.emplace(user.get_id(), std::move(user));
     }
 }
@@ -144,9 +144,9 @@ void BaseRRScheduler::evaluate_stats()
 int BaseRRScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
-    int effective_data_size_per_rb_for_user_in_bytes =
-        (StandardManager::get_modulation_scheme(
-            standard_name, user->get_modulation_scheme()) *
+    double effective_data_size_per_rb_for_user_in_bytes =
+        (StandardManager::get_cqi_efficiency(
+            standard_name, user->get_cqi()) *
         StandardManager::get_resource_elements_in_resource_block(
             standard_name)) / 8;
 
@@ -170,7 +170,7 @@ void BaseRRScheduler::sync_user_channels()
         if (std::abs(new_out_of_sync - channel_sync_interval) < epsilon)
         {
             user.set_out_of_channel_sync_for(0);
-            user.set_modulation_scheme(base_modulation_scheme);
+            user.set_cqi(base_cqi);
         }
         else
         {

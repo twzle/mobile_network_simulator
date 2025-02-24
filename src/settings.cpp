@@ -6,7 +6,7 @@
 Settings::Settings(
     int launches,
     std::string standard_type,
-    std::string modulation_scheme,
+    uint8_t cqi,
     std::string tti_duration,
     std::string channel_sync_interval,
     std::string scheduler_type,
@@ -18,7 +18,7 @@ Settings::Settings(
 {
     this->launches = launches;
     this->standard_type = standard_type;
-    this->modulation_scheme = modulation_scheme;
+    this->cqi = cqi;
     this->tti_duration = tti_duration;
     this->channel_sync_interval = channel_sync_interval;
     this->scheduler_type = scheduler_type;
@@ -69,11 +69,11 @@ void Settings::validate()
 
     try
     {
-        StandardManager::get_modulation_scheme(standard_type, modulation_scheme);
+        StandardManager::get_cqi_efficiency(standard_type, cqi);
     }
     catch (const std::out_of_range &e)
     {
-        throw std::invalid_argument("Invalid modulation scheme.");
+        throw std::invalid_argument("Invalid CQI.");
     }
 
     auto is_allowed_scheduler_type =
@@ -138,6 +138,11 @@ std::string Settings::get_standard_type()
     return this->standard_type;
 }
 
+uint8_t Settings::get_cqi()
+{
+    return this->cqi;
+}
+
 std::string Settings::get_tti_duration()
 {
     return this->tti_duration;
@@ -158,22 +163,22 @@ std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
     if (this->scheduler_type == "DefaultRRScheduler")
     {
         return std::make_unique<DefaultRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
+            standard_type, tti_value, channel_sync_interval_value, cqi);
     }
     else if (this->scheduler_type == "FixedDRRScheduler")
     {
         return std::make_unique<FixedDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
+            standard_type, tti_value, channel_sync_interval_value, cqi);
     }
     else if (this->scheduler_type == "CyclicDRRScheduler")
     {
         return std::make_unique<CyclicDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
+            standard_type, tti_value, channel_sync_interval_value, cqi);
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
         return std::make_unique<DefaultDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, modulation_scheme);
+            standard_type, tti_value, channel_sync_interval_value, cqi);
     }
     return nullptr;
 }
@@ -228,12 +233,12 @@ int Settings::get_packet_size_limit()
 {
     int rb_per_tti_limit = get_resource_block_per_tti_limit();
 
-    uint8_t bit_per_re = StandardManager::get_modulation_scheme(
-        standard_type, modulation_scheme);
+    double bit_per_re = StandardManager::get_cqi_efficiency(
+        standard_type, cqi);
     uint8_t re_per_rb = StandardManager::get_resource_elements_in_resource_block(
         standard_type);
 
-    int bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
+    double bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
     int byte_per_tti_limit = bit_per_tti_limit / 8;
 
     return byte_per_tti_limit;

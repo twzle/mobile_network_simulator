@@ -3,11 +3,11 @@
 FixedDRRScheduler::FixedDRRScheduler(
     std::string standard_name, double tti,
     double channel_sync_interval,
-    std::string base_modulation_scheme)
+    uint8_t base_cqi)
     : BaseRRScheduler(
           standard_name, tti,
           channel_sync_interval,
-          base_modulation_scheme) {};
+          base_cqi) {};
 
 /*
 Логика работы планировщика

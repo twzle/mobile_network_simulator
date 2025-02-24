@@ -4,6 +4,7 @@
 #include "utils/plotter.hpp"
 #include "standard_info.hpp"
 #include "settings.hpp"
+#include <stdint.h>
 
 int main()
 {
@@ -12,12 +13,12 @@ int main()
     UserGenerator::initialize();
     User::initialize();
 
-    int launches = 2000; // Количество перезапусков
+    int launches = 20; // Количество перезапусков
 
-    std::string standard_type = "LTE";                  // Стандарт связи
-    std::string tti_duration = "1ms";                   // Длительность TTI
-    std::string channel_sync_interval = "5ms";          // Интервал синхронизации канала
-    std::string modulation_scheme = "QPSK";          // Схема модуляции канала
+    std::string standard_type = "LTE";                 // Стандарт связи
+    std::string tti_duration = "1ms";                  // Длительность TTI
+    std::string channel_sync_interval = "10ms";        // Интервал синхронизации канала
+    uint8_t cqi = 15;                                  // СQI (1-15)
     std::string scheduler_type = "CyclicDRRScheduler"; // Тип планировщика
     double bandwidth = 5;                              // Полоса пропускания в МГц
 
@@ -36,7 +37,7 @@ int main()
         Settings(
             launches,
             standard_type,
-            modulation_scheme,
+            cqi,
             tti_duration,
             channel_sync_interval,
             scheduler_type,

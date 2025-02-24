@@ -2,8 +2,8 @@
 
 int User::last_id;
 
-User::User(std::string modulation_scheme)
-    : id(++last_id), modulation_scheme(modulation_scheme),
+User::User(uint8_t cqi)
+    : id(++last_id), cqi(cqi),
       out_of_channel_sync_for(0) {}
 
 void User::initialize()
@@ -21,14 +21,14 @@ int User::get_id() const
     return id;
 }
 
-std::string User::get_modulation_scheme() const
+uint8_t User::get_cqi() const
 {
-    return modulation_scheme;
+    return cqi;
 }
 
-void User::set_modulation_scheme(std::string modulation_scheme)
+void User::set_cqi(uint8_t cqi)
 {
-    this->modulation_scheme = modulation_scheme;
+    this->cqi = cqi;
 }
 
 double User::get_out_of_channel_sync_for() const

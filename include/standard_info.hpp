@@ -11,10 +11,11 @@ struct StandardInfo
     std::string description;                              // Краткое описание
     std::map<std::string, double> ttis;                   // Доступные интервалы TTI (строковое обозначение к числу секунд)
     std::map<std::string, double> channel_sync_intervals; // Доступные интервалы синхронизации канала (строковое обозначение к числу секунд)
-    std::map<std::string, uint8_t> modulation_schemes;    // Схемы модуляции (строковое обозначение к числу бит полезных данных в OFDMA-символе (RE))
+    std::map<uint8_t, double> cqi_efficiency;             // CQI (строковое обозначение к числу бит полезных данных в RE)
+    std::map<double, uint8_t> sinr_to_cqi;                // SINR to CQI
     std::vector<double> bandwidths;                       // Доступные полосы пропускания (в МГц)
     std::vector<std::string> schedulers;                  // Доступные планировщики
-    uint8_t resource_elements;                            // Количество доступных OFDMA-символов в одном ресурсном блоке (RB)
+    uint8_t resource_elements;                            // Количество доступных ресурсных элементов (RE) в одном ресурсном блоке (RB)
 };
 
 class StandardManager
@@ -28,10 +29,10 @@ public:
         const std::string &standard_name,
         const std::string &tti_name);
 
-    // Статическая функция для получения схемы модуляции по строковому ключу
-    static uint8_t get_modulation_scheme(
+    // Статическая функция для получения числа полезных в RE по строковому ключу
+    static double get_cqi_efficiency(
         const std::string &standard_name,
-        const std::string &modulation_scheme_name);
+        const uint8_t &cqi);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
     static uint8_t get_resource_elements_in_resource_block(
@@ -39,7 +40,7 @@ public:
 
     static int get_resource_block_effective_data_size(
         const std::string &standard_name,
-        const std::string &modulation_scheme_name);
+        const uint8_t &cqi);
 
     static double get_channel_sync_interval(
         const std::string &standard_name,

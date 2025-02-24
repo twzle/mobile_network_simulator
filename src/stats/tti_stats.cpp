@@ -54,10 +54,10 @@ void TTIStats::add_allocated_effective_data_to_user(
     if (user != nullptr)
     {
         int user_id = user->get_id();
-        std::string user_modulation_scheme = user->get_modulation_scheme();
+        uint8_t user_cqi = user->get_cqi();
         int effective_data_size_per_rb =
-            StandardManager::get_modulation_scheme(
-                standard_name, user_modulation_scheme) *
+            StandardManager::get_cqi_efficiency(
+                standard_name, user_cqi) *
             StandardManager::get_resource_elements_in_resource_block(
                 standard_name);
         int effective_data_size = rb_count * effective_data_size_per_rb;
@@ -71,10 +71,10 @@ void TTIStats::add_allocated_effective_data_to_queue(
 {
     if (user != nullptr)
     {
-        std::string user_modulation_scheme = user->get_modulation_scheme();
-        int effective_data_size_per_rb =
-            StandardManager::get_modulation_scheme(
-                standard_name, user_modulation_scheme) *
+        uint8_t user_cqi = user->get_cqi();
+        double effective_data_size_per_rb =
+            StandardManager::get_cqi_efficiency(
+                standard_name, user_cqi) *
             StandardManager::get_resource_elements_in_resource_block(
                 standard_name);
         int effective_data_size = rb_count * effective_data_size_per_rb;
@@ -88,10 +88,10 @@ void TTIStats::add_allocated_effective_data_to_total(
 {
     if (user != nullptr)
     {
-        std::string user_modulation_scheme = user->get_modulation_scheme();
-        int effective_data_size_per_rb =
-            StandardManager::get_modulation_scheme(
-                standard_name, user_modulation_scheme) *
+        uint8_t user_cqi = user->get_cqi();
+        double effective_data_size_per_rb =
+            StandardManager::get_cqi_efficiency(
+                standard_name, user_cqi) *
             StandardManager::get_resource_elements_in_resource_block(
                 standard_name);
 
