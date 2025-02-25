@@ -2,9 +2,9 @@
 
 int User::last_id;
 
-User::User(uint8_t cqi)
+User::User(uint8_t cqi, Position position, Mobility mobility)
     : id(++last_id), cqi(cqi),
-      out_of_channel_sync_for(0) {}
+      out_of_channel_sync_for(0), position(position), mobility(mobility) {}
 
 void User::initialize()
 {
@@ -29,6 +29,24 @@ uint8_t User::get_cqi() const
 void User::set_cqi(uint8_t cqi)
 {
     this->cqi = cqi;
+}
+
+Position User::get_position() const
+{
+    return position;
+}
+
+void User::set_position(const Position &position)
+{
+    this->position = position;
+}
+
+Mobility User::get_mobility() const {
+    return mobility;
+}
+
+void User::set_mobility(const Mobility &mobility){
+    this->mobility = mobility;
 }
 
 double User::get_out_of_channel_sync_for() const

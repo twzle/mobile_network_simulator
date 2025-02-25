@@ -18,11 +18,35 @@ void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
     total_packets += packet_queue.size();
 }
 
-void BaseRRScheduler::connect_users(int user_count)
+void BaseRRScheduler::configure_base_station(BSConfig bs_config)
+{   
+    Position position = Position(
+        bs_config.get_x(), 
+        bs_config.get_y(), 
+        bs_config.get_z()
+    );
+
+    base_station = BaseStation(position);
+}
+
+void BaseRRScheduler::connect_users(std::vector<UserConfig> user_configs)
 {
-    for (int i = 0; i < user_count; ++i)
+    for (size_t i = 0; i < user_configs.size(); ++i)
     {
-        User user(base_cqi);
+        UserConfig user_cfg = user_configs[i];
+
+        Position position = Position(
+            user_cfg.get_x(), 
+            user_cfg.get_y(), 
+            user_cfg.get_z()
+        );
+
+        Mobility mobility = Mobility(
+            user_cfg.get_speed(), 
+            user_cfg.get_direction()
+        );
+
+        User user(base_cqi, position, mobility);
         connected_users.emplace(user.get_id(), std::move(user));
     }
 }

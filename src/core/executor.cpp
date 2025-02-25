@@ -30,7 +30,8 @@ void Executor::run()
 void Executor::execute()
 {
     auto scheduler = settings.get_scheduler_instance();
-    scheduler->connect_users(settings.get_user_count());
+    scheduler->configure_base_station(settings.get_bs_config());
+    scheduler->connect_users(settings.get_user_configs());
 
     // Наполнение очередей пакетами
     for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id)

@@ -4,6 +4,8 @@
 #include "utils/plotter.hpp"
 #include "standard_info.hpp"
 #include "settings.hpp"
+#include "user_config.hpp"
+#include "bs_config.hpp"
 #include <stdint.h>
 
 int main()
@@ -13,17 +15,19 @@ int main()
     UserGenerator::initialize();
     User::initialize();
 
-    int launches = 20; // Количество перезапусков
+    int launches = 1; // Количество перезапусков
 
     std::string standard_type = "LTE";                 // Стандарт связи
     std::string tti_duration = "1ms";                  // Длительность TTI
     std::string channel_sync_interval = "10ms";        // Интервал синхронизации канала
-    uint8_t cqi = 15;                                  // СQI (1-15)
     std::string scheduler_type = "CyclicDRRScheduler"; // Тип планировщика
-    double bandwidth = 5;                              // Полоса пропускания в МГц
+
+    double bandwidth = 5; // Полоса пропускания в МГц
+    uint8_t cqi = 15;     // СQI (1-15)
 
     int packet_count = 1000; // Количество пакетов в очереди
-    int packet_size = 256; // Размер пакета в байтах
+    int packet_size = 256;   // Размер пакета в байтах
+    double time_lambda = 300; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     int queue_count = 5;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
@@ -31,7 +35,15 @@ int main()
 
     int user_count = 10; // Количество пользователей
 
-    double time_lambda = 300; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    BSConfig bs_config = {0, 0, 25}; // Базовая станция
+
+    std::vector<UserConfig> user_configs = { // Пользователи
+        {100, 100, 1.5, 0, "left"},
+        {150, 150, 1.5, 0, "right"},
+        {200, 200, 1.5, 0, "forward"},
+        {250, 250, 1.5, 0, "backward"},
+        {300, 300, 1.5, 0, "random"}
+    };
 
     Settings settings =
         Settings(
@@ -48,7 +60,9 @@ int main()
             queue_quant,
             queue_limit,
             user_count,
-            time_lambda);
+            time_lambda,
+            user_configs,
+            bs_config);
 
     try
     {

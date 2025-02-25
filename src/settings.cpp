@@ -2,6 +2,7 @@
 #include <sstream>
 
 #define RB_BANDWIDTH 0.180 // Ширина RB в МГц
+#define CELL_COVERAGE 5000 // Покрытие в городе (метры)
 
 Settings::Settings(
     int launches,
@@ -14,7 +15,9 @@ Settings::Settings(
     int packet_count, int packet_size,
     int queue_count, double queue_quant, int queue_limit,
     int user_count,
-    double time_lambda)
+    double time_lambda,
+    std::vector<UserConfig> user_configs,
+    BSConfig bs_config)
 {
     this->launches = launches;
     this->standard_type = standard_type;
@@ -30,6 +33,8 @@ Settings::Settings(
     this->queue_limit = queue_limit;
     this->user_count = user_count;
     this->time_lambda = time_lambda;
+    this->user_configs = user_configs;
+    this->bs_config = bs_config;
 }
 
 void Settings::validate()
@@ -126,6 +131,57 @@ void Settings::validate()
     {
         throw std::invalid_argument("Time lambda should be greater than or equal to 1.");
     }
+
+    if (std::abs(bs_config.get_x()) > epsilon ||
+        std::abs(bs_config.get_y()) > epsilon ||
+        std::abs(bs_config.get_z() - 25) > epsilon)
+    {
+        throw std::invalid_argument("Base station should be place in {0, 0, 25}.");
+    }
+
+    int user_id = 0;
+    for (auto &user : user_configs)
+    {
+        if (user.get_x() > CELL_COVERAGE + epsilon ||
+            user.get_x() < -(CELL_COVERAGE + epsilon) ||
+            user.get_y() > CELL_COVERAGE + epsilon ||
+            user.get_y() < -(CELL_COVERAGE + epsilon) ||
+            user.get_z() < 1.5 || user.get_z() > 22.5)
+        {
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " is out of bounds: (" +
+                std::to_string(user.get_x()) + ", " +
+                std::to_string(user.get_y()) + ", " +
+                std::to_string(user.get_z()) + "). " +
+                "\nExpected range: " +
+                "x ∈ [" + std::to_string(-CELL_COVERAGE) + ", " + std::to_string(CELL_COVERAGE) + "] m, " +
+                "y ∈ [" + std::to_string(-CELL_COVERAGE) + ", " + std::to_string(CELL_COVERAGE) + "] m, z ≈ 25 m");
+        }
+
+        if (user.get_speed() >= epsilon)
+        {
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " has invalid speed " +
+                std::to_string(user.get_speed()) +
+                "\nExpected range: " +
+                "speed ∈ [0, 100] km/h");
+        }
+
+        if (user.get_direction() != "forward" && user.get_direction() != "backward" &&
+            user.get_direction() != "left" && user.get_direction() != "right" &&
+            user.get_direction() != "random")
+        {
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " has invalid mobility direction: " +
+                user.get_direction() + " \n" +
+                "Expected direction: \"forward\", \"backward\", " +
+                "\"left\", \"right\", \"random\"");
+        }
+        ++user_id;
+    }
 }
 
 int Settings::get_launches()
@@ -155,7 +211,7 @@ std::string Settings::get_channel_sync_interval()
 
 std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
 {
-    double tti_value = 
+    double tti_value =
         StandardManager::get_tti(standard_type, tti_duration);
     double channel_sync_interval_value =
         StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
@@ -203,6 +259,11 @@ int Settings::get_queue_count()
     return this->queue_count;
 }
 
+int Settings::get_user_count()
+{
+    return this->user_configs.size();
+}
+
 double Settings::get_queue_quant()
 {
     return this->queue_quant;
@@ -213,9 +274,14 @@ int Settings::get_queue_limit()
     return this->queue_limit;
 }
 
-int Settings::get_user_count()
+BSConfig Settings::get_bs_config()
 {
-    return this->user_count;
+    return this->bs_config;
+}
+
+std::vector<UserConfig> Settings::get_user_configs()
+{
+    return this->user_configs;
 }
 
 double Settings::get_time_lambda()

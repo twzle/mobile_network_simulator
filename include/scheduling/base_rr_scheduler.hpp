@@ -4,9 +4,12 @@
 #include <vector>
 #include <string>
 
+#include "user_config.hpp"
+#include "bs_config.hpp"
 #include "core/state.hpp"
 #include "core/packet_queue.hpp"
 #include "core/user.hpp"
+#include "core/base_station.hpp"
 #include "stats/iteration_stats.hpp"
 #include "stats/tti_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
@@ -26,8 +29,11 @@ public:
     // Добавление очередей для обслуживания
     void schedule(PacketQueue &&packet_queue);
 
+    // Добавления базовой станции
+    void configure_base_station(BSConfig bs_config);
+
     // Подключение пользователей для обслуживания
-    void connect_users(int user_count);
+    void connect_users(std::vector<UserConfig> user_count);
     User *get_user_ptr(int user_id);
 
     // Установка лимита ресурсных блоков на один TTI
@@ -65,6 +71,7 @@ protected:
 
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
     std::map<int, User> connected_users;       // Подключенные пользователи
+    BaseStation base_station;                  // Базовая станция
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов
