@@ -194,6 +194,7 @@ void BaseRRScheduler::sync_user_channels()
         if (std::abs(new_out_of_sync - channel_sync_interval) < epsilon)
         {
             user.set_out_of_channel_sync_for(0);
+            user.move(channel_sync_interval);
             user.set_cqi(base_cqi);
         }
         else

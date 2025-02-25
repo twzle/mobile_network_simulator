@@ -16,6 +16,10 @@ public:
     double get_y();
     double get_z();
 
+    void set_x(double x);
+    void set_y(double y);
+    void set_z(double z);
+
 private:
     double x; // Начальная координата x (метры)
     double y; // Начальная координата y (метры)

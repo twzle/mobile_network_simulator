@@ -1,9 +1,6 @@
 #include "settings.hpp"
 #include <sstream>
 
-#define RB_BANDWIDTH 0.180 // Ширина RB в МГц
-#define CELL_COVERAGE 5000 // Покрытие в городе (метры)
-
 Settings::Settings(
     int launches,
     std::string standard_type,

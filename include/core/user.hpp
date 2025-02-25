@@ -3,8 +3,10 @@
 #include <iostream>
 #include <string>
 #include <stdint.h>
+#include <cstdlib>
 #include "core/position.hpp"
 #include "core/mobility.hpp"
+#include "const.hpp"
 
 class User
 {
@@ -24,6 +26,8 @@ public:
 
     Mobility get_mobility() const;
     void set_mobility(const Mobility &mobility);
+
+    void move(double time_in_seconds);
 
     double get_out_of_channel_sync_for() const;
     void set_out_of_channel_sync_for(double out_of_channel_sync_for);

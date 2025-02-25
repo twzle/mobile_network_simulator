@@ -10,7 +10,7 @@ Position::Position(
 Position::Position(const Position &position)
     : x(position.x), y(position.y), z(position.z) {}
 
-Position & Position::operator=(const Position &position)
+Position &Position::operator=(const Position &position)
 {
     if (this != &position)
     {
@@ -34,4 +34,19 @@ double Position::get_y()
 double Position::get_z()
 {
     return this->z;
+}
+
+void Position::set_x(double x)
+{
+    this->x = x;
+}
+
+void Position::set_y(double y)
+{
+    this->y = y;
+}
+
+void Position::set_z(double z)
+{
+    this->z = z;
 }
