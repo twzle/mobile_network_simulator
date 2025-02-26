@@ -50,7 +50,7 @@ void User::set_mobility(const Mobility &mobility){
 }
 
 void User::move(double time_in_seconds){
-    // Если скорость 0 км/ч пользователь не двигается
+    // Если скорость 0 км/ч - пользователь не двигается
     if (std::abs(mobility.get_speed()) < epsilon){
         return;
     }
@@ -67,7 +67,7 @@ void User::move(double time_in_seconds){
         if (new_x < CELL_COVERAGE + epsilon){
             position.set_x(new_x);    
         }
-    } else if (mobility.get_direction() = "backward"){
+    } else if (mobility.get_direction() == "backward"){
         double new_x = position.get_x() - move_delta;
 
         if (new_x > -(CELL_COVERAGE + epsilon)){

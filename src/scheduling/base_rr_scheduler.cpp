@@ -195,6 +195,11 @@ void BaseRRScheduler::sync_user_channels()
         {
             user.set_out_of_channel_sync_for(0);
             user.move(channel_sync_interval);
+            double distance = user.get_position().get_distance_2d(
+                base_station.get_position());
+            
+            
+            
             user.set_cqi(base_cqi);
         }
         else
