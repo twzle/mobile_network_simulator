@@ -11,8 +11,10 @@ Executor::Executor(Settings settings)
 
     TimeGenerator::set_distribution(
         std::exponential_distribution<>(settings.get_time_lambda()));
-    UserGenerator::set_distribution(
+    UserGenerator::set_user_id_distribution(
         std::uniform_int_distribution<>(1, settings.get_user_count()));
+    UserGenerator::set_user_move_direction_distribution(
+        std::uniform_int_distribution<>(0, 3));
 }
 
 void Executor::run()
@@ -37,7 +39,7 @@ void Executor::execute()
     for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id)
     {
         TimeGenerator::reset_time();
-        
+
         PacketQueue queue(
             settings.get_queue_quant(),
             settings.get_queue_limit());

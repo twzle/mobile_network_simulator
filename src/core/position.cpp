@@ -66,3 +66,9 @@ double Position::get_distance_3d(const Position &position)
 
     return std::sqrt(distance_2d * distance_2d + delta_z * delta_z);
 }
+
+std::ostream &operator<<(std::ostream &os, const Position &position)
+{
+    os << "Position: (" << position.x << ", " << position.y << ", " << position.z << ")";
+    return os;
+}

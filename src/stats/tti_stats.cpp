@@ -1,11 +1,9 @@
 #include "stats/tti_stats.hpp"
 
 TTIStats::TTIStats(
-    std::string standard_name,
     size_t queue_count, size_t user_count,
     double tti_duration)
-    : standard_name(standard_name),
-      total_allocated_effective_data_size(0), tti_duration(tti_duration),
+    : total_allocated_effective_data_size(0), tti_duration(tti_duration),
       queue_count(queue_count), candidate_queue_count(0),
       fairness_of_effective_data_allocation_for_queues(0),
       _is_valid_fairness_for_queues(false),
@@ -56,10 +54,8 @@ void TTIStats::add_allocated_effective_data_to_user(
         int user_id = user->get_id();
         uint8_t user_cqi = user->get_cqi();
         int effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(
-                standard_name, user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block(
-                standard_name);
+            StandardManager::get_cqi_efficiency(user_cqi) *
+            StandardManager::get_resource_elements_in_resource_block();
         int effective_data_size = rb_count * effective_data_size_per_rb;
 
         user_statuses[user_id].allocated_effective_data_size += effective_data_size;
@@ -73,10 +69,8 @@ void TTIStats::add_allocated_effective_data_to_queue(
     {
         uint8_t user_cqi = user->get_cqi();
         double effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(
-                standard_name, user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block(
-                standard_name);
+            StandardManager::get_cqi_efficiency(user_cqi) *
+            StandardManager::get_resource_elements_in_resource_block();
         int effective_data_size = rb_count * effective_data_size_per_rb;
 
         queue_statuses[queue_id].allocated_effective_data_size += effective_data_size;
@@ -90,10 +84,8 @@ void TTIStats::add_allocated_effective_data_to_total(
     {
         uint8_t user_cqi = user->get_cqi();
         double effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(
-                standard_name, user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block(
-                standard_name);
+            StandardManager::get_cqi_efficiency(user_cqi) *
+            StandardManager::get_resource_elements_in_resource_block();
 
         int effective_data_size = rb_count * effective_data_size_per_rb;
 

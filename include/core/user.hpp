@@ -4,6 +4,7 @@
 #include <string>
 #include <stdint.h>
 #include <cstdlib>
+#include <algorithm>
 #include "core/position.hpp"
 #include "core/mobility.hpp"
 #include "const.hpp"
@@ -31,6 +32,8 @@ public:
 
     double get_out_of_channel_sync_for() const;
     void set_out_of_channel_sync_for(double out_of_channel_sync_for);
+
+    std::string get_random_move_direction();
 
 private:
     int id;                         // Уникальный идентификатор

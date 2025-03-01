@@ -1,10 +1,10 @@
 #include "scheduling/base_rr_scheduler.hpp"
 
 BaseRRScheduler::BaseRRScheduler(
-    std::string standard_name, double tti,
+    double tti,
     double channel_sync_interval,
     uint8_t base_cqi)
-    : standard_name(standard_name), tti_duration(tti),
+    : tti_duration(tti),
       channel_sync_interval(channel_sync_interval),
       base_cqi(base_cqi) {}
 
@@ -169,10 +169,8 @@ int BaseRRScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
     double effective_data_size_per_rb_for_user_in_bytes =
-        (StandardManager::get_cqi_efficiency(
-            standard_name, user->get_cqi()) *
-        StandardManager::get_resource_elements_in_resource_block(
-            standard_name)) / 8;
+        (StandardManager::get_cqi_efficiency(user->get_cqi()) *
+        StandardManager::get_resource_elements_in_resource_block()) / 8;
 
     int rb_count =
         static_cast<int>(
@@ -184,7 +182,7 @@ int BaseRRScheduler::convert_packet_size_to_rb_number(
 }
 
 void BaseRRScheduler::sync_user_channels()
-{
+{   
     for (auto &user_info : connected_users)
     {
         User &user = user_info.second;
@@ -197,6 +195,8 @@ void BaseRRScheduler::sync_user_channels()
             user.move(channel_sync_interval);
             // double distance = user.get_position().get_distance_2d(
             //     base_station.get_position());
+
+            std::cout << "User #" << user.get_id() <<  ". " << user.get_position() << std::endl;
             
             
             
@@ -205,8 +205,14 @@ void BaseRRScheduler::sync_user_channels()
         else
         {
             user.set_out_of_channel_sync_for(new_out_of_sync);
+
+            if (check_start_pos){
+                std::cout << "User #" << user.get_id() <<  ". Start " << user.get_position() << std::endl;
+            }
         }
     }
+
+    check_start_pos = false;
 }
 
 IterationStats &BaseRRScheduler::get_stats()

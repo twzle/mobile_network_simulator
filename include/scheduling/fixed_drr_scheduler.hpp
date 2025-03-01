@@ -6,7 +6,7 @@ class FixedDRRScheduler : public BaseRRScheduler
 {
 public:
     explicit FixedDRRScheduler(
-        std::string standard_name, double tti,
+        double tti,
         double channel_sync_interval,
         uint8_t base_cqi);
     void run() override;

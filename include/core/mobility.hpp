@@ -16,6 +16,6 @@ public:
     std::string get_direction();
 
 private:
-    double speed; // Начальная координата x (метры)
+    double speed; // Скорость (км/ч)
     std::string direction; // Начальная координата y (метры)
 };

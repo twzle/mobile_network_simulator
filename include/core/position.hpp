@@ -24,6 +24,8 @@ public:
     double get_distance_2d(const Position& position);
     double get_distance_3d(const Position& position);
 
+    friend std::ostream &operator<<(std::ostream &os, const Position &position);
+
 private:
     double x; // Начальная координата x (метры)
     double y; // Начальная координата y (метры)

@@ -4,21 +4,20 @@
 Settings::Settings(
     int launches,
     std::string standard_type,
-    uint8_t cqi,
+    uint8_t base_cqi,
     std::string tti_duration,
     std::string channel_sync_interval,
     std::string scheduler_type,
     double bandwidth,
     int packet_count, int packet_size,
     int queue_count, double queue_quant, int queue_limit,
-    int user_count,
     double time_lambda,
     std::vector<UserConfig> user_configs,
     BSConfig bs_config)
 {
     this->launches = launches;
     this->standard_type = standard_type;
-    this->cqi = cqi;
+    this->base_cqi = base_cqi;
     this->tti_duration = tti_duration;
     this->channel_sync_interval = channel_sync_interval;
     this->scheduler_type = scheduler_type;
@@ -28,9 +27,9 @@ Settings::Settings(
     this->queue_count = queue_count;
     this->queue_quant = queue_quant;
     this->queue_limit = queue_limit;
-    this->user_count = user_count;
     this->time_lambda = time_lambda;
     this->user_configs = user_configs;
+    this->user_count = user_configs.size();
     this->bs_config = bs_config;
 }
 
@@ -53,7 +52,7 @@ void Settings::validate()
 
     try
     {
-        StandardManager::get_tti(standard_type, tti_duration);
+        StandardManager::get_tti(tti_duration);
     }
     catch (const std::out_of_range &e)
     {
@@ -62,7 +61,7 @@ void Settings::validate()
 
     try
     {
-        StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
+        StandardManager::get_channel_sync_interval(channel_sync_interval);
     }
     catch (const std::out_of_range &e)
     {
@@ -71,7 +70,7 @@ void Settings::validate()
 
     try
     {
-        StandardManager::get_cqi_efficiency(standard_type, cqi);
+        StandardManager::get_cqi_efficiency(base_cqi);
     }
     catch (const std::out_of_range &e)
     {
@@ -156,7 +155,7 @@ void Settings::validate()
                 "y ∈ [" + std::to_string(-CELL_COVERAGE) + ", " + std::to_string(CELL_COVERAGE) + "] m, z ≈ 25 m");
         }
 
-        if (user.get_speed() >= epsilon)
+        if (user.get_speed() < -epsilon)
         {
             throw std::invalid_argument(
                 "User #" + std::to_string(user_id) +
@@ -191,9 +190,9 @@ std::string Settings::get_standard_type()
     return this->standard_type;
 }
 
-uint8_t Settings::get_cqi()
+uint8_t Settings::get_base_cqi()
 {
-    return this->cqi;
+    return this->base_cqi;
 }
 
 std::string Settings::get_tti_duration()
@@ -209,29 +208,29 @@ std::string Settings::get_channel_sync_interval()
 std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
 {
     double tti_value =
-        StandardManager::get_tti(standard_type, tti_duration);
+        StandardManager::get_tti(tti_duration);
     double channel_sync_interval_value =
-        StandardManager::get_channel_sync_interval(standard_type, channel_sync_interval);
+        StandardManager::get_channel_sync_interval(channel_sync_interval);
 
     if (this->scheduler_type == "DefaultRRScheduler")
     {
         return std::make_unique<DefaultRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, cqi);
+            tti_value, channel_sync_interval_value, base_cqi);
     }
     else if (this->scheduler_type == "FixedDRRScheduler")
     {
         return std::make_unique<FixedDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, cqi);
+            tti_value, channel_sync_interval_value, base_cqi);
     }
     else if (this->scheduler_type == "CyclicDRRScheduler")
     {
         return std::make_unique<CyclicDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, cqi);
+            tti_value, channel_sync_interval_value, base_cqi);
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
         return std::make_unique<DefaultDRRScheduler>(
-            standard_type, tti_value, channel_sync_interval_value, cqi);
+            tti_value, channel_sync_interval_value, base_cqi);
     }
     return nullptr;
 }
@@ -258,7 +257,7 @@ int Settings::get_queue_count()
 
 int Settings::get_user_count()
 {
-    return this->user_configs.size();
+    return this->user_count;
 }
 
 double Settings::get_queue_quant()
@@ -296,10 +295,8 @@ int Settings::get_packet_size_limit()
 {
     int rb_per_tti_limit = get_resource_block_per_tti_limit();
 
-    double bit_per_re = StandardManager::get_cqi_efficiency(
-        standard_type, cqi);
-    uint8_t re_per_rb = StandardManager::get_resource_elements_in_resource_block(
-        standard_type);
+    double bit_per_re = StandardManager::get_cqi_efficiency(base_cqi);
+    uint8_t re_per_rb = StandardManager::get_resource_elements_in_resource_block();
 
     double bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
     int byte_per_tti_limit = bit_per_tti_limit / 8;

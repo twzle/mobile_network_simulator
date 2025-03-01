@@ -27,7 +27,6 @@ private:
 
 public:
     TTIStats(
-        std::string standard_name,
         size_t queue_count, size_t user_count,
         double tti_duration);
 
@@ -57,8 +56,6 @@ public:
     bool is_valid_throughput_for_scheduler();
 
 private:
-    std::string standard_name = "LTE"; // Название cтандарта
-
     int total_allocated_effective_data_size; // Общий размер полезных данных за TTI (бит)
     double tti_duration;                     // Интервал времени TTI (секунды)
 

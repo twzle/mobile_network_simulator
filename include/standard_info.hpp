@@ -15,6 +15,7 @@ struct StandardInfo
     std::map<double, uint8_t> sinr_to_cqi;                // SINR to CQI
     std::vector<double> bandwidths;                       // Доступные полосы пропускания (в МГц)
     std::vector<std::string> schedulers;                  // Доступные планировщики
+    std::map<uint8_t, std::string> mobility_directions;   // Направления перемещения пользователя
     uint8_t resource_elements;                            // Количество доступных ресурсных элементов (RE) в одном ресурсном блоке (RB)
 };
 
@@ -26,25 +27,23 @@ public:
 
     // Статическая функция для получения TTI по строковому ключу
     static double get_tti(
-        const std::string &standard_name,
         const std::string &tti_name);
 
     // Статическая функция для получения числа полезных в RE по строковому ключу
     static double get_cqi_efficiency(
-        const std::string &standard_name,
         const uint8_t &cqi);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
-    static uint8_t get_resource_elements_in_resource_block(
-        const std::string &standard_name);
+    static uint8_t get_resource_elements_in_resource_block();
 
     static int get_resource_block_effective_data_size(
-        const std::string &standard_name,
         const uint8_t &cqi);
 
     static double get_channel_sync_interval(
-        const std::string &standard_name,
         const std::string &channel_sync_interval_name);
+
+    static std::string get_mobility_direction(
+        const uint8_t mobility_direction_id);
 
     // Статическая функция для инициализации данных
     static void initialize();
@@ -52,4 +51,5 @@ public:
 private:
     // Информации о стандартах
     static std::map<std::string, StandardInfo> standard_info_map;
+    static std::string current_standard_name;
 };

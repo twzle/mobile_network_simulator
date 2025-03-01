@@ -11,9 +11,10 @@
 int main()
 {
     TimeGenerator::initialize();
-    StandardManager::initialize();
     UserGenerator::initialize();
+
     User::initialize();
+    StandardManager::initialize();
 
     int launches = 1; // Количество перезапусков
 
@@ -23,23 +24,21 @@ int main()
     std::string scheduler_type = "CyclicDRRScheduler"; // Тип планировщика
 
     double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t cqi = 15;     // СQI (1-15)
+    uint8_t base_cqi = 15;     // СQI (1-15)
 
-    int packet_count = 1000; // Количество пакетов в очереди
+    int packet_count = 1; // Количество пакетов в очереди
     int packet_size = 256;   // Размер пакета в байтах
-    double time_lambda = 300; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 20; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     int queue_count = 5;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
     int queue_limit = 10000;  // Размер очереди
 
-    int user_count = 10; // Количество пользователей
-
     BSConfig bs_config = {0, 0, 25}; // Базовая станция
 
     std::vector<UserConfig> user_configs = { // Пользователи
-        {100, 100, 1.5, 0, "left"},
-        {150, 150, 1.5, 0, "right"},
+        {-5000, -5000, 1.5, 5, "backward"},
+        {150, 100, 1.5, 0, "right"},
         {200, 200, 1.5, 0, "forward"},
         {250, 250, 1.5, 0, "backward"},
         {300, 300, 1.5, 0, "random"}
@@ -49,7 +48,7 @@ int main()
         Settings(
             launches,
             standard_type,
-            cqi,
+            base_cqi,
             tti_duration,
             channel_sync_interval,
             scheduler_type,
@@ -59,7 +58,6 @@ int main()
             queue_count,
             queue_quant,
             queue_limit,
-            user_count,
             time_lambda,
             user_configs,
             bs_config);

@@ -1,11 +1,11 @@
 #include "scheduling/default_drr_scheduler.hpp"
 
 DefaultDRRScheduler::DefaultDRRScheduler(
-    std::string standard_name, double tti,
+    double tti,
     double channel_sync_interval,
     uint8_t base_cqi)
     : BaseRRScheduler(
-          standard_name, tti,
+          tti,
           channel_sync_interval,
           base_cqi) {};
 
@@ -26,7 +26,6 @@ void DefaultDRRScheduler::run()
     {
         // Начало TTI
         TTIStats tti_stats = TTIStats(
-            standard_name,
             scheduled_queues.size(),
             connected_users.size(),
             tti_duration);
