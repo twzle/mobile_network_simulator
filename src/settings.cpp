@@ -13,7 +13,10 @@ Settings::Settings(
     int queue_count, double queue_quant, int queue_limit,
     double time_lambda,
     std::vector<UserConfig> user_configs,
-    BSConfig bs_config)
+    BSConfig bs_config,
+    double carrier_frequency,
+    int bs_transmission_power,
+    std::string area_type)
 {
     this->launches = launches;
     this->standard_type = standard_type;
@@ -31,6 +34,9 @@ Settings::Settings(
     this->user_configs = user_configs;
     this->user_count = user_configs.size();
     this->bs_config = bs_config;
+    this->carrier_frequency = carrier_frequency;
+    this->bs_transmission_power = bs_transmission_power;
+    this->area_type = area_type;
 }
 
 void Settings::validate()
@@ -43,6 +49,7 @@ void Settings::validate()
     StandardInfo standard_info;
     try
     {
+        StandardManager::set_current_standard(standard_type);
         standard_info = StandardManager::get_standard_info(standard_type);
     }
     catch (const std::out_of_range &e)
@@ -178,6 +185,27 @@ void Settings::validate()
         }
         ++user_id;
     }
+
+    auto is_allowed_area_type =
+        std::find(
+            standard_info.area_types.begin(),
+            standard_info.area_types.end(),
+            area_type) != standard_info.area_types.end();
+
+    if (!is_allowed_area_type)
+    {
+        throw std::invalid_argument("Invalid area type.");
+    }
+
+    if (carrier_frequency < 700 || carrier_frequency > 3000)
+    {
+        throw std::invalid_argument("Carrier frequency should be in range [700, 3000] MHz.");
+    }
+
+    if (bs_transmission_power < 40 || bs_transmission_power > 50)
+    {
+        throw std::invalid_argument("BS transmission power should be in range [40, 50] dB.");
+    }
 }
 
 int Settings::get_launches()
@@ -212,25 +240,28 @@ std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
     double channel_sync_interval_value =
         StandardManager::get_channel_sync_interval(channel_sync_interval);
 
+    Channel channel =
+        Channel(carrier_frequency, bs_transmission_power, area_type);
+
     if (this->scheduler_type == "DefaultRRScheduler")
     {
         return std::make_unique<DefaultRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi);
+            tti_value, channel_sync_interval_value, base_cqi, channel);
     }
     else if (this->scheduler_type == "FixedDRRScheduler")
     {
         return std::make_unique<FixedDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi);
+            tti_value, channel_sync_interval_value, base_cqi, channel);
     }
     else if (this->scheduler_type == "CyclicDRRScheduler")
     {
         return std::make_unique<CyclicDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi);
+            tti_value, channel_sync_interval_value, base_cqi, channel);
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
         return std::make_unique<DefaultDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi);
+            tti_value, channel_sync_interval_value, base_cqi, channel);
     }
     return nullptr;
 }

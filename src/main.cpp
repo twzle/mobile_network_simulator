@@ -22,13 +22,17 @@ int main()
     std::string tti_duration = "1ms";                  // Длительность TTI
     std::string channel_sync_interval = "10ms";        // Интервал синхронизации канала
     std::string scheduler_type = "CyclicDRRScheduler"; // Тип планировщика
+    std::string area_type = "Urban";
+
+    double carrier_frequency = 2000; // Несущая частота в МГц
+    int bs_transmission_power = 46;  // Мощность предачи данных на базовой станции в дБ
 
     double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t base_cqi = 15;     // СQI (1-15)
+    uint8_t base_cqi = 1; // СQI (1-15)
 
-    int packet_count = 1; // Количество пакетов в очереди
+    int packet_count = 1;    // Количество пакетов в очереди
     int packet_size = 256;   // Размер пакета в байтах
-    double time_lambda = 20; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 40; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     int queue_count = 5;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
@@ -36,12 +40,9 @@ int main()
 
     BSConfig bs_config = {0, 0, 25}; // Базовая станция
 
-    std::vector<UserConfig> user_configs = { // Пользователи
-        {-5000, -5000, 1.5, 5, "backward"},
-        {150, 100, 1.5, 0, "right"},
-        {200, 200, 1.5, 0, "forward"},
-        {250, 250, 1.5, 0, "backward"},
-        {300, 300, 1.5, 0, "random"}
+    std::vector<UserConfig> user_configs = {
+        // Пользователи
+        {100, 100, 1.5, 5, "random"},
     };
 
     Settings settings =
@@ -60,7 +61,10 @@ int main()
             queue_limit,
             time_lambda,
             user_configs,
-            bs_config);
+            bs_config,
+            carrier_frequency,
+            bs_transmission_power, 
+            area_type);
 
     try
     {

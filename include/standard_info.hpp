@@ -16,6 +16,7 @@ struct StandardInfo
     std::vector<double> bandwidths;                       // Доступные полосы пропускания (в МГц)
     std::vector<std::string> schedulers;                  // Доступные планировщики
     std::map<uint8_t, std::string> mobility_directions;   // Направления перемещения пользователя
+    std::vector<std::string> area_types;                  // Типы местности
     uint8_t resource_elements;                            // Количество доступных ресурсных элементов (RE) в одном ресурсном блоке (RB)
 };
 
@@ -24,6 +25,7 @@ class StandardManager
 public:
     // Статическая функция для получения информации о стандарте
     static StandardInfo get_standard_info(const std::string &standard_name);
+    static void set_current_standard(const std::string &standard_name);
 
     // Статическая функция для получения TTI по строковому ключу
     static double get_tti(
@@ -32,6 +34,10 @@ public:
     // Статическая функция для получения числа полезных в RE по строковому ключу
     static double get_cqi_efficiency(
         const uint8_t &cqi);
+
+    // Статическая функция для получения числа полезных в RE по строковому ключу
+    static int get_cqi_from_sinr(
+        const double cqi);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
     static uint8_t get_resource_elements_in_resource_block();

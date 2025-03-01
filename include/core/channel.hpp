@@ -12,7 +12,7 @@ class Channel
 {
 public:
     Channel();
-    Channel(double carrier_frequency, int constant_offset);
+    Channel(double carrier_frequency, int power_bs_transmitted, std::string area_type);
 
     double get_path_loss(double user_distance, double bs_height, double user_height);
     double get_sinr(

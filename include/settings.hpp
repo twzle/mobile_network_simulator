@@ -10,6 +10,7 @@
 #include "scheduling/fixed_drr_scheduler.hpp"
 #include "scheduling/cyclic_drr_scheduler.hpp"
 #include "scheduling/default_drr_scheduler.hpp"
+#include "core/channel.hpp"
 #include "standard_info.hpp"
 #include "user_config.hpp"
 #include "bs_config.hpp"
@@ -34,7 +35,10 @@ public:
         int queue_limit,
         double time_lambda,
         std::vector<UserConfig> user_configs,
-        BSConfig bs_config);
+        BSConfig bs_config,
+        double carrier_frequency,
+        int bs_transmission_power,
+        std::string area_type);
 
     void validate();
 
@@ -74,4 +78,7 @@ private:
     double time_lambda;                   // Частота прихода пакетов в единицу времени
     std::vector<UserConfig> user_configs; // Конфигурации пользователей
     BSConfig bs_config;                   // Конфигурация базовой станции
+    double carrier_frequency;             // Несущая частота
+    int bs_transmission_power;            // Мощность передачи базовой станции
+    std::string area_type;                // Тип местности
 };

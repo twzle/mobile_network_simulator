@@ -14,7 +14,7 @@ Executor::Executor(Settings settings)
     UserGenerator::set_user_id_distribution(
         std::uniform_int_distribution<>(1, settings.get_user_count()));
     UserGenerator::set_user_move_direction_distribution(
-        std::uniform_int_distribution<>(0, 3));
+        std::uniform_int_distribution<>(1, 4));
 }
 
 void Executor::run()

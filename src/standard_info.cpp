@@ -8,6 +8,21 @@ std::map<std::string, StandardInfo> StandardManager::standard_info_map;
 std::string StandardManager::current_standard_name = "LTE";
 
 // Статическая функция для получения информации о стандарте
+void StandardManager::set_current_standard(const std::string &standard_name)
+{
+    try
+    {
+        get_standard_info(standard_name);
+    }
+    catch (std::exception &ex)
+    {
+        throw(ex);
+    }
+
+    current_standard_name = standard_name;
+}
+
+// Статическая функция для получения информации о стандарте
 StandardInfo StandardManager::get_standard_info(const std::string &standard_name)
 {
     return standard_info_map.at(standard_name);
@@ -27,6 +42,27 @@ double StandardManager::get_cqi_efficiency(
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
     return standard_info.cqi_efficiency.at(cqi);
+}
+
+// Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
+int StandardManager::get_cqi_from_sinr(
+    const double sinr)
+{
+    StandardInfo standard_info = get_standard_info(current_standard_name);
+    int cqi = 0;
+
+    auto it = standard_info.sinr_to_cqi.lower_bound(sinr);
+
+    if (it == standard_info.sinr_to_cqi.end())
+    {
+        cqi = std::prev(it)->second; // Если SINR больше всех ключей, берём максимальный
+    }
+    if (it == standard_info.sinr_to_cqi.begin())
+    {
+        cqi = it->second; // Если SINR меньше всех ключей, берём минимальный
+    }
+
+    return cqi;
 }
 
 uint8_t StandardManager::get_resource_elements_in_resource_block()
@@ -63,7 +99,7 @@ double StandardManager::get_channel_sync_interval(
 }
 
 std::string StandardManager::get_mobility_direction(
-    const uint8_t mobility_direction_id) 
+    const uint8_t mobility_direction_id)
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
     return standard_info.mobility_directions.at(mobility_direction_id);
@@ -90,6 +126,7 @@ void StandardManager::initialize()
                  "CyclicDRRScheduler",
                  "DefaultDRRScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
+                {"Urban", "Suburban", "Rural"},
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)
             },
         },

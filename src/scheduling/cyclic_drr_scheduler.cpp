@@ -3,11 +3,13 @@
 CyclicDRRScheduler::CyclicDRRScheduler(
     double tti,
     double channel_sync_interval,
-    uint8_t base_cqi)
+    uint8_t base_cqi,
+    Channel channel)
     : BaseRRScheduler(
           tti,
           channel_sync_interval,
-          base_cqi) {};
+          base_cqi,
+          channel) {};
 
 /*
 Логика работы планировщика

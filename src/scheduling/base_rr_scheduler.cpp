@@ -3,10 +3,12 @@
 BaseRRScheduler::BaseRRScheduler(
     double tti,
     double channel_sync_interval,
-    uint8_t base_cqi)
+    uint8_t base_cqi,
+    Channel channel)
     : tti_duration(tti),
       channel_sync_interval(channel_sync_interval),
-      base_cqi(base_cqi) {}
+      base_cqi(base_cqi),
+      channel(channel) {}
 
 /*
 Планирование очереди через запись в массив очередей
@@ -19,12 +21,11 @@ void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
 }
 
 void BaseRRScheduler::configure_base_station(BSConfig bs_config)
-{   
+{
     Position position = Position(
-        bs_config.get_x(), 
-        bs_config.get_y(), 
-        bs_config.get_z()
-    );
+        bs_config.get_x(),
+        bs_config.get_y(),
+        bs_config.get_z());
 
     base_station = BaseStation(position);
 }
@@ -36,15 +37,13 @@ void BaseRRScheduler::connect_users(std::vector<UserConfig> user_configs)
         UserConfig user_cfg = user_configs[i];
 
         Position position = Position(
-            user_cfg.get_x(), 
-            user_cfg.get_y(), 
-            user_cfg.get_z()
-        );
+            user_cfg.get_x(),
+            user_cfg.get_y(),
+            user_cfg.get_z());
 
         Mobility mobility = Mobility(
-            user_cfg.get_speed(), 
-            user_cfg.get_direction()
-        );
+            user_cfg.get_speed(),
+            user_cfg.get_direction());
 
         User user(base_cqi, position, mobility);
         connected_users.emplace(user.get_id(), std::move(user));
@@ -170,45 +169,64 @@ int BaseRRScheduler::convert_packet_size_to_rb_number(
 {
     double effective_data_size_per_rb_for_user_in_bytes =
         (StandardManager::get_cqi_efficiency(user->get_cqi()) *
-        StandardManager::get_resource_elements_in_resource_block()) / 8;
+         StandardManager::get_resource_elements_in_resource_block()) /
+        8;
 
     int rb_count =
         static_cast<int>(
             std::ceil(
-                static_cast<double>(packet_size) / 
+                static_cast<double>(packet_size) /
                 effective_data_size_per_rb_for_user_in_bytes));
 
     return rb_count;
 }
 
 void BaseRRScheduler::sync_user_channels()
-{   
+{
     for (auto &user_info : connected_users)
     {
         User &user = user_info.second;
-        double channel_out_of_sync_for = user.get_out_of_channel_sync_for();
-        double new_out_of_sync = channel_out_of_sync_for + tti_duration;
+        double time_from_last_channel_sync = user.get_time_from_last_channel_sync();
+        double new_time_from_last_channel_sync = time_from_last_channel_sync + tti_duration;
 
-        if (std::abs(new_out_of_sync - channel_sync_interval) < epsilon)
+        // Если время без сихронизации превышает интервал синхронизации, то сброс таймера в 0
+        if (new_time_from_last_channel_sync > channel_sync_interval + epsilon)
         {
-            user.set_out_of_channel_sync_for(0);
-            user.move(channel_sync_interval);
-            // double distance = user.get_position().get_distance_2d(
-            //     base_station.get_position());
+            new_time_from_last_channel_sync = 0;
+        }
 
-            std::cout << "User #" << user.get_id() <<  ". " << user.get_position() << std::endl;
+        // Периодеческая синхронизация позиции пользователя
+        if (time_from_last_channel_sync <= epsilon)
+        {
+            std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
+            user.move(channel_sync_interval);
+
+            double user_to_bs_distance = user.get_position().get_distance_2d(
+                base_station.get_position());
+            double user_height = user.get_position().get_z();
+            double bs_height = base_station.get_position().get_z();
+
+            double path_loss =
+                channel.get_path_loss(user_to_bs_distance, bs_height, user_height);
+
+            double user_received_signal_power =
+                channel.get_recieved_signal_power(path_loss);
+            double noise_power = channel.get_noise_power();
+            double interference_power =
+                channel.get_interference_power(user_received_signal_power);
+
+            double sinr = channel.get_sinr(
+                user_received_signal_power,
+                noise_power, interference_power);
             
-            
-            
+            int cqi = StandardManager::get_cqi_from_sinr(sinr);
+            std::cout << cqi << "\n";
+
             user.set_cqi(base_cqi);
         }
         else
         {
-            user.set_out_of_channel_sync_for(new_out_of_sync);
-
-            if (check_start_pos){
-                std::cout << "User #" << user.get_id() <<  ". Start " << user.get_position() << std::endl;
-            }
+            user.set_time_from_last_channel_sync(new_time_from_last_channel_sync);
         }
     }
 

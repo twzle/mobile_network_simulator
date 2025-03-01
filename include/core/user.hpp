@@ -30,17 +30,17 @@ public:
 
     void move(double time_in_seconds);
 
-    double get_out_of_channel_sync_for() const;
-    void set_out_of_channel_sync_for(double out_of_channel_sync_for);
+    double get_time_from_last_channel_sync() const;
+    void set_time_from_last_channel_sync(double time_from_last_channel_sync);
 
     std::string get_random_move_direction();
 
 private:
-    int id;                         // Уникальный идентификатор
-    uint8_t cqi;                    // CQI (индекс качества канала 0-15)
-    double out_of_channel_sync_for; // Времени без синхронизации
-    Position position;              // Позиция пользователя в пространстве
-    Mobility mobility;              // Пользовательская мобильность
+    int id;                             // Уникальный идентификатор
+    uint8_t cqi;                        // CQI (индекс качества канала 0-15)
+    double time_from_last_channel_sync; // Времени без синхронизации
+    Position position;                  // Позиция пользователя в пространстве
+    Mobility mobility;                  // Пользовательская мобильность
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };

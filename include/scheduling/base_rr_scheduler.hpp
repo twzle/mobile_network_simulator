@@ -10,6 +10,7 @@
 #include "core/packet_queue.hpp"
 #include "core/user.hpp"
 #include "core/base_station.hpp"
+#include "core/channel.hpp"
 #include "stats/iteration_stats.hpp"
 #include "stats/tti_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
@@ -20,7 +21,8 @@ public:
     explicit BaseRRScheduler(
         double tti,
         double channel_sync_interval,
-        uint8_t base_cqi);
+        uint8_t base_cqi,
+        Channel physical_channel);
     virtual ~BaseRRScheduler() = default;
 
     // Основной метод запуска планировщика
@@ -67,12 +69,13 @@ protected:
     int resource_block_effective_data_size = 0;   // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;              // Общее число RB на TTI
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
-    
+
     bool check_start_pos = true;
 
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
     std::map<int, User> connected_users;       // Подключенные пользователи
     BaseStation base_station;                  // Базовая станция
+    Channel channel;                  // Канал связи
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов
