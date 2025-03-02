@@ -44,13 +44,15 @@ public:
     std::string get_random_move_direction();
 
 private:
-    int id;                                 // Уникальный идентификатор
-    uint8_t cqi;                            // CQI (индекс качества канала 0-15)
-    double time_from_last_channel_sync;     // Времени без синхронизации
-    Position position;                      // Позиция пользователя в пространстве
-    Mobility mobility;                      // Пользовательская мобильность
-    double priority;                        // Приоритет (PF-метрика)
-    std::queue<double> throughput_history; // История пропускной способности пользователя
+    int id;                               // Уникальный идентификатор
+    uint8_t cqi;                          // CQI (индекс качества канала 0-15)
+    double time_from_last_channel_sync;   // Времени без синхронизации
+    Position position;                    // Позиция пользователя в пространстве
+    Mobility mobility;                    // Пользовательская мобильность
+    double priority;                      // Приоритет (PF-метрика)
+    int current_throughput;               // Текущая пропускная способность
+    double average_historical_throughput; // Историческое значение пропускной способности (R)
+    int throughput_history_size;          // Размер истории
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };

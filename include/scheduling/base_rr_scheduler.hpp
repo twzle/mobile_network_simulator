@@ -76,7 +76,7 @@ protected:
     bool check_start_pos = true;
 
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
-    std::map<int, User> connected_users;       // Подключенные пользователи
+    std::map<int, User> connected_users;       // Подключенные пользователи (id -> ptr)
     BaseStation base_station;                  // Базовая станция
     Channel channel;                           // Канал связи
 

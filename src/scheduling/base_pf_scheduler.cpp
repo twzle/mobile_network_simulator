@@ -1,6 +1,6 @@
 #include "scheduling/base_pf_scheduler.hpp"
 
-BasePFScheduler::BasePFScheduler(){}
+BasePFScheduler::BasePFScheduler() {}
 
 /*
 Логика работы планировщика
@@ -21,8 +21,10 @@ void BasePFScheduler::run()
             tti_duration);
 
         sync_user_channels();
+        update_user_priorities();
+        collect_relevant_packets(current_time, tti_stats);
 
-        
+        // Конец TTI
     }
 
     // Метка времени в момент завершения работы планировщика
@@ -108,6 +110,38 @@ void BasePFScheduler::set_base_cqi(uint8_t base_cqi)
 void BasePFScheduler::set_channel(Channel channel)
 {
     this->channel = channel;
+}
+
+// Фильтрация актуальных пакетов по времени прихода на текущий момент
+void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats& tti_stats)
+{   
+    while (main_queue.size() > 0)
+    {
+        Packet packet = main_queue.front();
+
+        // Если пакет не пришел, его время больше текущего
+        if (current_time + epsilon < packet.get_scheduled_at())
+        {
+            // Конец перебора при встрече первого непришедшего пакета
+            break;
+        }
+
+        // Если пакет уже был доступен по времени
+        if (packet.get_scheduled_at() < current_time - epsilon)
+        {
+            // Отметка пользователя как активного претендента на ресурсы
+            tti_stats.mark_user_as_resource_candidate(
+                packet.get_user_ptr());
+        }
+
+        // Удаление первого элемента для доступа к следующим
+        main_queue.pop();
+        // Перенос в промежуточную очередь
+        relevant_queue.push(packet);
+    }
+
+
+    relevant_queue.print();
 }
 
 void BasePFScheduler::check_queue_remaining_scheduled_packets(
@@ -243,6 +277,20 @@ void BasePFScheduler::sync_user_channels()
         {
             user.set_time_from_last_channel_sync(new_time_from_last_channel_sync);
         }
+    }
+}
+
+void BasePFScheduler::update_user_priorities()
+{
+    for (auto &user_info : connected_users)
+    {
+        double max_throughput_for_rb = 
+            StandardManager::get_cqi_efficiency(user_info.second.get_cqi());
+        double average_throughput = user_info.second.get_average_throughput();
+
+        double priority = max_throughput_for_rb / average_throughput;
+
+        user_info.second.set_priority(priority);
     }
 }
 

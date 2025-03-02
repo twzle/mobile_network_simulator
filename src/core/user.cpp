@@ -70,42 +70,23 @@ void User::set_priority(double priority)
 
 double User::get_average_throughput()
 {
-    if (throughput_history.empty()) 
-    {
-        return 0;  // Чтобы избежать деления на 0
-    }
-
-    double total_throughput = 0;
-    std::queue<double> tmp_throughput_history;
-
-    int history_size = throughput_history.size();
-
-    for (int i = 0; i < history_size; ++i)
-    {
-        double current_throughput = throughput_history.front();
-        total_throughput += current_throughput;
-
-        tmp_throughput_history.push(current_throughput);
-        throughput_history.pop();
-    }
-
-    throughput_history = std::move(tmp_throughput_history);
-
-    return total_throughput / history_size;
+    return average_historical_throughput;
 }
-
 
 void User::initialize_throughput_history(int throughput_history_size) 
 {
-    for (int i = 0; i < throughput_history_size; ++i){
-        throughput_history.push(THROUGHPUT_MIN);
-    }
+    average_historical_throughput = 0.001;
+    this->throughput_history_size = throughput_history_size;
 }
 
 void User::update_throughput_history(double throughput)
 {
-    throughput_history.pop();
-    throughput_history.push(throughput);
+    // alpha = 2 / (N + 1)
+    double alpha = 2.0 / (double)(throughput_history_size + 1);
+
+    // R_i = (1 - alpha) * R_i + alpha * r_i
+    average_historical_throughput = 
+        (1 - alpha) * average_historical_throughput + alpha * throughput;
     
 }
 

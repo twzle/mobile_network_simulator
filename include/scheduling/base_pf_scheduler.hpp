@@ -58,6 +58,8 @@ protected:
 
     int convert_packet_size_to_rb_number(User *user, int packet_size);
     void sync_user_channels();
+    void update_user_priorities();
+    void collect_relevant_packets(double current_time, TTIStats& tti_stats);
 
 protected:
     int total_packets = 0;                      // Общее число пакетов для обслуживания
@@ -69,7 +71,7 @@ protected:
 
     PacketQueue main_queue;              // Основная очередь для обслуживания
     RelevantPacketQueue relevant_queue;  // Вспомогательная очередь пакетов готовых к обслуживанию
-    std::map<int, User> connected_users; // Подключенные пользователи
+    std::map<int, User> connected_users; // Подключенные пользователи (id -> ptr)
     BaseStation base_station;            // Базовая станция
     Channel channel;                     // Канал связи
 
