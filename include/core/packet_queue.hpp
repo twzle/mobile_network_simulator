@@ -9,10 +9,10 @@ const double DEFICIT_MAX = 1000000;
 class PacketQueue
 {
 public:
+    PacketQueue();
     PacketQueue(double quant, size_t limit);
 
-    void add_packet(Packet &packet);
-    void add_delay(int delay);
+    void schedule_packet(Packet &packet);
 
     double get_quant() const;
     size_t get_limit() const;
@@ -30,5 +30,5 @@ private:
     double quant; // Выделяемое очереди время/частоты в ресурсных блоках (RB)
     double deficit; // Накопленный дефицит в ресурсных блоках (RB)
     size_t limit; // Размер очереди
-    std::priority_queue<Packet, std::vector<Packet>, PacketGreater> packet_queue; // Очередь из обслуживаемых пакетов
+    std::priority_queue<Packet, std::vector<Packet>, PacketGreaterByTime> packet_queue; // Очередь из обслуживаемых пакетов
 };

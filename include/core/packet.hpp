@@ -31,10 +31,27 @@ private:
     User *user;          // Пользователь создавший пакет
 };
 
-struct PacketGreater
+struct PacketGreaterByTime
 {
     bool operator()(const Packet &lhs, const Packet &rhs) const
     {
         return lhs.get_scheduled_at() > rhs.get_scheduled_at();
+    }
+};
+
+struct PacketGreaterByUserPriorityAndTime
+{
+    bool operator()(const Packet &lhs, const Packet &rhs) const
+    {
+        double lhs_priority = lhs.get_user_ptr()->get_priority();
+        double rhs_priority = rhs.get_user_ptr()->get_priority();
+
+        if (std::fabs(lhs_priority - rhs_priority) < epsilon) {
+            // Приоритеты практически равны → сортируем по времени (по возрастанию)
+            return lhs.get_scheduled_at() > rhs.get_scheduled_at();
+        } else {
+            // Приоритеты разные → сортируем по убыванию приоритета
+            return lhs_priority > rhs_priority;
+        }
     }
 };

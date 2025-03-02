@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <algorithm>
+#include <queue>
 #include "core/position.hpp"
 #include "core/mobility.hpp"
 #include "const.hpp"
@@ -13,7 +14,7 @@ class User
 {
 public:
     // Конструктор, который автоматически присваивает уникальный id
-    User(uint8_t cqi, Position position, Mobility mobility);
+    User(uint8_t cqi, Position position, Mobility mobility, int throughput_history_size);
 
     static void initialize();
     static void reset_last_id();
@@ -28,6 +29,13 @@ public:
     Mobility get_mobility() const;
     void set_mobility(const Mobility &mobility);
 
+    double get_priority() const;
+    void set_priority(double priority);
+
+    double get_average_throughput();
+    void initialize_throughput_history(int throughput_history_size);
+    void update_throughput_history(double throughput);
+
     void move(double time_in_seconds);
 
     double get_time_from_last_channel_sync() const;
@@ -36,11 +44,13 @@ public:
     std::string get_random_move_direction();
 
 private:
-    int id;                             // Уникальный идентификатор
-    uint8_t cqi;                        // CQI (индекс качества канала 0-15)
-    double time_from_last_channel_sync; // Времени без синхронизации
-    Position position;                  // Позиция пользователя в пространстве
-    Mobility mobility;                  // Пользовательская мобильность
+    int id;                                 // Уникальный идентификатор
+    uint8_t cqi;                            // CQI (индекс качества канала 0-15)
+    double time_from_last_channel_sync;     // Времени без синхронизации
+    Position position;                      // Позиция пользователя в пространстве
+    Mobility mobility;                      // Пользовательская мобильность
+    double priority;                        // Приоритет (PF-метрика)
+    std::queue<double> throughput_history; // История пропускной способности пользователя
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };

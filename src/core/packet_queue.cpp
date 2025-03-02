@@ -1,9 +1,12 @@
 #include "core/packet_queue.hpp"
 
+PacketQueue::PacketQueue()
+    : quant(0), deficit(0), limit(0) {};
+
 PacketQueue::PacketQueue(double quant, size_t limit = 1)
     : quant(quant), deficit(0), limit(limit) {};
 
-void PacketQueue::add_packet(Packet &packet)
+void PacketQueue::schedule_packet(Packet &packet)
 {
     if (packet_queue.size() < limit)
     {
@@ -32,7 +35,7 @@ void PacketQueue::print()
 {
     int i = 0;
 
-    std::priority_queue<Packet, std::vector<Packet>, PacketGreater> tmp;
+    std::priority_queue<Packet, std::vector<Packet>, PacketGreaterByTime> tmp;
 
     while (!this->packet_queue.empty())
     {   

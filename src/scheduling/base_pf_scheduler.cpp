@@ -1,18 +1,48 @@
-#include "scheduling/base_rr_scheduler.hpp"
+#include "scheduling/base_pf_scheduler.hpp"
 
-BaseRRScheduler::BaseRRScheduler(){}
+BasePFScheduler::BasePFScheduler(){}
+
+/*
+Логика работы планировщика
+*/
+void BasePFScheduler::run()
+{
+    // Метка времени в момент запуска планировщика
+    session.set_scheduling_start_time(0.0);
+    double current_time = session.get_scheduling_start_time();
+
+    // Цикл до обслуживания всех пакетов во всех очередях
+    while (session.get_processed_packet_count() < this->total_packets)
+    {
+        // Начало TTI
+        TTIStats tti_stats = TTIStats(
+            1,
+            connected_users.size(),
+            tti_duration);
+
+        sync_user_channels();
+
+        
+    }
+
+    // Метка времени в момент завершения работы планировщика
+    session.set_scheduling_end_time(current_time);
+
+    // Подсчет статистики
+    evaluate_stats();
+}
 
 /*
 Планирование очереди через запись в массив очередей
 и вычисление новой суммы общего количества пакетов
 */
-void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
+void BasePFScheduler::schedule(PacketQueue &&packet_queue)
 {
-    scheduled_queues.push_back(packet_queue);
+    main_queue = std::move(packet_queue);
     total_packets += packet_queue.size();
 }
 
-void BaseRRScheduler::set_base_station(BSConfig bs_config)
+void BasePFScheduler::set_base_station(BSConfig bs_config)
 {
     Position position = Position(
         bs_config.get_x(),
@@ -22,7 +52,7 @@ void BaseRRScheduler::set_base_station(BSConfig bs_config)
     base_station = BaseStation(position);
 }
 
-void BaseRRScheduler::set_users(std::vector<UserConfig> user_configs)
+void BasePFScheduler::set_users(std::vector<UserConfig> user_configs)
 {
     for (size_t i = 0; i < user_configs.size(); ++i)
     {
@@ -37,12 +67,12 @@ void BaseRRScheduler::set_users(std::vector<UserConfig> user_configs)
             user_cfg.get_speed(),
             user_cfg.get_direction());
 
-        User user(base_cqi, position, mobility, 0);
+        User user(base_cqi, position, mobility, 500);
         connected_users.emplace(user.get_id(), std::move(user));
     }
 }
 
-User *BaseRRScheduler::get_user_ptr(int user_id)
+User *BasePFScheduler::get_user_ptr(int user_id)
 {
     auto it = connected_users.find(user_id);
     if (it != connected_users.end())
@@ -55,56 +85,32 @@ User *BaseRRScheduler::get_user_ptr(int user_id)
     return nullptr;
 }
 
-void BaseRRScheduler::set_tti_duration(double tti_duration)
+void BasePFScheduler::set_tti_duration(double tti_duration)
 {
     this->tti_duration = tti_duration;
 }
 
-void BaseRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
+void BasePFScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
 {
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
 }
 
-void BaseRRScheduler::set_channel_sync_interval(double channel_sync_interval)
+void BasePFScheduler::set_channel_sync_interval(double channel_sync_interval)
 {
     this->channel_sync_interval = channel_sync_interval;
 }
 
-void BaseRRScheduler::set_base_cqi(uint8_t base_cqi)
+void BasePFScheduler::set_base_cqi(uint8_t base_cqi)
 {
     this->base_cqi = base_cqi;
 }
 
-void BaseRRScheduler::set_channel(Channel channel){
+void BasePFScheduler::set_channel(Channel channel)
+{
     this->channel = channel;
 }
 
-void BaseRRScheduler::set_initial_queue(size_t new_initial_queue_id)
-{
-    this->current_initial_absolute_queue_id = new_initial_queue_id;
-}
-
-size_t BaseRRScheduler::get_initial_queue()
-{
-    return this->current_initial_absolute_queue_id;
-}
-
-size_t BaseRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
-{
-    size_t bias = this->current_initial_absolute_queue_id;
-    size_t current_relative_queue_id = current_absolute_queue_id + bias;
-
-    if (current_relative_queue_id >= scheduled_queues.size())
-    {
-        return current_relative_queue_id % scheduled_queues.size();
-    }
-    else
-    {
-        return current_relative_queue_id;
-    }
-}
-
-void BaseRRScheduler::check_queue_remaining_scheduled_packets(
+void BasePFScheduler::check_queue_remaining_scheduled_packets(
     PacketQueue &queue, double current_time, TTIStats &tti_stats)
 {
     PacketQueue tmp(queue.get_quant(), queue.get_limit());
@@ -158,24 +164,21 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets(
 /*
 Подсчет статистики по результатам работы планировщика
 */
-void BaseRRScheduler::evaluate_stats()
+void BasePFScheduler::evaluate_stats()
 {
     stats.scheduler_total_time =
         session.get_scheduling_end_time() - session.get_scheduling_start_time();
     stats.packet_count = session.get_processed_packet_count();
 
-    for (size_t queue_id = 0; queue_id < scheduled_queues.size(); ++queue_id)
-    {
-        double queue_total_time = stats.get_queue_processing_time(queue_id) +
-                                  stats.get_queue_idle_time(queue_id) +
-                                  stats.get_queue_wait_time(queue_id);
+    double queue_total_time = stats.get_queue_processing_time(0) +
+                              stats.get_queue_idle_time(0) +
+                              stats.get_queue_wait_time(0);
 
-        stats.set_queue_total_time(queue_id, queue_total_time);
-    }
+    stats.set_queue_total_time(0, queue_total_time);
 }
 
 // Перевод размера пакета из байтов в ресурсные блоки согласно размеру полезных данных в одном RB
-int BaseRRScheduler::convert_packet_size_to_rb_number(
+int BasePFScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
     double effective_data_size_per_rb_for_user_in_bytes =
@@ -192,7 +195,7 @@ int BaseRRScheduler::convert_packet_size_to_rb_number(
     return rb_count;
 }
 
-void BaseRRScheduler::sync_user_channels()
+void BasePFScheduler::sync_user_channels()
 {
     for (auto &user_info : connected_users)
     {
@@ -214,6 +217,7 @@ void BaseRRScheduler::sync_user_channels()
 
             double user_to_bs_distance = user.get_position().get_distance_2d(
                 base_station.get_position());
+
             double user_height = user.get_position().get_z();
             double bs_height = base_station.get_position().get_z();
 
@@ -229,22 +233,20 @@ void BaseRRScheduler::sync_user_channels()
             double sinr = channel.get_sinr(
                 user_received_signal_power,
                 noise_power, interference_power);
-            
+
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
             std::cout << cqi << "\n";
 
-            user.set_cqi(base_cqi);
+            user.set_cqi(cqi);
         }
         else
         {
             user.set_time_from_last_channel_sync(new_time_from_last_channel_sync);
         }
     }
-
-    check_start_pos = false;
 }
 
-IterationStats &BaseRRScheduler::get_stats()
+IterationStats &BasePFScheduler::get_stats()
 {
     return this->stats;
 }

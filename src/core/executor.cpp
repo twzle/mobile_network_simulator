@@ -69,7 +69,7 @@ void Executor::execute()
             if (user != nullptr)
             {
                 Packet packet(queue_id, settings.get_packet_size(), user);
-                queue.add_packet(packet);
+                queue.schedule_packet(packet);
             }
         }
 

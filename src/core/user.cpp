@@ -6,9 +6,12 @@
 
 int User::last_id;
 
-User::User(uint8_t cqi, Position position, Mobility mobility)
+User::User(uint8_t cqi, Position position, Mobility mobility, int throughput_history_size)
     : id(++last_id), cqi(cqi),
-      time_from_last_channel_sync(0), position(position), mobility(mobility) {}
+      time_from_last_channel_sync(0), position(position), mobility(mobility)
+      {
+        initialize_throughput_history(throughput_history_size);
+      }
 
 void User::initialize()
 {
@@ -53,6 +56,57 @@ Mobility User::get_mobility() const
 void User::set_mobility(const Mobility &mobility)
 {
     this->mobility = mobility;
+}
+
+double User::get_priority() const 
+{
+    return this->priority;
+}
+
+void User::set_priority(double priority)
+{
+    this->priority = priority;
+}
+
+double User::get_average_throughput()
+{
+    if (throughput_history.empty()) 
+    {
+        return 0;  // Чтобы избежать деления на 0
+    }
+
+    double total_throughput = 0;
+    std::queue<double> tmp_throughput_history;
+
+    int history_size = throughput_history.size();
+
+    for (int i = 0; i < history_size; ++i)
+    {
+        double current_throughput = throughput_history.front();
+        total_throughput += current_throughput;
+
+        tmp_throughput_history.push(current_throughput);
+        throughput_history.pop();
+    }
+
+    throughput_history = std::move(tmp_throughput_history);
+
+    return total_throughput / history_size;
+}
+
+
+void User::initialize_throughput_history(int throughput_history_size) 
+{
+    for (int i = 0; i < throughput_history_size; ++i){
+        throughput_history.push(THROUGHPUT_MIN);
+    }
+}
+
+void User::update_throughput_history(double throughput)
+{
+    throughput_history.pop();
+    throughput_history.push(throughput);
+    
 }
 
 void User::move(double time_in_seconds)
