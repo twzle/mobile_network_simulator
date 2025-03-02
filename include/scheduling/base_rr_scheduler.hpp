@@ -18,11 +18,7 @@
 class BaseRRScheduler
 {
 public:
-    explicit BaseRRScheduler(
-        double tti,
-        double channel_sync_interval,
-        uint8_t base_cqi,
-        Channel physical_channel);
+    explicit BaseRRScheduler();
     virtual ~BaseRRScheduler() = default;
 
     // Основной метод запуска планировщика
@@ -31,15 +27,22 @@ public:
     // Добавление очередей для обслуживания
     void schedule(PacketQueue &&packet_queue);
 
-    // Добавления базовой станции
-    void configure_base_station(BSConfig bs_config);
-
-    // Подключение пользователей для обслуживания
-    void connect_users(std::vector<UserConfig> user_count);
-    User *get_user_ptr(int user_id);
-
+    // Установка базовой станции
+    void set_base_station(BSConfig bs_config);
     // Установка лимита ресурсных блоков на один TTI
     void set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit);
+    // Установка длительности одного TTI
+    void set_tti_duration(double tti_duration);
+    // Установка длительности одного TTI
+    void set_channel_sync_interval(double channel_sync_interval);
+    // Установка базового CQI
+    void set_base_cqi(uint8_t base_cqi);
+    // Установка канала связи
+    void set_channel(Channel channel);
+
+    // Подключение пользователей для обслуживания
+    void set_users(std::vector<UserConfig> user_count);
+    User *get_user_ptr(int user_id);
 
     // Получение статистики выполнения
     IterationStats &get_stats();
@@ -75,7 +78,7 @@ protected:
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
     std::map<int, User> connected_users;       // Подключенные пользователи
     BaseStation base_station;                  // Базовая станция
-    Channel channel;                  // Канал связи
+    Channel channel;                           // Канал связи
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов

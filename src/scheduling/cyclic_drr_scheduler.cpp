@@ -1,15 +1,7 @@
 #include "scheduling/cyclic_drr_scheduler.hpp"
 
-CyclicDRRScheduler::CyclicDRRScheduler(
-    double tti,
-    double channel_sync_interval,
-    uint8_t base_cqi,
-    Channel channel)
-    : BaseRRScheduler(
-          tti,
-          channel_sync_interval,
-          base_cqi,
-          channel) {};
+CyclicDRRScheduler::CyclicDRRScheduler()
+    : BaseRRScheduler() {};
 
 /*
 Логика работы планировщика

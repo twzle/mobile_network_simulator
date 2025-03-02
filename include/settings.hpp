@@ -45,8 +45,9 @@ public:
     int get_launches();
     std::string get_standard_type();
     uint8_t get_base_cqi();
-    std::string get_tti_duration();
+    double get_tti_value();
     std::string get_channel_sync_interval();
+    double get_channel_sync_interval_value();
     std::unique_ptr<BaseRRScheduler> get_scheduler_instance();
     double get_bandwidth();
     double get_time_lambda();
@@ -60,6 +61,9 @@ public:
     std::vector<UserConfig> get_user_configs();
     int get_resource_block_per_tti_limit();
     int get_packet_size_limit();
+    double get_carrier_frequency();
+    int get_bs_transmission_power();
+    std::string get_area_type();
 
 private:
     int launches;                         // Количество повторов

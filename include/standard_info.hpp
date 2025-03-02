@@ -3,7 +3,10 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <stdexcept>
+#include <cmath>
 #include <stdint.h>
+#include "const.hpp"
 
 struct StandardInfo
 {
@@ -13,7 +16,7 @@ struct StandardInfo
     std::map<std::string, double> channel_sync_intervals; // Доступные интервалы синхронизации канала (строковое обозначение к числу секунд)
     std::map<uint8_t, double> cqi_efficiency;             // CQI (строковое обозначение к числу бит полезных данных в RE)
     std::map<double, uint8_t> sinr_to_cqi;                // SINR to CQI
-    std::vector<double> bandwidths;                       // Доступные полосы пропускания (в МГц)
+    std::map<double, int> bandwidth_to_rb;             // Доступные полосы пропускания (в МГц) к максимальному числу RB в них
     std::vector<std::string> schedulers;                  // Доступные планировщики
     std::map<uint8_t, std::string> mobility_directions;   // Направления перемещения пользователя
     std::vector<std::string> area_types;                  // Типы местности
@@ -33,7 +36,11 @@ public:
 
     // Статическая функция для получения числа полезных в RE по строковому ключу
     static double get_cqi_efficiency(
-        const uint8_t &cqi);
+        const uint8_t cqi);
+
+    // Статическая функция для получения числа полезных в RE по строковому ключу
+    static double get_rb_number_from_bandwidth(
+        const double bandwidth);
 
     // Статическая функция для получения числа полезных в RE по строковому ключу
     static int get_cqi_from_sinr(
@@ -43,7 +50,7 @@ public:
     static uint8_t get_resource_elements_in_resource_block();
 
     static int get_resource_block_effective_data_size(
-        const uint8_t &cqi);
+        const uint8_t cqi);
 
     static double get_channel_sync_interval(
         const std::string &channel_sync_interval_name);

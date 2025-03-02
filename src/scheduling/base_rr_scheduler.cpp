@@ -1,14 +1,6 @@
 #include "scheduling/base_rr_scheduler.hpp"
 
-BaseRRScheduler::BaseRRScheduler(
-    double tti,
-    double channel_sync_interval,
-    uint8_t base_cqi,
-    Channel channel)
-    : tti_duration(tti),
-      channel_sync_interval(channel_sync_interval),
-      base_cqi(base_cqi),
-      channel(channel) {}
+BaseRRScheduler::BaseRRScheduler(){}
 
 /*
 Планирование очереди через запись в массив очередей
@@ -20,7 +12,7 @@ void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
     total_packets += packet_queue.size();
 }
 
-void BaseRRScheduler::configure_base_station(BSConfig bs_config)
+void BaseRRScheduler::set_base_station(BSConfig bs_config)
 {
     Position position = Position(
         bs_config.get_x(),
@@ -30,7 +22,7 @@ void BaseRRScheduler::configure_base_station(BSConfig bs_config)
     base_station = BaseStation(position);
 }
 
-void BaseRRScheduler::connect_users(std::vector<UserConfig> user_configs)
+void BaseRRScheduler::set_users(std::vector<UserConfig> user_configs)
 {
     for (size_t i = 0; i < user_configs.size(); ++i)
     {
@@ -63,9 +55,28 @@ User *BaseRRScheduler::get_user_ptr(int user_id)
     return nullptr;
 }
 
+void BaseRRScheduler::set_tti_duration(double tti_duration)
+{
+    this->tti_duration = tti_duration;
+}
+
 void BaseRRScheduler::set_resource_block_per_tti_limit(int resource_blocks_per_tti_limit)
 {
     this->resource_blocks_per_tti = resource_blocks_per_tti_limit;
+}
+
+void BaseRRScheduler::set_channel_sync_interval(double channel_sync_interval)
+{
+    this->channel_sync_interval = channel_sync_interval;
+}
+
+void BaseRRScheduler::set_base_cqi(uint8_t base_cqi)
+{
+    this->base_cqi = base_cqi;
+}
+
+void BaseRRScheduler::set_channel(Channel channel){
+    this->channel = channel;
 }
 
 void BaseRRScheduler::set_initial_queue(size_t new_initial_queue_id)

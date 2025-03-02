@@ -28,7 +28,7 @@ int main()
     int bs_transmission_power = 46;  // Мощность предачи данных на базовой станции в дБ
 
     double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t base_cqi = 1; // СQI (1-15)
+    uint8_t base_cqi = 10; // СQI (1-15)
 
     int packet_count = 1;    // Количество пакетов в очереди
     int packet_size = 256;   // Размер пакета в байтах
@@ -42,7 +42,7 @@ int main()
 
     std::vector<UserConfig> user_configs = {
         // Пользователи
-        {100, 100, 1.5, 5, "random"},
+        {-20000, -20001, 1.5, 5, "random"},
     };
 
     Settings settings =

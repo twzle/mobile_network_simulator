@@ -21,6 +21,10 @@ public:
     void set_y(double y);
     void set_z(double z);
 
+    double constrain_position(
+        double pos, double move_delta, 
+        double min_limit, double max_limit, double epsilon);
+
     double get_distance_2d(const Position& position);
     double get_distance_3d(const Position& position);
 

@@ -1,5 +1,4 @@
 #include "standard_info.hpp"
-#include <iostream>
 
 // Статическое объявление мап
 std::map<std::string, StandardInfo> StandardManager::standard_info_map;
@@ -38,10 +37,29 @@ double StandardManager::get_tti(
 
 // Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
 double StandardManager::get_cqi_efficiency(
-    const uint8_t &cqi)
+    const uint8_t cqi)
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
     return standard_info.cqi_efficiency.at(cqi);
+}
+
+// Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
+double StandardManager::get_rb_number_from_bandwidth(
+    const double bandwidth)
+{
+    StandardInfo standard_info = get_standard_info(current_standard_name);
+
+    auto it = standard_info.bandwidth_to_rb.lower_bound(bandwidth);
+
+    if (it != standard_info.bandwidth_to_rb.end() &&
+        std::fabs(it->first - bandwidth) < epsilon)
+    {
+        return it->second;
+    }
+    else
+    {
+        throw std::out_of_range("Invalid LTE bandwidth.");
+    }
 }
 
 // Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
@@ -72,7 +90,7 @@ uint8_t StandardManager::get_resource_elements_in_resource_block()
 }
 
 int StandardManager::get_resource_block_effective_data_size(
-    const uint8_t &cqi)
+    const uint8_t cqi)
 {
     const double effective_bits_per_resource_element =
         static_cast<int>(
@@ -120,7 +138,7 @@ void StandardManager::initialize()
                     {1, 0.1523}, {2, 0.2344}, {3, 0.3770}, {4, 0.6016}, {5, 0.8770}, {6, 1.1758}, {7, 1.4766}, {8, 1.9141}, {9, 2.4063}, {10, 2.7305}, {11, 3.3223}, {12, 3.9023}, {13, 4.5234}, {14, 5.1152}, {15, 5.5547} // 3GPP Table 7.2.3-1
                 },
                 {{-6.9390, 1}, {-5.1470, 2}, {-3.1800, 3}, {-1.2530, 4}, {0.7610, 5}, {2.6990, 6}, {4.6930, 7}, {6.5250, 8}, {8.5730, 9}, {10.3660, 10}, {12.2890, 11}, {14.1730, 12}, {15.8880, 13}, {17.8140, 14}, {19.8290, 15}},
-                {1.4, 3, 5, 10, 15, 20},
+                {{1.4, 6}, {3, 15}, {5, 25}, {10, 50}, {15, 75}, {20, 100}},
                 {"DefaultRRScheduler",
                  "FixedDRRScheduler",
                  "CyclicDRRScheduler",

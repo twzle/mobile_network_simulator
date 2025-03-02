@@ -1,15 +1,7 @@
 #include "scheduling/default_rr_scheduler.hpp"
 
-DefaultRRScheduler::DefaultRRScheduler(
-    double tti,
-    double channel_sync_interval,
-    uint8_t base_cqi,
-    Channel channel)
-    : BaseRRScheduler(
-          tti,
-          channel_sync_interval,
-          base_cqi,
-          channel) {};
+DefaultRRScheduler::DefaultRRScheduler()
+    : BaseRRScheduler() {};
 
 /*
 Логика работы планировщика

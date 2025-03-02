@@ -68,35 +68,35 @@ void User::move(double time_in_seconds)
     double time_in_ms = time_in_seconds * 1000;
     double move_delta = speed_in_m_per_ms * time_in_ms;
 
-    double x_bound = CELL_COVERAGE;
-    double y_bound = CELL_COVERAGE;
-
+    double max_x = BS_TO_UE_DISTANCE_MAX;
+    double max_y = BS_TO_UE_DISTANCE_MAX;
+    double min_x = BS_TO_UE_DISTANCE_MIN;
+    double min_y = BS_TO_UE_DISTANCE_MIN;
+    
     std::string move_direction = mobility.get_direction();
-
-    if (move_direction == "random")
+    
+    if (move_direction == "random") 
     {
         move_direction = get_random_move_direction();
     }
-
-    if (move_direction == "forward")
+    
+    if (move_direction == "forward" || move_direction == "backward")
     {
-        double new_y = position.get_y() + move_delta;
-        position.set_y(std::min(new_y, y_bound));
+        double sign = (move_direction == "forward") ? 1.0 : -1.0;
+        position.set_y(
+            position.constrain_position(
+                position.get_y(), sign * move_delta, min_y, max_y, epsilon
+            )
+        );
     }
-    else if (move_direction == "backward")
+    else if (move_direction == "right" || move_direction == "left")
     {
-        double new_y = position.get_y() - move_delta;
-        position.set_y(std::max(new_y, -y_bound));
-    }
-    else if (move_direction == "right")
-    {
-        double new_x = position.get_x() + move_delta;
-        position.set_x(std::min(new_x, x_bound));
-    }
-    else if (move_direction == "left")
-    {
-        double new_x = position.get_x() - move_delta;
-        position.set_x(std::max(new_x, -y_bound));
+        double sign = (move_direction == "right") ? 1.0 : -1.0;
+        position.set_x(
+            position.constrain_position(
+                position.get_x(), sign * move_delta, min_x, max_x, epsilon
+            )
+        );
     }
 }
 

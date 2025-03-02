@@ -95,15 +95,13 @@ void Settings::validate()
         throw std::invalid_argument("Invalid scheduler type.");
     }
 
-    auto is_allowed_bandwidth =
-        std::find(
-            standard_info.bandwidths.begin(),
-            standard_info.bandwidths.end(),
-            bandwidth) != standard_info.bandwidths.end();
-
-    if (!is_allowed_bandwidth)
+    try
     {
-        throw std::invalid_argument("Invalid bandwidth.");
+        StandardManager::get_rb_number_from_bandwidth(bandwidth);
+    }
+    catch (const std::out_of_range &e)
+    {
+        throw std::invalid_argument("Bandwidth should be one of [1.4, 3, 5, 10, 15, 20] MHz.");
     }
 
     if (packet_count < 1)
@@ -145,10 +143,14 @@ void Settings::validate()
     int user_id = 0;
     for (auto &user : user_configs)
     {
-        if (user.get_x() > CELL_COVERAGE + epsilon ||
-            user.get_x() < -(CELL_COVERAGE + epsilon) ||
-            user.get_y() > CELL_COVERAGE + epsilon ||
-            user.get_y() < -(CELL_COVERAGE + epsilon) ||
+        if (user.get_x() > BS_TO_UE_DISTANCE_MAX + epsilon ||
+            user.get_x() < -(BS_TO_UE_DISTANCE_MAX + epsilon) ||
+            (user.get_x() < (BS_TO_UE_DISTANCE_MIN - epsilon) && 
+            user.get_x() > -(BS_TO_UE_DISTANCE_MIN - epsilon)) ||
+            user.get_y() > BS_TO_UE_DISTANCE_MAX + epsilon ||
+            user.get_y() < -(BS_TO_UE_DISTANCE_MAX + epsilon) ||
+            (user.get_y() < (BS_TO_UE_DISTANCE_MIN - epsilon) && 
+            user.get_y() > -(BS_TO_UE_DISTANCE_MIN - epsilon)) ||
             user.get_z() < 1.5 || user.get_z() > 22.5)
         {
             throw std::invalid_argument(
@@ -158,8 +160,9 @@ void Settings::validate()
                 std::to_string(user.get_y()) + ", " +
                 std::to_string(user.get_z()) + "). " +
                 "\nExpected range: " +
-                "x ∈ [" + std::to_string(-CELL_COVERAGE) + ", " + std::to_string(CELL_COVERAGE) + "] m, " +
-                "y ∈ [" + std::to_string(-CELL_COVERAGE) + ", " + std::to_string(CELL_COVERAGE) + "] m, z ≈ 25 m");
+                "x ∈ [1000, 20000] ∪ [-20000, -1000] m, " +
+                "y ∈ [1000, 20000] ∪ [-20000, -1000] m, " +
+                "z ≈ 25 m");
         }
 
         if (user.get_speed() < -epsilon)
@@ -223,9 +226,9 @@ uint8_t Settings::get_base_cqi()
     return this->base_cqi;
 }
 
-std::string Settings::get_tti_duration()
-{
-    return this->tti_duration;
+double Settings::get_tti_value()
+{   
+    return StandardManager::get_tti(tti_duration);
 }
 
 std::string Settings::get_channel_sync_interval()
@@ -233,35 +236,28 @@ std::string Settings::get_channel_sync_interval()
     return this->channel_sync_interval;
 }
 
+double Settings::get_channel_sync_interval_value()
+{
+    return StandardManager::get_channel_sync_interval(channel_sync_interval);
+}
+
 std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
 {
-    double tti_value =
-        StandardManager::get_tti(tti_duration);
-    double channel_sync_interval_value =
-        StandardManager::get_channel_sync_interval(channel_sync_interval);
-
-    Channel channel =
-        Channel(carrier_frequency, bs_transmission_power, area_type);
-
     if (this->scheduler_type == "DefaultRRScheduler")
     {
-        return std::make_unique<DefaultRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi, channel);
+        return std::make_unique<DefaultRRScheduler>();
     }
     else if (this->scheduler_type == "FixedDRRScheduler")
     {
-        return std::make_unique<FixedDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi, channel);
+        return std::make_unique<FixedDRRScheduler>();
     }
     else if (this->scheduler_type == "CyclicDRRScheduler")
     {
-        return std::make_unique<CyclicDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi, channel);
+        return std::make_unique<CyclicDRRScheduler>();
     }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
-        return std::make_unique<DefaultDRRScheduler>(
-            tti_value, channel_sync_interval_value, base_cqi, channel);
+        return std::make_unique<DefaultDRRScheduler>();
     }
     return nullptr;
 }
@@ -316,9 +312,26 @@ double Settings::get_time_lambda()
     return this->time_lambda;
 }
 
+double Settings::get_carrier_frequency()
+{
+    return this->carrier_frequency;
+}
+
+int Settings::get_bs_transmission_power()
+{
+    return this->bs_transmission_power;
+}
+
+std::string Settings::get_area_type()
+{
+    return this->area_type;
+}
+
 int Settings::get_resource_block_per_tti_limit()
 {
-    int resource_block_per_tti_limit = this->bandwidth / RB_BANDWIDTH;
+    int resource_block_per_tti_limit = 
+        StandardManager::get_rb_number_from_bandwidth(bandwidth);
+
     return resource_block_per_tti_limit;
 }
 

@@ -29,11 +29,30 @@ void Executor::run()
     }
 }
 
+std::unique_ptr<BaseRRScheduler> Executor::initialize_scheduler(){
+    auto scheduler = settings.get_scheduler_instance();
+
+    scheduler->set_base_station(settings.get_bs_config());
+    scheduler->set_users(settings.get_user_configs());
+    scheduler->set_resource_block_per_tti_limit(
+        settings.get_resource_block_per_tti_limit());
+    scheduler->set_tti_duration(settings.get_tti_value());
+    scheduler->set_channel_sync_interval(settings.get_channel_sync_interval_value());
+    scheduler->set_base_cqi(settings.get_base_cqi());
+    scheduler->set_channel(
+        Channel(
+            settings.get_carrier_frequency(), 
+            settings.get_bs_transmission_power(),
+            settings.get_area_type()
+        )
+    );
+
+    return scheduler;
+}
+
 void Executor::execute()
 {
-    auto scheduler = settings.get_scheduler_instance();
-    scheduler->configure_base_station(settings.get_bs_config());
-    scheduler->connect_users(settings.get_user_configs());
+    auto scheduler = initialize_scheduler();
 
     // Наполнение очередей пакетами
     for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id)
@@ -56,8 +75,6 @@ void Executor::execute()
 
         // Планирование обслуживания очереди
         scheduler->schedule(std::move(queue));
-        scheduler->set_resource_block_per_tti_limit(
-            settings.get_resource_block_per_tti_limit());
     }
 
     scheduler->run();

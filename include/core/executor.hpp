@@ -7,6 +7,7 @@ class Executor
 {
     public:
         Executor(Settings settings);
+        std::unique_ptr<BaseRRScheduler> initialize_scheduler();
         void run();
         void execute();
         MeanStats& get_stats();
