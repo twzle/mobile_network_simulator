@@ -27,8 +27,8 @@ int main()
     double carrier_frequency = 2000; // Несущая частота в МГц
     int bs_transmission_power = 46;  // Мощность предачи данных на базовой станции в дБ
 
-    double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t base_cqi = 10; // СQI (1-15)
+    double bandwidth = 1.4; // Полоса пропускания в МГц
+    uint8_t base_cqi = 1; // СQI (1-15)
 
     int packet_count = 1;    // Количество пакетов в очереди
     int packet_size = 256;   // Размер пакета в байтах

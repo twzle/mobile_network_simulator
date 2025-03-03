@@ -40,7 +40,15 @@ double StandardManager::get_cqi_efficiency(
     const uint8_t cqi)
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
-    return standard_info.cqi_efficiency.at(cqi);
+
+    auto mcs = standard_info.cqi_to_mcs.at(cqi);
+    std::string modulation_scheme = mcs.first;
+    double code_rate = mcs.second;
+
+    int bit_per_re = standard_info.modulation_schemes.at(modulation_scheme);
+
+    double efficiency = bit_per_re * code_rate;
+    return efficiency;
 }
 
 // Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
@@ -135,7 +143,15 @@ void StandardManager::initialize()
                 {{"1ms", 0.001}},
                 {{"10ms", 0.010}},
                 {
-                    {1, 0.1523}, {2, 0.2344}, {3, 0.3770}, {4, 0.6016}, {5, 0.8770}, {6, 1.1758}, {7, 1.4766}, {8, 1.9141}, {9, 2.4063}, {10, 2.7305}, {11, 3.3223}, {12, 3.9023}, {13, 4.5234}, {14, 5.1152}, {15, 5.5547} // 3GPP Table 7.2.3-1
+                    // 3GPP Table 7.2.3-1
+                    {1, {"QPSK", 0.1523}}, {2, {"QPSK", 0.2344}}, {3, {"QPSK", 0.3770}}, 
+                    {4, {"QPSK", 0.6016}}, {5, {"QPSK", 0.8770}}, {6, {"QPSK", 1.1758}}, 
+                    {7, {"16-QAM", 1.4766}}, {8, {"16-QAM", 1.9141}}, {9, {"16-QAM", 2.4063}}, 
+                    {10, {"64-QAM", 2.7305}}, {11, {"64-QAM", 3.3223}}, {12, {"64-QAM", 3.9023}}, 
+                    {13, {"64-QAM", 4.5234}}, {14, {"64-QAM", 5.1152}}, {15, {"64-QAM", 5.5547}}
+                },
+                {
+                    {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}
                 },
                 {{-6.9390, 1}, {-5.1470, 2}, {-3.1800, 3}, {-1.2530, 4}, {0.7610, 5}, {2.6990, 6}, {4.6930, 7}, {6.5250, 8}, {8.5730, 9}, {10.3660, 10}, {12.2890, 11}, {14.1730, 12}, {15.8880, 13}, {17.8140, 14}, {19.8290, 15}},
                 {{1.4, 6}, {3, 15}, {5, 25}, {10, 50}, {15, 75}, {20, 100}},
