@@ -29,7 +29,7 @@ void Executor::run()
     }
 }
 
-std::unique_ptr<BaseRRScheduler> Executor::initialize_scheduler(){
+std::unique_ptr<BaseScheduler> Executor::initialize_scheduler(){
     auto scheduler = settings.get_scheduler_instance();
 
     scheduler->set_base_station(settings.get_bs_config());

@@ -75,17 +75,19 @@ int StandardManager::get_cqi_from_sinr(
     const double sinr)
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
-    int cqi = 0;
+    int cqi = 1;
 
     auto it = standard_info.sinr_to_cqi.lower_bound(sinr);
 
     if (it == standard_info.sinr_to_cqi.end())
     {
         cqi = std::prev(it)->second; // Если SINR больше всех ключей, берём максимальный
-    }
-    if (it == standard_info.sinr_to_cqi.begin())
+    } 
+    else if (it == standard_info.sinr_to_cqi.begin())
     {
         cqi = it->second; // Если SINR меньше всех ключей, берём минимальный
+    } else {
+        cqi = it->second;
     }
 
     return cqi;
@@ -158,7 +160,8 @@ void StandardManager::initialize()
                 {"DefaultRRScheduler",
                  "FixedDRRScheduler",
                  "CyclicDRRScheduler",
-                 "DefaultDRRScheduler"},
+                 "DefaultDRRScheduler",
+                 "DefaultPFScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
                 {"Urban", "Suburban", "Rural"},
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)

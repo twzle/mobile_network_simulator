@@ -20,7 +20,7 @@ public:
         double noise_power, double interference_power);
     double get_recieved_signal_power(double path_loss);
     double get_noise_power();
-    double get_interference_power(double user_received_signal_power);
+    double get_interference_power();
 
 
 private:

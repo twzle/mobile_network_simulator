@@ -66,11 +66,7 @@ double Channel::get_noise_power()
     return power_noise;
 }
 
-double Channel::get_interference_power(double user_received_signal_power)
+double Channel::get_interference_power()
 {
-    double bs_to_ue_interference_offset = -30;
-
-    double interference_power = user_received_signal_power + bs_to_ue_interference_offset;
-
-    return interference_power;
+    return 0;
 }

@@ -5,7 +5,9 @@
 #include <vector>
 #include <algorithm>
 
+#include "scheduling/base_scheduler.hpp"
 #include "scheduling/base_rr_scheduler.hpp"
+#include "scheduling/base_pf_scheduler.hpp"
 #include "scheduling/default_rr_scheduler.hpp"
 #include "scheduling/fixed_drr_scheduler.hpp"
 #include "scheduling/cyclic_drr_scheduler.hpp"
@@ -48,7 +50,7 @@ public:
     double get_tti_value();
     std::string get_channel_sync_interval();
     double get_channel_sync_interval_value();
-    std::unique_ptr<BaseRRScheduler> get_scheduler_instance();
+    std::unique_ptr<BaseScheduler> get_scheduler_instance();
     double get_bandwidth();
     double get_time_lambda();
     int get_packet_count();

@@ -241,7 +241,7 @@ double Settings::get_channel_sync_interval_value()
     return StandardManager::get_channel_sync_interval(channel_sync_interval);
 }
 
-std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
+std::unique_ptr<BaseScheduler> Settings::get_scheduler_instance()
 {
     if (this->scheduler_type == "DefaultRRScheduler")
     {
@@ -258,6 +258,10 @@ std::unique_ptr<BaseRRScheduler> Settings::get_scheduler_instance()
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
         return std::make_unique<DefaultDRRScheduler>();
+    }
+    else if (this->scheduler_type == "DefaultPFScheduler")
+    {
+        return std::make_unique<BasePFScheduler>();
     }
     return nullptr;
 }
