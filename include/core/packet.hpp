@@ -51,7 +51,7 @@ struct PacketGreaterByUserPriorityAndTime
             return lhs.get_scheduled_at() > rhs.get_scheduled_at();
         } else {
             // Приоритеты разные → сортируем по убыванию приоритета
-            return lhs_priority > rhs_priority;
+            return lhs_priority < rhs_priority;
         }
     }
 };

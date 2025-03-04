@@ -2,16 +2,6 @@
 
 BaseScheduler::BaseScheduler() {}
 
-/*
-Планирование очереди через запись в массив очередей
-и вычисление новой суммы общего количества пакетов
-*/
-void BaseScheduler::schedule(PacketQueue &&packet_queue)
-{
-    scheduled_queues.push_back(packet_queue);
-    total_packets += packet_queue.size();
-}
-
 void BaseScheduler::set_base_station(BSConfig bs_config)
 {
     Position position = Position(

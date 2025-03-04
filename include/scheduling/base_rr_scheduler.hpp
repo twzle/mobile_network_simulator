@@ -22,9 +22,11 @@ public:
         double current_time,
         TTIStats &tti_stats);
 
+    void schedule(PacketQueue &&packet_queue) override;
     void sync_user_channels() override;
     void evaluate_stats() override;
 
 protected:
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
+    std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
 };

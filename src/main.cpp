@@ -22,19 +22,19 @@ int main()
     std::string tti_duration = "1ms";                  // Длительность TTI
     std::string channel_sync_interval = "10ms";        // Интервал синхронизации канала
     std::string scheduler_type = "DefaultPFScheduler"; // Тип планировщика
-    std::string area_type = "Urban";
+    std::string area_type = "Suburban";
 
     double carrier_frequency = 2000; // Несущая частота в МГц
     int bs_transmission_power = 46;  // Мощность предачи данных на базовой станции в дБ
 
     double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t base_cqi = 10; // СQI (1-15)
+    uint8_t base_cqi = 5; // СQI (1-15)
 
-    int packet_count = 1;    // Количество пакетов в очереди
+    int packet_count = 10;    // Количество пакетов в очереди
     int packet_size = 256;   // Размер пакета в байтах
-    double time_lambda = 40; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    double time_lambda = 15; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
-    int queue_count = 5;      // Количество очередей
+    int queue_count = 1;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
     int queue_limit = 10000;  // Размер очереди
 
@@ -42,7 +42,9 @@ int main()
 
     std::vector<UserConfig> user_configs = {
         // Пользователи
-        {1500, 1500, 1.5, 0, "random"},
+        {8000, 8000, 1.5, 0, "random"},
+        {7000, 7000, 1.5, 0, "random"},
+        {1000, 1000, 1.5, 0, "random"},
     };
 
     Settings settings =

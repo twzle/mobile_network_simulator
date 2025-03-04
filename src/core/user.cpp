@@ -75,7 +75,7 @@ double User::get_average_throughput()
 
 void User::initialize_throughput_history(int throughput_history_size) 
 {
-    average_historical_throughput = 0.001;
+    average_historical_throughput = 0.1;
     this->throughput_history_size = throughput_history_size;
 }
 

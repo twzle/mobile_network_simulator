@@ -3,7 +3,7 @@
 // Ширина RB в МГц
 #define RB_BANDWIDTH 0.180
 // Максимальное расстояние между базовой станцией и пользователем согласно СOST231 (метры)
-#define BS_TO_UE_DISTANCE_MAX 10000
+#define BS_TO_UE_DISTANCE_MAX 14000
 // Максимальное расстояние между базовой станцией и пользователем согласно СOST231 (метры)
 #define BS_TO_UE_DISTANCE_MIN 1000
 

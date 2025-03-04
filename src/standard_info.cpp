@@ -163,7 +163,7 @@ void StandardManager::initialize()
                  "DefaultDRRScheduler",
                  "DefaultPFScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
-                {"Urban", "Suburban", "Rural"},
+                {"Dense Urban", "Urban", "Suburban"},
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)
             },
         },

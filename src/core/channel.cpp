@@ -9,12 +9,13 @@ Channel::Channel(double carrier_frequency, int power_bs_transmitted, std::string
     : carrier_frequency(carrier_frequency),
       power_bs_transmitted(power_bs_transmitted)
 {
-    if (area_type == "Urban"){
+    if (area_type == "Dense Urban"){
         constant_offset = 3;
+    } else if (area_type == "Urban"){
+        constant_offset = 0;
     } else if (area_type == "Suburban"){
-        constant_offset = 0;
-    } else if (area_type == "Rural"){
-        constant_offset = 0;
+        double log_frequency = log10(carrier_frequency/28);
+        constant_offset = -(2 * log_frequency * log_frequency + 5.4);
     }
 }
 

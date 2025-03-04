@@ -25,7 +25,7 @@ public:
     virtual void run() = 0;
 
     // Добавление очередей для обслуживания
-    void schedule(PacketQueue &&packet_queue);
+    virtual void schedule(PacketQueue &&packet_queue) = 0;
 
     // Установка базовой станции
     void set_base_station(BSConfig bs_config);
@@ -60,7 +60,6 @@ protected:
     int resource_block_effective_data_size = 0; // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;            // Общее число RB на TTI
 
-    std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
     std::map<int, User> connected_users;       // Подключенные пользователи (id -> ptr)
     BaseStation base_station;                  // Базовая станция
     Channel channel;                           // Канал связи

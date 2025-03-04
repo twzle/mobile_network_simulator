@@ -2,6 +2,16 @@
 
 BaseRRScheduler::BaseRRScheduler() : BaseScheduler() {}
 
+/*
+Планирование очереди через запись в массив очередей
+и вычисление новой суммы общего количества пакетов
+*/
+void BaseRRScheduler::schedule(PacketQueue &&packet_queue)
+{
+    scheduled_queues.push_back(packet_queue);
+    total_packets += packet_queue.size();
+}
+
 void BaseRRScheduler::set_initial_queue(size_t new_initial_queue_id)
 {
     this->current_initial_absolute_queue_id = new_initial_queue_id;
