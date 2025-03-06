@@ -19,20 +19,21 @@ int main()
     int launches = 1; // Количество перезапусков
 
     std::string standard_type = "LTE";                 // Стандарт связи
-    std::string tti_duration = "1ms";                  // Длительность TTI
-    std::string channel_sync_interval = "10ms";        // Интервал синхронизации канала
     std::string scheduler_type = "DefaultPFScheduler"; // Тип планировщика
-    std::string area_type = "Suburban";
+    std::string area_type = "Dense Urban";             // Тип среды
+
+    std::string tti_duration = "1ms";           // Длительность TTI
+    std::string channel_sync_interval = "10ms"; // Интервал синхронизации канала
 
     double carrier_frequency = 2000; // Несущая частота в МГц
     int bs_transmission_power = 46;  // Мощность предачи данных на базовой станции в дБ
 
     double bandwidth = 5; // Полоса пропускания в МГц
-    uint8_t base_cqi = 5; // СQI (1-15)
+    uint8_t base_cqi = 1; // СQI (1-15)
 
-    int packet_count = 10;    // Количество пакетов в очереди
-    int packet_size = 256;   // Размер пакета в байтах
-    double time_lambda = 15; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
+    int packet_count = 10;     // Количество пакетов в очереди
+    int packet_size = 159;     // Размер пакета в байтах
+    double time_lambda = 1500; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
     int queue_count = 1;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
@@ -43,8 +44,6 @@ int main()
     std::vector<UserConfig> user_configs = {
         // Пользователи
         {8000, 8000, 1.5, 0, "random"},
-        {7000, 7000, 1.5, 0, "random"},
-        {1000, 1000, 1.5, 0, "random"},
     };
 
     Settings settings =
@@ -65,18 +64,21 @@ int main()
             user_configs,
             bs_config,
             carrier_frequency,
-            bs_transmission_power, 
+            bs_transmission_power,
             area_type);
 
     try
     {
         settings.validate();
+        settings.validate_scheduler_specific_parameters();
     }
     catch (const std::invalid_argument &e)
     {
         std::cout << "Invalid settings: " << e.what() << std::endl;
         return 1;
     }
+
+    StandardManager::set_current_standard(standard_type);
 
     Executor executor = Executor(settings);
     executor.run();

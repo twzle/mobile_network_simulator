@@ -51,27 +51,6 @@ void Position::set_z(double z)
     this->z = z;
 }
 
-double Position::constrain_position(
-    double pos, double move_delta, double min_limit, double max_limit, double epsilon)
-{
-    double new_pos = pos + move_delta;
-
-    if (new_pos > -min_limit + epsilon && new_pos < min_limit - epsilon)
-    {
-        return (pos > 0) ? min_limit : -min_limit;
-    }
-    else if (new_pos > max_limit + epsilon)
-    {
-        return max_limit;
-    }
-    else if (new_pos < -max_limit - epsilon)
-    {
-        return -max_limit;
-    }
-
-    return new_pos;
-}
-
 double Position::get_distance_2d(const Position &position)
 {
     double delta_x = x - position.x;

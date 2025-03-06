@@ -43,6 +43,7 @@ public:
         std::string area_type);
 
     void validate();
+    void validate_scheduler_specific_parameters();
 
     int get_launches();
     std::string get_standard_type();

@@ -49,12 +49,22 @@ void Settings::validate()
     StandardInfo standard_info;
     try
     {
-        StandardManager::set_current_standard(standard_type);
         standard_info = StandardManager::get_standard_info(standard_type);
     }
     catch (const std::out_of_range &e)
     {
         throw std::invalid_argument("Invalid standard.");
+    }
+
+    auto is_allowed_scheduler_type =
+        std::find(
+            standard_info.schedulers.begin(),
+            standard_info.schedulers.end(),
+            scheduler_type) != standard_info.schedulers.end();
+
+    if (!is_allowed_scheduler_type)
+    {
+        throw std::invalid_argument("Invalid scheduler type.");
     }
 
     try
@@ -82,17 +92,6 @@ void Settings::validate()
     catch (const std::out_of_range &e)
     {
         throw std::invalid_argument("Invalid CQI.");
-    }
-
-    auto is_allowed_scheduler_type =
-        std::find(
-            standard_info.schedulers.begin(),
-            standard_info.schedulers.end(),
-            scheduler_type) != standard_info.schedulers.end();
-
-    if (!is_allowed_scheduler_type)
-    {
-        throw std::invalid_argument("Invalid scheduler type.");
     }
 
     try
@@ -128,9 +127,9 @@ void Settings::validate()
         throw std::invalid_argument("Queue quant should be greater than or equal to 0.");
     }
 
-    if (time_lambda < 1)
+    if (time_lambda + epsilon <= 0)
     {
-        throw std::invalid_argument("Time lambda should be greater than or equal to 1.");
+        throw std::invalid_argument("Time lambda should be greater than 0.");
     }
 
     if (std::abs(bs_config.get_x()) > epsilon ||
@@ -143,14 +142,11 @@ void Settings::validate()
     int user_id = 0;
     for (auto &user : user_configs)
     {
-        if (user.get_x() > BS_TO_UE_DISTANCE_MAX + epsilon ||
-            user.get_x() < -(BS_TO_UE_DISTANCE_MAX + epsilon) ||
-            (user.get_x() < (BS_TO_UE_DISTANCE_MIN - epsilon) && 
-            user.get_x() > -(BS_TO_UE_DISTANCE_MIN - epsilon)) ||
-            user.get_y() > BS_TO_UE_DISTANCE_MAX + epsilon ||
-            user.get_y() < -(BS_TO_UE_DISTANCE_MAX + epsilon) ||
-            (user.get_y() < (BS_TO_UE_DISTANCE_MIN - epsilon) && 
-            user.get_y() > -(BS_TO_UE_DISTANCE_MIN - epsilon)) ||
+        double x = user.get_x();
+        double y = user.get_y();
+        double bs_to_ue_2d_distance = std::sqrt(x * x + y * y);
+        if (bs_to_ue_2d_distance > BS_TO_UE_DISTANCE_MAX + epsilon ||
+            bs_to_ue_2d_distance < BS_TO_UE_DISTANCE_MIN - epsilon ||
             user.get_z() < 1.5 || user.get_z() > 22.5)
         {
             throw std::invalid_argument(
@@ -160,8 +156,7 @@ void Settings::validate()
                 std::to_string(user.get_y()) + ", " +
                 std::to_string(user.get_z()) + "). " +
                 "\nExpected range: " +
-                "x ∈ [1000, 20000] ∪ [-20000, -1000] m, " +
-                "y ∈ [1000, 20000] ∪ [-20000, -1000] m, " +
+                "2D distance ∈ [1000, 20000] m, " +
                 "z ≈ 25 m");
         }
 
@@ -205,9 +200,28 @@ void Settings::validate()
         throw std::invalid_argument("Carrier frequency should be in range [700, 3000] MHz.");
     }
 
-    if (bs_transmission_power < 40 || bs_transmission_power > 50)
+    if (bs_transmission_power != 43 && 
+        bs_transmission_power != 46 && 
+        bs_transmission_power != 49)
     {
-        throw std::invalid_argument("BS transmission power should be in range [40, 50] dB.");
+        throw std::invalid_argument("BS transmission power should be in range (43, 46, 49) dB.");
+    }
+}
+
+void Settings::validate_scheduler_specific_parameters(){
+    if (scheduler_type == "DefaultPFScheduler"){
+        if (base_cqi != 1){
+            throw std::invalid_argument("Allowed base CQI value for PF scheduler is 1.");
+        }
+    }
+
+    if (scheduler_type == "DefaultRRScheduler" ||
+        scheduler_type == "FixedDRRScheduler" ||
+        scheduler_type == "CyclicDRRScheduler" ||
+        scheduler_type == "DefaultDRRScheduler"){
+        if (base_cqi < 1 || base_cqi > 15){
+            throw std::invalid_argument("Allowed base CQI value for RR-based scheduler is [1, 15].");
+        }
     }
 }
 
@@ -227,7 +241,7 @@ uint8_t Settings::get_base_cqi()
 }
 
 double Settings::get_tti_value()
-{   
+{
     return StandardManager::get_tti(tti_duration);
 }
 
@@ -333,7 +347,7 @@ std::string Settings::get_area_type()
 
 int Settings::get_resource_block_per_tti_limit()
 {
-    int resource_block_per_tti_limit = 
+    int resource_block_per_tti_limit =
         StandardManager::get_rb_number_from_bandwidth(bandwidth);
 
     return resource_block_per_tti_limit;
