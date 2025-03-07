@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base_rr_scheduler.hpp"
+#include "scheduling/RR/base_rr_scheduler.hpp"
 
 class FixedDRRScheduler : public BaseRRScheduler
 {

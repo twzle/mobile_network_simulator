@@ -228,3 +228,13 @@ double User::get_quant() const
 {
     return quant;
 }
+
+double User::get_deficit() const
+{
+    return deficit;
+}
+
+void User::set_deficit(double deficit)
+{
+    this->deficit = deficit;
+}

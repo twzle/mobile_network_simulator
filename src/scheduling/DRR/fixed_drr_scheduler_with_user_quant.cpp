@@ -1,18 +1,18 @@
-#include "scheduling/default_rr_scheduler.hpp"
+#include "scheduling/DRR/fixed_drr_scheduler_with_user_quant.hpp"
 
-DefaultRRScheduler::DefaultRRScheduler()
+FixedDRRSchedulerWithUserQuant::FixedDRRSchedulerWithUserQuant()
     : BaseRRScheduler() {};
 
 /*
 Логика работы планировщика
 */
-void DefaultRRScheduler::run()
+void FixedDRRSchedulerWithUserQuant::run()
 {
     // Метка времени в момент запуска планировщика
     session.set_scheduling_start_time(0.0);
     double current_time = session.get_scheduling_start_time();
 
-    // Перебор очередей начиная с очереди с индексом 0
+    // Начало следующего TTI всегда с 0 очереди
     set_initial_queue(0);
 
     // Цикл до обслуживания всех пакетов во всех очередях
@@ -25,11 +25,11 @@ void DefaultRRScheduler::run()
             tti_duration);
 
         sync_user_channels();
+        update_users_deficit();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
         int available_resource_blocks = this->resource_blocks_per_tti;
-        set_last_starving_queue(0); // Последняя недообслуженная очередь
 
         for (size_t absolute_queue_id = 0;
              absolute_queue_id < scheduled_queues.size();
@@ -40,6 +40,7 @@ void DefaultRRScheduler::run()
             size_t relative_queue_id = get_relative_queue_id(absolute_queue_id);
 
             PacketQueue &queue = scheduled_queues[relative_queue_id];
+            queue.set_deficit(queue.get_deficit() + queue.get_quant());
 
             // std::cout << "-> " << relative_queue_id << " ";
 
@@ -67,12 +68,21 @@ void DefaultRRScheduler::run()
                         break;
                     }
 
+                    // Если размер пакета больше, чем дефицит, то переход к следующей очереди
+                    if (packet_size_in_rb > queue.get_deficit() + epsilon)
+                    {
+                        queue_state = set_idle(queue_state);
+                        scheduler_state = set_idle(scheduler_state);
+
+                        // Кандидаты на получение ресурсов только пользователь,
+                        // Очередь без дефицита не кандидат
+                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        break;
+                    }
+
                     // Если размер пакета больше, чем реальное кол-во RB, то переход к следующей очереди
                     if (packet_size_in_rb > available_resource_blocks)
                     {
-                        // Последняя очередь на которую не хватило RB
-                        set_last_starving_queue(relative_queue_id);
-
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
@@ -105,6 +115,7 @@ void DefaultRRScheduler::run()
                     {
                         // Обслуживание пакета
                         queue.pop();
+                        queue.set_deficit(queue.get_deficit() - packet_size_in_rb);
 
                         users_served_in_tti.insert(packet.get_user_ptr());
 
@@ -147,6 +158,7 @@ void DefaultRRScheduler::run()
                 relative_queue_id,
                 tti_duration);
         }
+
         // Конец TTI
         current_time += this->tti_duration;
 
@@ -180,14 +192,19 @@ void DefaultRRScheduler::run()
     evaluate_stats();
 }
 
-// Начало следующего TTI всегда с последней недообслуженной очереди
-int DefaultRRScheduler::get_next_initial_queue()
+// Перебор в следующем TTI фиксированно c 0 очереди
+int FixedDRRSchedulerWithUserQuant::get_next_initial_queue()
 {
-    return last_starving_queue;
+    return 0;
 }
 
-// Сохранение последней недообслуженной очереди
-void DefaultRRScheduler::set_last_starving_queue(int last_starving_queue)
+// Обновление дефицитов пользователей
+void FixedDRRSchedulerWithUserQuant::update_users_deficit()
 {
-    this->last_starving_queue = last_starving_queue;
+    for (auto& user_info : connected_users){
+        user_info.second.set_deficit(
+            user_info.second.get_deficit() + 
+            user_info.second.get_quant()
+        );
+    }
 }

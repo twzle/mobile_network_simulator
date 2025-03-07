@@ -1,11 +1,11 @@
 #pragma once
 
-#include "base_rr_scheduler.hpp"
+#include "scheduling/RR/base_rr_scheduler.hpp"
 
-class DefaultRRScheduler : public BaseRRScheduler
+class DefaultDRRScheduler : public BaseRRScheduler
 {
 public:
-    explicit DefaultRRScheduler();
+    explicit DefaultDRRScheduler();
     void run() override;
 
     int get_next_initial_queue();

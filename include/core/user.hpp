@@ -53,6 +53,9 @@ public:
     std::string get_random_move_direction();
     double get_quant() const;
 
+    double get_deficit() const;
+    void set_deficit(double deficit);
+
 private:
     int id;                               // Уникальный идентификатор
     uint8_t cqi;                          // CQI (индекс качества канала 0-15)
@@ -65,6 +68,7 @@ private:
     int throughput_history_size;          // Размер истории
     bool resource_candidate;              // Претендовал ли пользователь на ресурсы в TTI
     double quant;                         // Квант времени (RB/мс)
+    double deficit;                       // Дефицит ресурсов (RB)
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };

@@ -1,4 +1,4 @@
-#include "scheduling/base_rr_scheduler.hpp"
+#include "scheduling/RR/base_rr_scheduler.hpp"
 
 BaseRRScheduler::BaseRRScheduler() : BaseScheduler() {}
 

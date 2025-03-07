@@ -1,4 +1,4 @@
-#include "scheduling/fixed_drr_scheduler.hpp"
+#include "scheduling/DRR/fixed_drr_scheduler.hpp"
 
 FixedDRRScheduler::FixedDRRScheduler()
     : BaseRRScheduler() {};

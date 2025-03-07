@@ -245,8 +245,11 @@ void Settings::validate_scheduler_specific_parameters(){
 
     if (scheduler_type == "DefaultRRScheduler" ||
         scheduler_type == "FixedDRRScheduler" ||
+        scheduler_type == "FixedDRRSchedulerWithUserQuant" ||
         scheduler_type == "CyclicDRRScheduler" ||
-        scheduler_type == "DefaultDRRScheduler"){
+        scheduler_type == "CyclicDRRSchedulerWithUserQuant" ||
+        scheduler_type == "DefaultDRRScheduler" ||
+        scheduler_type == "DefaultDRRSchedulerWithUserQuant"){
         if (base_cqi < 1 || base_cqi > 15){
             throw std::invalid_argument("Allowed base CQI value for RR-based scheduler is [1, 15].");
         }
@@ -288,18 +291,30 @@ std::unique_ptr<BaseScheduler> Settings::get_scheduler_instance()
     if (this->scheduler_type == "DefaultRRScheduler")
     {
         return std::make_unique<DefaultRRScheduler>();
-    }
+    } 
     else if (this->scheduler_type == "FixedDRRScheduler")
     {
         return std::make_unique<FixedDRRScheduler>();
+    }
+    else if (this->scheduler_type == "FixedDRRSchedulerWithUserQuant") 
+    {
+        return std::make_unique<FixedDRRSchedulerWithUserQuant>();
     }
     else if (this->scheduler_type == "CyclicDRRScheduler")
     {
         return std::make_unique<CyclicDRRScheduler>();
     }
+    else if (this->scheduler_type == "CyclicDRRSchedulerWithUserQuant") 
+    {
+        return std::make_unique<CyclicDRRSchedulerWithUserQuant>();
+    }
     else if (this->scheduler_type == "DefaultDRRScheduler")
     {
         return std::make_unique<DefaultDRRScheduler>();
+    }
+    else if (this->scheduler_type == "DefaultDRRSchedulerWithUserQuant") 
+    {
+        return std::make_unique<DefaultDRRSchedulerWithUserQuant>();
     }
     else if (this->scheduler_type == "DefaultPFScheduler")
     {

@@ -1,4 +1,4 @@
-#include "scheduling/default_drr_scheduler.hpp"
+#include "scheduling/DRR/default_drr_scheduler.hpp"
 
 DefaultDRRScheduler::DefaultDRRScheduler()
     : BaseRRScheduler() {};

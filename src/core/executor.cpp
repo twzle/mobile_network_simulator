@@ -1,9 +1,6 @@
 #include "core/executor.hpp"
 #include "core/time_generator.hpp"
 #include "core/user_generator.hpp"
-#include "scheduling/default_drr_scheduler.hpp"
-#include "scheduling/fixed_drr_scheduler.hpp"
-#include "scheduling/cyclic_drr_scheduler.hpp"
 
 Executor::Executor(Settings settings)
 {

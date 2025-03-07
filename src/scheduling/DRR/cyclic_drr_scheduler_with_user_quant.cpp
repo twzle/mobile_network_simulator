@@ -1,12 +1,12 @@
-#include "scheduling/cyclic_drr_scheduler.hpp"
+#include "scheduling/DRR/cyclic_drr_scheduler_with_user_quant.hpp"
 
-CyclicDRRScheduler::CyclicDRRScheduler()
+CyclicDRRSchedulerWithUserQuant::CyclicDRRSchedulerWithUserQuant()
     : BaseRRScheduler() {};
 
 /*
 Логика работы планировщика
 */
-void CyclicDRRScheduler::run()
+void CyclicDRRSchedulerWithUserQuant::run()
 {
     // Начало планирования
     session.set_scheduling_start_time(0.0);
@@ -25,6 +25,7 @@ void CyclicDRRScheduler::run()
             tti_duration);
 
         sync_user_channels();
+        update_users_deficit();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
 
@@ -187,7 +188,7 @@ void CyclicDRRScheduler::run()
 }
 
 // Перебор в следующем TTI с очереди следующей за текущей начальной
-int CyclicDRRScheduler::get_next_initial_queue()
+int CyclicDRRSchedulerWithUserQuant::get_next_initial_queue()
 {
     if (this->current_initial_absolute_queue_id == scheduled_queues.size() - 1)
     {
@@ -196,5 +197,16 @@ int CyclicDRRScheduler::get_next_initial_queue()
     else
     {
         return ++this->current_initial_absolute_queue_id;
+    }
+}
+
+// Обновление дефицитов пользователей
+void CyclicDRRSchedulerWithUserQuant::update_users_deficit()
+{
+    for (auto& user_info : connected_users){
+        user_info.second.set_deficit(
+            user_info.second.get_deficit() + 
+            user_info.second.get_quant()
+        );
     }
 }
