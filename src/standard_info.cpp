@@ -35,7 +35,7 @@ double StandardManager::get_tti(
     return standard_info.ttis.at(tti_name);
 }
 
-// Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
+// Статическая функция для получения размера полезных данных (бит) в RE для CQI (1-15)
 double StandardManager::get_cqi_efficiency(
     const uint8_t cqi)
 {
@@ -51,7 +51,7 @@ double StandardManager::get_cqi_efficiency(
     return efficiency;
 }
 
-// Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
+// Статическая функция для получения количества RB в канале
 double StandardManager::get_rb_number_from_bandwidth(
     const double bandwidth)
 {
@@ -70,7 +70,7 @@ double StandardManager::get_rb_number_from_bandwidth(
     }
 }
 
-// Статическая функция для получения размера полезных данных (бит) для CQI (1-15)
+// Статическая функция для получения CQI по SINR
 int StandardManager::get_cqi_from_sinr(
     const double sinr)
 {

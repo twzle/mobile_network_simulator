@@ -68,25 +68,45 @@ void User::set_priority(double priority)
     this->priority = priority;
 }
 
+bool User::is_resource_candidate(){
+    return resource_candidate;
+}
+
+void User::set_resource_candidate(bool resource_candidate){
+    this->resource_candidate = resource_candidate;
+}
+
 double User::get_average_throughput() const
 {
     return average_historical_throughput;
 }
 
+void User::set_current_throughput(double throughput)
+{
+    current_throughput = throughput;
+}
+
+void User::increment_current_throughput(int rb_count)
+{   
+    int bytes_per_rb = StandardManager::get_resource_block_effective_data_size(cqi);
+    current_throughput += bytes_per_rb * rb_count;
+}
+
 void User::initialize_throughput_history(int throughput_history_size)
 {
-    average_historical_throughput = 0.1;
+    average_historical_throughput = 0.001;
     this->throughput_history_size = throughput_history_size;
 }
 
-void User::update_throughput_history(double throughput)
+void User::update_throughput_history()
 {
     // alpha = 2 / (N + 1)
     double alpha = 2.0 / (double)(throughput_history_size + 1);
 
-    // R_i = (1 - alpha) * R_i + alpha * r_i
+    // R_i = (1 - alpha) * R_i + alpha * (current_throughput)
+    // current_throughput = r_i * rb_count
     average_historical_throughput =
-        (1 - alpha) * average_historical_throughput + alpha * throughput;
+        (1 - alpha) * average_historical_throughput + alpha * current_throughput;
 }
 
 void User::move(double time_in_seconds)

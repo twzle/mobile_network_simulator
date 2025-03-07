@@ -33,8 +33,14 @@ public:
     void set_priority(double priority);
 
     double get_average_throughput() const;
+    void set_current_throughput(double throughput);
+    void increment_current_throughput(int rb_count);
+
     void initialize_throughput_history(int throughput_history_size);
-    void update_throughput_history(double throughput);
+    void update_throughput_history();
+
+    bool is_resource_candidate();
+    void set_resource_candidate(bool resource_candidate);
 
     void move(double time_in_seconds);
 
@@ -50,16 +56,17 @@ private:
     Position position;                    // Позиция пользователя в пространстве
     Mobility mobility;                    // Пользовательская мобильность
     double priority;                      // Приоритет (PF-метрика)
-    int current_throughput;               // Текущая пропускная способность
+    double current_throughput;            // Текущая пропускная способность
     double average_historical_throughput; // Историческое значение пропускной способности (R)
     int throughput_history_size;          // Размер истории
+    bool resource_candidate;           // Претендовал ли пользователь на ресурсы в TTI
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };
 
 struct UserPFComparator
 {
-    bool operator()(const User* lhs, const User* rhs) const
+    bool operator()(const User *lhs, const User *rhs) const
     {
         if (lhs->get_priority() != rhs->get_priority())
         {

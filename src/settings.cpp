@@ -217,7 +217,7 @@ void Settings::validate()
 
     if (!is_allowed_users_limit)
     {
-        throw std::invalid_argument("Invalid users limit.");
+        throw std::invalid_argument("Invalid users limit, allowed (4, 8).");
     }
 }
 

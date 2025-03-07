@@ -33,8 +33,10 @@ void BasePFScheduler::run()
             connected_users.size(),
             tti_duration);
 
+        flush_user_context();
         sync_user_channels();
         update_user_priorities();
+
         collect_relevant_packets(current_time, tti_stats);
         exculde_users_from_scheduling();
         filter_packets_of_excluded_from_scheduling_users();
@@ -75,6 +77,8 @@ void BasePFScheduler::run()
             {
                 // Обслуживание пакета без возврата в исходную очередь
                 relevant_queue.pop();
+                packet.get_user_ptr()->increment_current_throughput(
+                    packet_size_in_rb);
 
                 session.increment_processed_packet_count(1);
 
@@ -109,6 +113,8 @@ void BasePFScheduler::run()
         // Конец TTI
         current_time += this->tti_duration;
         sorted_resource_candidates_for_tti.clear();
+        
+        update_user_throughputs();
 
         stats.update_scheduler_time_stats(
             scheduler_state,
@@ -155,6 +161,7 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
             // Отметка пользователя как активного претендента на ресурсы
             tti_stats.mark_user_as_resource_candidate(
                 packet.get_user_ptr());
+            packet.get_user_ptr()->set_resource_candidate(true);
 
             sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
         }
@@ -241,13 +248,26 @@ void BasePFScheduler::sync_user_channels()
     }
 }
 
+void BasePFScheduler::flush_user_context()
+{
+    for (auto &user_info : connected_users)
+    {
+        user_info.second.set_current_throughput(0);
+        user_info.second.set_resource_candidate(false);
+    }
+}
+
 void BasePFScheduler::update_user_priorities()
 {
     for (auto &user_info : connected_users)
     {
+        // PF-metric = r_i / R_i
+        // r_i (bytes/ms)
         double max_throughput_for_rb =
-            StandardManager::get_cqi_efficiency(user_info.second.get_cqi()) *
-            StandardManager::get_resource_elements_in_resource_block();
+            StandardManager::get_resource_block_effective_data_size(
+                user_info.second.get_cqi());
+
+        // R_i (bytes/ms)
         double average_throughput = user_info.second.get_average_throughput();
 
         double priority = max_throughput_for_rb / average_throughput;
@@ -258,71 +278,91 @@ void BasePFScheduler::update_user_priorities()
     }
 }
 
-void BasePFScheduler::exculde_users_from_scheduling() {
-    if (sorted_resource_candidates_for_tti.size() <= (size_t) users_per_tti_limit) {
+void BasePFScheduler::update_user_throughputs()
+{
+    for (auto &user_info : connected_users)
+    {
+        if (user_info.second.is_resource_candidate())
+        {
+            user_info.second.update_throughput_history();
+        }
+    }
+}
+
+void BasePFScheduler::exculde_users_from_scheduling()
+{
+    if (sorted_resource_candidates_for_tti.size() <= (size_t)users_per_tti_limit)
+    {
         return;
     }
 
     std::sort(
-        sorted_resource_candidates_for_tti.begin(), 
-        sorted_resource_candidates_for_tti.end(), 
-        UserPFComparator()
-    );
+        sorted_resource_candidates_for_tti.begin(),
+        sorted_resource_candidates_for_tti.end(),
+        UserPFComparator());
 
     int priority_collision_start_idx = 0;
     int priority_collision_end_idx = 0;
 
-    for (size_t i = 1; i < sorted_resource_candidates_for_tti.size(); ++i) {
-        
-        double priority_delta = 
+    for (size_t i = 1; i < sorted_resource_candidates_for_tti.size(); ++i)
+    {
+
+        double priority_delta =
             std::fabs(
-                sorted_resource_candidates_for_tti[i - 1]->get_priority() - 
+                sorted_resource_candidates_for_tti[i - 1]->get_priority() -
                 sorted_resource_candidates_for_tti[i]->get_priority());
-        
+
         double avg_throughput_delta =
             std::fabs(
-                sorted_resource_candidates_for_tti[i - 1]->get_average_throughput() - 
+                sorted_resource_candidates_for_tti[i - 1]->get_average_throughput() -
                 sorted_resource_candidates_for_tti[i]->get_average_throughput());
 
-        if (priority_delta < epsilon && avg_throughput_delta < epsilon) {
+        if (priority_delta < epsilon && avg_throughput_delta < epsilon)
+        {
             priority_collision_end_idx = i;
-        } else {
-            if (i < (size_t) users_per_tti_limit) {
+        }
+        else
+        {
+            if (i < (size_t)users_per_tti_limit)
+            {
                 priority_collision_start_idx = i;
                 priority_collision_end_idx = i;
-            } else {
+            }
+            else
+            {
                 break;
             }
         }
     }
 
-    if (priority_collision_start_idx < users_per_tti_limit) {
+    if (priority_collision_start_idx < users_per_tti_limit)
+    {
         // Перемешивание пользователей в диапазоне коллизий
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(
             sorted_resource_candidates_for_tti.begin() + priority_collision_start_idx,
-            sorted_resource_candidates_for_tti.begin() + priority_collision_end_idx + 1, 
+            sorted_resource_candidates_for_tti.begin() + priority_collision_end_idx + 1,
             g);
     }
 
     // Удаление всех пользователей за пределами `users_per_tti_limit`
     sorted_resource_candidates_for_tti.erase(
-        sorted_resource_candidates_for_tti.begin() + users_per_tti_limit, 
+        sorted_resource_candidates_for_tti.begin() + users_per_tti_limit,
         sorted_resource_candidates_for_tti.end());
 }
 
-
-void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users(){
+void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users()
+{
     RelevantPacketQueue tmp_queue;
 
     while (relevant_queue.size() > 0)
     {
         Packet packet = relevant_queue.front();
-        User* user_ptr = packet.get_user_ptr();
+        User *user_ptr = packet.get_user_ptr();
 
         auto it = std::find(
-            sorted_resource_candidates_for_tti.begin(), 
+            sorted_resource_candidates_for_tti.begin(),
             sorted_resource_candidates_for_tti.end(), user_ptr);
 
         // Если пакет принадлежит разрешенному пользователю
