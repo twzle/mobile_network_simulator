@@ -68,7 +68,7 @@ void User::set_priority(double priority)
     this->priority = priority;
 }
 
-double User::get_average_throughput()
+double User::get_average_throughput() const
 {
     return average_historical_throughput;
 }

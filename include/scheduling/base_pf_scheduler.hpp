@@ -12,7 +12,9 @@ public:
     void run();
 
     void update_user_priorities();
+    void exculde_users_from_scheduling();
     void collect_relevant_packets(double current_time, TTIStats& tti_stats);
+    void filter_packets_of_excluded_from_scheduling_users();
 
     void schedule(PacketQueue &&packet_queue) override;
     void evaluate_stats() override;
@@ -21,4 +23,10 @@ public:
 protected:
     PacketQueue main_queue;              // Основная очередь для обслуживания
     RelevantPacketQueue relevant_queue;  // Вспомогательная очередь пакетов готовых к обслуживанию
+
+    /*
+    Пользователи-кандидаты на получения ресурсов 
+    с сортировкой по (PF-метрике -> пропускной способности)
+    */
+    std::vector<User*> sorted_resource_candidates_for_tti;
 };

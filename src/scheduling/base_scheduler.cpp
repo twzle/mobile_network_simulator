@@ -69,6 +69,10 @@ void BaseScheduler::set_channel(Channel channel){
     this->channel = channel;
 }
 
+void BaseScheduler::set_user_limit_per_tti(int user_limit_per_tti){
+    this->user_limit_per_tti = user_limit_per_tti;
+}
+
 IterationStats &BaseScheduler::get_stats()
 {
     return this->stats;

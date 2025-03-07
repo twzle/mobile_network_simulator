@@ -36,6 +36,8 @@ void BasePFScheduler::run()
         sync_user_channels();
         update_user_priorities();
         collect_relevant_packets(current_time, tti_stats);
+        exculde_users_from_scheduling();
+        filter_packets_of_excluded_from_scheduling_users();
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
@@ -108,6 +110,7 @@ void BasePFScheduler::run()
         std::cout << "TTI END\n";
         // Конец TTI
         current_time += this->tti_duration;
+        sorted_resource_candidates_for_tti.clear();
 
         stats.update_scheduler_time_stats(
             scheduler_state,
@@ -155,6 +158,8 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
             // Отметка пользователя как активного претендента на ресурсы
             tti_stats.mark_user_as_resource_candidate(
                 packet.get_user_ptr());
+
+            sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
         }
 
         // Удаление первого элемента для доступа к следующим
@@ -257,4 +262,83 @@ void BasePFScheduler::update_user_priorities()
 
         std::cout << "User #" << user_info.first << ". Priority = " << priority << ", AV TPUT = " << average_throughput << "\n";
     }
+}
+
+void BasePFScheduler::exculde_users_from_scheduling() {
+    if (sorted_resource_candidates_for_tti.size() <= (size_t) user_limit_per_tti) {
+        return;
+    }
+
+    std::sort(
+        sorted_resource_candidates_for_tti.begin(), 
+        sorted_resource_candidates_for_tti.end(), 
+        UserPFComparator()
+    );
+
+    int priority_collision_start_idx = 0;
+    int priority_collision_end_idx = 0;
+
+    for (size_t i = 1; i < sorted_resource_candidates_for_tti.size(); ++i) {
+        
+        double priority_delta = 
+            std::fabs(
+                sorted_resource_candidates_for_tti[i - 1]->get_priority() - 
+                sorted_resource_candidates_for_tti[i]->get_priority());
+        
+        double avg_throughput_delta =
+            std::fabs(
+                sorted_resource_candidates_for_tti[i - 1]->get_average_throughput() - 
+                sorted_resource_candidates_for_tti[i]->get_average_throughput());
+
+        if (priority_delta < epsilon && avg_throughput_delta < epsilon) {
+            priority_collision_end_idx = i;
+        } else {
+            if (i < (size_t) user_limit_per_tti) {
+                priority_collision_start_idx = i;
+                priority_collision_end_idx = i;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (priority_collision_start_idx < user_limit_per_tti) {
+        // Перемешивание пользователей в диапазоне коллизий
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(
+            sorted_resource_candidates_for_tti.begin() + priority_collision_start_idx,
+            sorted_resource_candidates_for_tti.begin() + priority_collision_end_idx + 1, 
+            g);
+    }
+
+    // Удаление всех пользователей за пределами `user_limit_per_tti`
+    sorted_resource_candidates_for_tti.erase(
+        sorted_resource_candidates_for_tti.begin() + user_limit_per_tti, 
+        sorted_resource_candidates_for_tti.end());
+}
+
+
+void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users(){
+    RelevantPacketQueue tmp_queue;
+
+    while (relevant_queue.size() > 0)
+    {
+        Packet packet = relevant_queue.front();
+        User* user_ptr = packet.get_user_ptr();
+
+        auto it = std::find(
+            sorted_resource_candidates_for_tti.begin(), 
+            sorted_resource_candidates_for_tti.end(), user_ptr);
+
+        // Если пакет принадлежит разрешенному пользователю
+        if (it != sorted_resource_candidates_for_tti.end())
+        {
+            tmp_queue.push(packet);
+        }
+
+        relevant_queue.pop();
+    }
+
+    relevant_queue = std::move(tmp_queue);
 }

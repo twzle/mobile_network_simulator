@@ -39,6 +39,8 @@ public:
     void set_base_cqi(uint8_t base_cqi);
     // Установка канала связи
     void set_channel(Channel channel);
+    // Установка лимита пользователей
+    void set_user_limit_per_tti(int user_limit_per_tti);
 
     // Подключение пользователей для обслуживания
     void set_users(std::vector<UserConfig> user_count);
@@ -59,10 +61,11 @@ protected:
     uint8_t base_cqi = 0;                       // Базовый CQI
     int resource_block_effective_data_size = 0; // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;            // Общее число RB на TTI
+    int user_limit_per_tti = 0;                 // Лимит пользователей обслуживаемых за TTI
 
-    std::map<int, User> connected_users;       // Подключенные пользователи (id -> ptr)
-    BaseStation base_station;                  // Базовая станция
-    Channel channel;                           // Канал связи
+    std::map<int, User> connected_users; // Подключенные пользователи (id -> ptr)
+    BaseStation base_station;            // Базовая станция
+    Channel channel;                     // Канал связи
 
     SchedulerSession session; // Данные сессии работы планировщика
     IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов

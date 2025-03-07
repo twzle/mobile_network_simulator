@@ -32,7 +32,7 @@ public:
     double get_priority() const;
     void set_priority(double priority);
 
-    double get_average_throughput();
+    double get_average_throughput() const;
     void initialize_throughput_history(int throughput_history_size);
     void update_throughput_history(double throughput);
 
@@ -55,4 +55,16 @@ private:
     int throughput_history_size;          // Размер истории
 
     static int last_id; // Статическая переменная для отслеживания последнего id
+};
+
+struct UserPFComparator
+{
+    bool operator()(const User* lhs, const User* rhs) const
+    {
+        if (lhs->get_priority() != rhs->get_priority())
+        {
+            return lhs->get_priority() > rhs->get_priority(); // Больше приоритет — выше
+        }
+        return lhs->get_average_throughput() < rhs->get_average_throughput(); // Меньший throughput — выше
+    }
 };

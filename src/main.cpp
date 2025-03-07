@@ -38,6 +38,7 @@ int main()
     int queue_count = 1;      // Количество очередей
     double queue_quant = 100; // Квант времени (RB)
     int queue_limit = 10000;  // Размер очереди
+    int pucch_user_limit = 4; // Лимит обслуживания пользователей за TTI
 
     BSConfig bs_config = {0, 0, 25}; // Базовая станция
 
