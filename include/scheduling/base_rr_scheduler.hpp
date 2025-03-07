@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "scheduling/base_scheduler.hpp"
 
 class BaseRRScheduler : public BaseScheduler
@@ -29,4 +31,6 @@ public:
 protected:
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
     std::vector<PacketQueue> scheduled_queues; // Очереди для обслуживания
+
+    std::set<User*> users_served_in_tti; // Пользователи обслуженные за TTI
 };

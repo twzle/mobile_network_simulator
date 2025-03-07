@@ -82,11 +82,32 @@ void DefaultRRScheduler::run()
                         break;
                     }
 
+                    // Если лимит обслуженных пользователей достигнут
+                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit)
+                    {
+                        auto it = users_served_in_tti.find(packet.get_user_ptr());
+
+                        // Не найден в списке пользователей на текущий TTI
+                        if (it == users_served_in_tti.end())
+                        {
+                            queue_state = set_idle(queue_state);
+                            scheduler_state = set_idle(scheduler_state);
+
+                            // Кандидаты на получение ресурсов пользователь и очередь
+                            tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                            tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                            break;
+                        }
+                    }
+
                     // Если размер пакета меньше, чем реальное кол-во RB, то обслуживаем пакет
                     if (packet_size_in_rb <= available_resource_blocks)
                     {
                         // Обслуживание пакета
                         queue.pop();
+
+                        users_served_in_tti.insert(packet.get_user_ptr());
+
                         session.increment_processed_packet_count(1);
 
                         available_resource_blocks -= packet_size_in_rb;
