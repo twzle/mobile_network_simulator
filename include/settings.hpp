@@ -40,7 +40,8 @@ public:
         BSConfig bs_config,
         double carrier_frequency,
         int bs_transmission_power,
-        std::string area_type);
+        std::string area_type,
+        int users_per_tti_limit);
 
     void validate();
     void validate_scheduler_specific_parameters();
@@ -67,6 +68,8 @@ public:
     double get_carrier_frequency();
     int get_bs_transmission_power();
     std::string get_area_type();
+    int get_users_per_tti_limit();
+
 
 private:
     int launches;                         // Количество повторов
@@ -88,4 +91,5 @@ private:
     double carrier_frequency;             // Несущая частота
     int bs_transmission_power;            // Мощность передачи базовой станции
     std::string area_type;                // Тип местности
+    int users_per_tti_limit;               // Лимит обслуживаемых пользователей за TTI
 };

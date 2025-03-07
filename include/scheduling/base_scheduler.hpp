@@ -40,7 +40,7 @@ public:
     // Установка канала связи
     void set_channel(Channel channel);
     // Установка лимита пользователей
-    void set_user_limit_per_tti(int user_limit_per_tti);
+    void set_users_per_tti_limit(int users_per_tti_limit);
 
     // Подключение пользователей для обслуживания
     void set_users(std::vector<UserConfig> user_count);
@@ -61,7 +61,7 @@ protected:
     uint8_t base_cqi = 0;                       // Базовый CQI
     int resource_block_effective_data_size = 0; // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;            // Общее число RB на TTI
-    int user_limit_per_tti = 0;                 // Лимит пользователей обслуживаемых за TTI
+    int users_per_tti_limit = 0;                 // Лимит пользователей обслуживаемых за TTI
 
     std::map<int, User> connected_users; // Подключенные пользователи (id -> ptr)
     BaseStation base_station;            // Базовая станция

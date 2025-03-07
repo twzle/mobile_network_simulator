@@ -47,6 +47,8 @@ std::unique_ptr<BaseScheduler> Executor::initialize_scheduler(){
         )
     );
 
+    scheduler->set_users_per_tti_limit(settings.get_users_per_tti_limit());
+    
     return scheduler;
 }
 

@@ -16,7 +16,8 @@ Settings::Settings(
     BSConfig bs_config,
     double carrier_frequency,
     int bs_transmission_power,
-    std::string area_type)
+    std::string area_type,
+    int users_per_tti_limit)
 {
     this->launches = launches;
     this->standard_type = standard_type;
@@ -37,6 +38,7 @@ Settings::Settings(
     this->carrier_frequency = carrier_frequency;
     this->bs_transmission_power = bs_transmission_power;
     this->area_type = area_type;
+    this->users_per_tti_limit = users_per_tti_limit;
 }
 
 void Settings::validate()
@@ -206,6 +208,17 @@ void Settings::validate()
     {
         throw std::invalid_argument("BS transmission power should be in range (43, 46, 49) dB.");
     }
+
+    auto is_allowed_users_limit =
+        std::find(
+            standard_info.users_per_tti_limits.begin(),
+            standard_info.users_per_tti_limits.end(),
+            users_per_tti_limit) != standard_info.users_per_tti_limits.end();
+
+    if (!is_allowed_users_limit)
+    {
+        throw std::invalid_argument("Invalid users limit.");
+    }
 }
 
 void Settings::validate_scheduler_specific_parameters(){
@@ -343,6 +356,11 @@ int Settings::get_bs_transmission_power()
 std::string Settings::get_area_type()
 {
     return this->area_type;
+}
+
+int Settings::get_users_per_tti_limit()
+{
+    return this->users_per_tti_limit;
 }
 
 int Settings::get_resource_block_per_tti_limit()

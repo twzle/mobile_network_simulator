@@ -41,8 +41,6 @@ void BasePFScheduler::run()
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
-        std::cout << "RBs = " << available_resource_blocks << "\n";
-
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
         PacketQueueState queue_state = PacketQueueState::UNDEFINED;
 
@@ -140,7 +138,6 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
 {
     current_time = 100;
 
-    std::cout << "MAIN QUEUE SIZE = " << main_queue.size() << "\n";
     while (main_queue.size() > 0)
     {
         Packet packet = main_queue.front();
@@ -167,9 +164,6 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
         // Перенос в промежуточную очередь
         relevant_queue.push(packet);
     }
-
-    std::cout << "RELEVANT QUEUE SIZE = " << relevant_queue.size() << "\n";
-    relevant_queue.print();
 }
 
 /*
@@ -265,7 +259,7 @@ void BasePFScheduler::update_user_priorities()
 }
 
 void BasePFScheduler::exculde_users_from_scheduling() {
-    if (sorted_resource_candidates_for_tti.size() <= (size_t) user_limit_per_tti) {
+    if (sorted_resource_candidates_for_tti.size() <= (size_t) users_per_tti_limit) {
         return;
     }
 
@@ -293,7 +287,7 @@ void BasePFScheduler::exculde_users_from_scheduling() {
         if (priority_delta < epsilon && avg_throughput_delta < epsilon) {
             priority_collision_end_idx = i;
         } else {
-            if (i < (size_t) user_limit_per_tti) {
+            if (i < (size_t) users_per_tti_limit) {
                 priority_collision_start_idx = i;
                 priority_collision_end_idx = i;
             } else {
@@ -302,7 +296,7 @@ void BasePFScheduler::exculde_users_from_scheduling() {
         }
     }
 
-    if (priority_collision_start_idx < user_limit_per_tti) {
+    if (priority_collision_start_idx < users_per_tti_limit) {
         // Перемешивание пользователей в диапазоне коллизий
         std::random_device rd;
         std::mt19937 g(rd());
@@ -312,9 +306,9 @@ void BasePFScheduler::exculde_users_from_scheduling() {
             g);
     }
 
-    // Удаление всех пользователей за пределами `user_limit_per_tti`
+    // Удаление всех пользователей за пределами `users_per_tti_limit`
     sorted_resource_candidates_for_tti.erase(
-        sorted_resource_candidates_for_tti.begin() + user_limit_per_tti, 
+        sorted_resource_candidates_for_tti.begin() + users_per_tti_limit, 
         sorted_resource_candidates_for_tti.end());
 }
 

@@ -164,6 +164,7 @@ void StandardManager::initialize()
                  "DefaultPFScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
                 {"Dense Urban", "Urban", "Suburban"},
+                {4, 8}, // Лимит пользователей обслуживаемых за TTI 
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)
             }, // 168 * 2 * 0.1523 * 25 / 8 =  
         },

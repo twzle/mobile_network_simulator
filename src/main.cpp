@@ -35,10 +35,10 @@ int main()
     int packet_size = 159;     // Размер пакета в байтах
     double time_lambda = 1500; // Частота (количество) прихода пакетов в отедельную очередь за секунду (1/с), среднее время между приходом пакетов (1/lambda)
 
-    int queue_count = 1;      // Количество очередей
-    double queue_quant = 100; // Квант времени (RB)
-    int queue_limit = 10000;  // Размер очереди
-    int pucch_user_limit = 4; // Лимит обслуживания пользователей за TTI
+    int queue_count = 1;         // Количество очередей
+    double queue_quant = 100;    // Квант времени (RB)
+    int queue_limit = 10000;     // Размер очереди
+    int users_per_tti_limit = 4; // Лимит обслуживания пользователей за TTI (PUCCH)
 
     BSConfig bs_config = {0, 0, 25}; // Базовая станция
 
@@ -66,7 +66,8 @@ int main()
             bs_config,
             carrier_frequency,
             bs_transmission_power,
-            area_type);
+            area_type,
+            users_per_tti_limit);
 
     try
     {
