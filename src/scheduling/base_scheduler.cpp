@@ -12,7 +12,8 @@ void BaseScheduler::set_base_station(BSConfig bs_config)
     base_station = BaseStation(position);
 }
 
-void BaseScheduler::set_users(std::vector<UserConfig> user_configs)
+void BaseScheduler::set_users(
+    std::vector<UserConfig> user_configs, int throughput_history_size)
 {
     for (size_t i = 0; i < user_configs.size(); ++i)
     {
@@ -26,8 +27,10 @@ void BaseScheduler::set_users(std::vector<UserConfig> user_configs)
         Mobility mobility = Mobility(
             user_cfg.get_speed(),
             user_cfg.get_direction());
+        
+        double quant = user_cfg.get_quant();
 
-        User user(base_cqi, position, mobility, 0);
+        User user(base_cqi, position, mobility, throughput_history_size, quant);
         connected_users.emplace(user.get_id(), std::move(user));
     }
 }

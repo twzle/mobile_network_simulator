@@ -2,8 +2,11 @@
 
 UserConfig::UserConfig(
     double x, double y, double z,
-    double speed, std::string direction) : 
-    x(x), y(y), z(z), speed(speed), direction(direction)
+    double speed, std::string direction,
+    double quant) : 
+    x(x), y(y), z(z), 
+    speed(speed), direction(direction),
+    quant(quant)
 {
 }
 
@@ -30,4 +33,9 @@ double UserConfig::get_speed()
 std::string UserConfig::get_direction()
 {
     return this->direction;
+}
+
+double UserConfig::get_quant()
+{
+    return this->quant;
 }

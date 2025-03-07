@@ -17,7 +17,8 @@ Settings::Settings(
     double carrier_frequency,
     int bs_transmission_power,
     std::string area_type,
-    int users_per_tti_limit)
+    int users_per_tti_limit,
+    double throughput_history_size)
 {
     this->launches = launches;
     this->standard_type = standard_type;
@@ -39,6 +40,7 @@ Settings::Settings(
     this->bs_transmission_power = bs_transmission_power;
     this->area_type = area_type;
     this->users_per_tti_limit = users_per_tti_limit;
+    this->throughput_history_size = throughput_history_size;
 }
 
 void Settings::validate()
@@ -183,7 +185,20 @@ void Settings::validate()
                 "Expected direction: \"forward\", \"backward\", " +
                 "\"left\", \"right\", \"random\"");
         }
+
+        if (user.get_quant() <= epsilon){
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " has invalid quant: " +
+                std::to_string(user.get_quant()) + " \n" +
+                "Expected quant: (0, +inf)");
+        }
+
         ++user_id;
+    }
+
+    if (throughput_history_size < 0 || throughput_history_size > 10000){
+        throw std::invalid_argument("Invalid throughput history size. Allowed [0, 10000]");
     }
 
     auto is_allowed_area_type =
@@ -363,6 +378,7 @@ int Settings::get_users_per_tti_limit()
     return this->users_per_tti_limit;
 }
 
+
 int Settings::get_resource_block_per_tti_limit()
 {
     int resource_block_per_tti_limit =
@@ -382,4 +398,9 @@ int Settings::get_packet_size_limit()
     int byte_per_tti_limit = bit_per_tti_limit / 8;
 
     return byte_per_tti_limit;
+}
+
+int Settings::get_throughput_history_size()
+{
+    return this->throughput_history_size;
 }

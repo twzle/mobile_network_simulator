@@ -44,8 +44,9 @@ int main()
 
     std::vector<UserConfig> user_configs = {
         // Пользователи
-        {8000, 8000, 1.5, 0, "random"},
+        {8000, 8000, 1.5, 0, "random", 10},
     };
+    int throughput_history_size = 2000;
 
     Settings settings =
         Settings(
@@ -67,7 +68,9 @@ int main()
             carrier_frequency,
             bs_transmission_power,
             area_type,
-            users_per_tti_limit);
+            users_per_tti_limit,
+            throughput_history_size
+        );
 
     try
     {

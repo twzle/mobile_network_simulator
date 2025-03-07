@@ -41,7 +41,8 @@ public:
         double carrier_frequency,
         int bs_transmission_power,
         std::string area_type,
-        int users_per_tti_limit);
+        int users_per_tti_limit,
+        double throughput_history_size);
 
     void validate();
     void validate_scheduler_specific_parameters();
@@ -69,7 +70,7 @@ public:
     int get_bs_transmission_power();
     std::string get_area_type();
     int get_users_per_tti_limit();
-
+    int get_throughput_history_size();
 
 private:
     int launches;                         // Количество повторов
@@ -91,5 +92,6 @@ private:
     double carrier_frequency;             // Несущая частота
     int bs_transmission_power;            // Мощность передачи базовой станции
     std::string area_type;                // Тип местности
-    int users_per_tti_limit;               // Лимит обслуживаемых пользователей за TTI
+    int users_per_tti_limit;              // Лимит обслуживаемых пользователей за TTI
+    int throughput_history_size;          // Размер истории пропускной способности (PF)
 };

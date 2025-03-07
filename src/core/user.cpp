@@ -6,9 +6,13 @@
 
 int User::last_id;
 
-User::User(uint8_t cqi, Position position, Mobility mobility, int throughput_history_size)
-    : id(++last_id), cqi(cqi),
-      time_from_last_channel_sync(0), position(position), mobility(mobility)
+User::User(
+    uint8_t cqi, 
+    Position position, Mobility mobility, 
+    int throughput_history_size, double quant)
+    : id(++last_id), cqi(cqi), time_from_last_channel_sync(0), 
+    position(position), mobility(mobility),
+    quant(quant)
 {
     initialize_throughput_history(throughput_history_size);
 }
@@ -218,4 +222,9 @@ double User::get_time_from_last_channel_sync() const
 void User::set_time_from_last_channel_sync(double time_from_last_channel_sync)
 {
     this->time_from_last_channel_sync = time_from_last_channel_sync;
+}
+
+double User::get_quant() const
+{
+    return quant;
 }

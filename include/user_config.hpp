@@ -7,13 +7,17 @@
 class UserConfig
 {
 public:
-    UserConfig(double x, double y, double z, double speed, std::string direction);
+    UserConfig(
+        double x, double y, double z, 
+        double speed, std::string direction,
+        double quant);
 
     double get_x();
     double get_y();
     double get_z();
     double get_speed();
     std::string get_direction();
+    double get_quant();
 
 private:
     double x;              // Начальная координата x (метры)
@@ -21,4 +25,5 @@ private:
     double z;              // Начальная координата z (метры)
     double speed;          // Скорость (км/ч)
     std::string direction; // Направление движения (вперед "forward", назад "back", налево "left", направо "right")
+    double quant;          // Квант времени (RB/мс)
 };

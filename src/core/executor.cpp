@@ -33,7 +33,10 @@ std::unique_ptr<BaseScheduler> Executor::initialize_scheduler(){
     auto scheduler = settings.get_scheduler_instance();
 
     scheduler->set_base_station(settings.get_bs_config());
-    scheduler->set_users(settings.get_user_configs());
+    scheduler->set_users(
+        settings.get_user_configs(), 
+        settings.get_throughput_history_size()
+    );
     scheduler->set_resource_block_per_tti_limit(
         settings.get_resource_block_per_tti_limit());
     scheduler->set_tti_duration(settings.get_tti_value());

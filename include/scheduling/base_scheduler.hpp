@@ -43,7 +43,10 @@ public:
     void set_users_per_tti_limit(int users_per_tti_limit);
 
     // Подключение пользователей для обслуживания
-    void set_users(std::vector<UserConfig> user_count);
+    void set_users(
+        std::vector<UserConfig> user_count,
+        int throughput_history_size
+    );
     User *get_user_ptr(int user_id);
 
     // Получение статистики выполнения

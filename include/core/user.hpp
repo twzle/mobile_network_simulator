@@ -14,7 +14,10 @@ class User
 {
 public:
     // Конструктор, который автоматически присваивает уникальный id
-    User(uint8_t cqi, Position position, Mobility mobility, int throughput_history_size);
+    User(
+        uint8_t cqi,
+        Position position, Mobility mobility,
+        int throughput_history_size, double quant);
 
     static void initialize();
     static void reset_last_id();
@@ -48,6 +51,7 @@ public:
     void set_time_from_last_channel_sync(double time_from_last_channel_sync);
 
     std::string get_random_move_direction();
+    double get_quant() const;
 
 private:
     int id;                               // Уникальный идентификатор
@@ -59,7 +63,8 @@ private:
     double current_throughput;            // Текущая пропускная способность
     double average_historical_throughput; // Историческое значение пропускной способности (R)
     int throughput_history_size;          // Размер истории
-    bool resource_candidate;           // Претендовал ли пользователь на ресурсы в TTI
+    bool resource_candidate;              // Претендовал ли пользователь на ресурсы в TTI
+    double quant;                         // Квант времени (RB/мс)
 
     static int last_id; // Статическая переменная для отслеживания последнего id
 };
