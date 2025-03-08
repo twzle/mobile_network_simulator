@@ -55,6 +55,8 @@ void FixedDRRSchedulerWithUserQuant::run()
                 {
                     // Проверка первого пакета в очереди
                     Packet packet = queue.front();
+                    User* user_ptr = packet.get_user_ptr();
+
                     int packet_size_in_bytes = packet.get_size();
                     int packet_size_in_rb =
                         convert_packet_size_to_rb_number(
@@ -69,14 +71,14 @@ void FixedDRRSchedulerWithUserQuant::run()
                     }
 
                     // Если размер пакета больше, чем дефицит, то переход к следующей очереди
-                    if (packet_size_in_rb > queue.get_deficit() + epsilon)
+                    user_ptr->set_deficit(user_ptr->get_deficit() - packet_size_in_rb);
                     {
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
                         // Кандидаты на получение ресурсов только пользователь,
-                        // Очередь без дефицита не кандидат
-                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        // Пользователь без дефицита не кандидат
+                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
@@ -115,7 +117,7 @@ void FixedDRRSchedulerWithUserQuant::run()
                     {
                         // Обслуживание пакета
                         queue.pop();
-                        queue.set_deficit(queue.get_deficit() - packet_size_in_rb);
+                        user_ptr->set_deficit(user_ptr->get_deficit() - packet_size_in_rb);
 
                         users_served_in_tti.insert(packet.get_user_ptr());
 
@@ -150,7 +152,7 @@ void FixedDRRSchedulerWithUserQuant::run()
                 }
             }
 
-            check_queue_remaining_scheduled_packets(
+            check_queue_remaining_scheduled_packets_with_user_quant(
                 queue, current_time, tti_stats);
 
             stats.update_queue_time_stats(

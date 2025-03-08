@@ -78,8 +78,8 @@ void DefaultDRRSchedulerWithUserQuant::run()
                         scheduler_state = set_idle(scheduler_state);
 
                         // Кандидаты на получение ресурсов только пользователь,
-                        // Очередь без дефицита не кандидат
-                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        // Пользователь без дефицита не кандидат
+                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
@@ -156,7 +156,7 @@ void DefaultDRRSchedulerWithUserQuant::run()
                 }
             }
 
-            check_queue_remaining_scheduled_packets(
+            check_queue_remaining_scheduled_packets_with_user_quant(
                 queue, current_time, tti_stats);
 
             stats.update_queue_time_stats(

@@ -65,6 +65,153 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets(
                 // Отметка пользователя как активного претендента на ресурсы
                 tti_stats.mark_user_as_resource_candidate(
                     packet.get_user_ptr());
+
+                tti_stats.mark_queue_as_resource_candidate(
+                    packet.get_queue());
+            }
+        }
+
+        // Удаление первого элемента для доступа к следующим
+        queue.pop();
+        // Сохранение во временной очереди пакета для восстановления
+        tmp.push(packet);
+
+        ++packet_count;
+    }
+
+    // Восстановление пакетов в исходной очереди из временной
+    while (tmp.size() > 0)
+    {
+        Packet packet = tmp.front();
+
+        // Удаление первого элемента для доступа к следующим
+        tmp.pop();
+        // Восстановление пакета из временной очереди
+        queue.push(packet);
+    }
+}
+
+void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_queue_quant(
+    PacketQueue &queue, double current_time, TTIStats &tti_stats)
+{
+    PacketQueue tmp(queue.get_quant(), queue.get_limit());
+
+    double current_deficit = queue.get_deficit();
+
+    int packet_count = 0;
+
+    // Проверка пакетов исходной очереди на факт доступности
+    while (queue.size() > 0)
+    {
+        Packet packet = queue.front();
+
+        // Если пакет не пришел, его время больше текущего
+        if (current_time + epsilon < packet.get_scheduled_at())
+        {
+            // Конец перебора при встрече первого непришедшего пакета
+            break;
+        }
+
+        // Если пакет уже был доступен по времени
+        if (packet.get_scheduled_at() < current_time - epsilon)
+        {
+            // Первый непришедший пакет учтен DRR, остальные нет
+            if (packet_count > 0)
+            {
+                // Отметка пользователя как активного претендента на ресурсы
+                tti_stats.mark_user_as_resource_candidate(
+                    packet.get_user_ptr());
+
+                int packet_size_in_bytes = packet.get_size();
+                int packet_size_in_rb =
+                    convert_packet_size_to_rb_number(
+                        packet.get_user_ptr(), packet_size_in_bytes);
+
+                // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
+                if (packet_size_in_rb < current_deficit - epsilon)
+                {
+                    // Отметка очереди как активного претендента на ресурсы
+                    tti_stats.mark_queue_as_resource_candidate(
+                        packet.get_queue());
+
+                    current_deficit -= packet_size_in_rb;
+                }
+            }
+        }
+
+        // Удаление первого элемента для доступа к следующим
+        queue.pop();
+        // Сохранение во временной очереди пакета для восстановления
+        tmp.push(packet);
+
+        ++packet_count;
+    }
+
+    // Восстановление пакетов в исходной очереди из временной
+    while (tmp.size() > 0)
+    {
+        Packet packet = tmp.front();
+
+        // Удаление первого элемента для доступа к следующим
+        tmp.pop();
+        // Восстановление пакета из временной очереди
+        queue.push(packet);
+    }
+}
+
+void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_user_quant(
+    PacketQueue &queue, double current_time, TTIStats &tti_stats)
+{
+    PacketQueue tmp(queue.get_quant(), queue.get_limit());
+
+    std::map<int, double> current_user_deficit;
+
+    for (auto &user_info : connected_users)
+    {
+        current_user_deficit[user_info.first] = user_info.second.get_deficit();
+    }
+
+    int packet_count = 0;
+
+    // Проверка пакетов исходной очереди на факт доступности
+    while (queue.size() > 0)
+    {
+        Packet packet = queue.front();
+
+        // Если пакет не пришел, его время больше текущего
+        if (current_time + epsilon < packet.get_scheduled_at())
+        {
+            // Конец перебора при встрече первого непришедшего пакета
+            break;
+        }
+
+        // Если пакет уже был доступен по времени
+        if (packet.get_scheduled_at() < current_time - epsilon)
+        {
+            // Первый непришедший пакет учтен DRR, остальные нет
+            if (packet_count > 0)
+            {
+                // Отметка пользователя как активного претендента на ресурсы
+                tti_stats.mark_queue_as_resource_candidate(
+                    packet.get_queue());
+
+                int packet_size_in_bytes = packet.get_size();
+                int packet_size_in_rb =
+                    convert_packet_size_to_rb_number(
+                        packet.get_user_ptr(), packet_size_in_bytes);
+
+                double current_deficit =
+                    current_user_deficit[packet.get_user_ptr()->get_id()];
+
+                    // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
+                    if (packet_size_in_rb < current_deficit - epsilon)
+                {
+                    // Отметка очереди как активного претендента на ресурсы
+                    tti_stats.mark_user_as_resource_candidate(
+                        packet.get_user_ptr());
+
+                    current_user_deficit[packet.get_user_ptr()->get_id()] -= packet_size_in_rb;
+                }
             }
         }
 
@@ -144,7 +291,7 @@ void BaseRRScheduler::sync_user_channels()
             double sinr = channel.get_sinr(
                 user_received_signal_power,
                 noise_power, interference_power);
-            
+
             StandardManager::get_cqi_from_sinr(sinr);
             // std::cout << cqi << "\n";
 

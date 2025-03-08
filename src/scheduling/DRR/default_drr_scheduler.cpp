@@ -153,7 +153,7 @@ void DefaultDRRScheduler::run()
                 }
             }
 
-            check_queue_remaining_scheduled_packets(
+            check_queue_remaining_scheduled_packets_with_queue_quant(
                 queue, current_time, tti_stats);
 
             stats.update_queue_time_stats(
