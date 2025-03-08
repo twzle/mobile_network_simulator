@@ -1,0 +1,37 @@
+launches: 1
+standard_type: "LTE"
+scheduler_type: "DefaultPFScheduler"
+area_type: "Dense Urban"
+
+tti_duration: "1ms"
+channel_sync_interval: "10ms"
+
+carrier_frequency: 2000
+bs_transmission_power: 46
+
+bandwidth: 5
+base_cqi: 1
+
+packet_count: 10
+packet_size: 159
+time_lambda: 1500
+
+queue_count: 1
+queue_quant: 100
+queue_limit: 10000
+users_per_tti_limit: 4
+
+bs_config:
+  x: 0
+  y: 0
+  z: 25
+
+user_configs:
+  - x: 8000
+    y: 8000
+    z: 1.5
+    speed: 0
+    direction: "random"
+    quant: 10
+
+throughput_history_size: 2000

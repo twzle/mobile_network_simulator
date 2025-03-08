@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include "scheduling/base_scheduler.hpp"
 #include "scheduling/RR/base_rr_scheduler.hpp"
@@ -16,9 +17,9 @@
 #include "scheduling/DRR/cyclic_drr_scheduler_with_user_quant.hpp"
 #include "scheduling/DRR/default_drr_scheduler_with_user_quant.hpp"
 #include "core/channel.hpp"
-#include "standard_info.hpp"
-#include "user_config.hpp"
-#include "bs_config.hpp"
+#include "config/standard_info.hpp"
+#include "config/user_config.hpp"
+#include "config/bs_config.hpp"
 #include "const.hpp"
 
 class Settings
@@ -98,3 +99,5 @@ private:
     int users_per_tti_limit;              // Лимит обслуживаемых пользователей за TTI
     int throughput_history_size;          // Размер истории пропускной способности (PF)
 };
+
+Settings load_settings_from_yaml(const std::string &filename);

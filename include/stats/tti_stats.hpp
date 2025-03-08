@@ -5,8 +5,8 @@
 #include <cmath>
 
 #include "core/user.hpp"
+#include "config/standard_info.hpp"
 #include "const.hpp"
-#include "standard_info.hpp"
 
 class TTIStats
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "settings.hpp"
+#include "config/settings.hpp"
 #include "stats/mean_stats.hpp"
 
 class Executor

@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 
-#include "user_config.hpp"
-#include "bs_config.hpp"
+#include "config/user_config.hpp"
+#include "config/bs_config.hpp"
 #include "core/state.hpp"
 #include "core/packet_queue.hpp"
 #include "core/user.hpp"

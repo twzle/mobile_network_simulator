@@ -1,4 +1,4 @@
-#include "standard_info.hpp"
+#include "config/standard_info.hpp"
 
 // Статическое объявление мап
 std::map<std::string, StandardInfo> StandardManager::standard_info_map;
@@ -158,9 +158,9 @@ void StandardManager::initialize()
                 {{-6.9390, 1}, {-5.1470, 2}, {-3.1800, 3}, {-1.2530, 4}, {0.7610, 5}, {2.6990, 6}, {4.6930, 7}, {6.5250, 8}, {8.5730, 9}, {10.3660, 10}, {12.2890, 11}, {14.1730, 12}, {15.8880, 13}, {17.8140, 14}, {19.8290, 15}},
                 {{1.4, 6}, {3, 15}, {5, 25}, {10, 50}, {15, 75}, {20, 100}},
                 {"DefaultRRScheduler",
-                 "FixedDRRScheduler", "FixedDRRSchedulerWithUserQuant"
-                 "CyclicDRRScheduler", "CyclicDRRSchedulerWithUserQuant"
-                 "DefaultDRRScheduler", "DefaultDRRSchedulerWithUserQuant"
+                 "FixedDRRScheduler", "FixedDRRSchedulerWithUserQuant",
+                 "CyclicDRRScheduler", "CyclicDRRSchedulerWithUserQuant",
+                 "DefaultDRRScheduler", "DefaultDRRSchedulerWithUserQuant",
                  "DefaultPFScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
                 {"Dense Urban", "Urban", "Suburban"},

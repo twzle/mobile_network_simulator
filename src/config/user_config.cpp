@@ -1,4 +1,4 @@
-#include "user_config.hpp"
+#include "config/user_config.hpp"
 
 UserConfig::UserConfig(
     double x, double y, double z,

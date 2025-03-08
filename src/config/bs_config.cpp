@@ -1,4 +1,4 @@
-#include "bs_config.hpp"
+#include "config/bs_config.hpp"
 
 BSConfig::BSConfig() : x(0), y(0), z(0) {}
 

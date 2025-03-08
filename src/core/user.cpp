@@ -1,6 +1,6 @@
 #include "core/user.hpp"
 #include "core/user_generator.hpp"
-#include "standard_info.hpp"
+#include "config/standard_info.hpp"
 #include <algorithm>
 #include <iostream>
 
