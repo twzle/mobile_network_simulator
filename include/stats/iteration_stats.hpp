@@ -53,6 +53,7 @@ public:
 
     void add_queue_packet_stats(
         size_t queue_id,
+        int user_id,
         double processing_delay);
 
     void update_queue_time_stats(
@@ -105,8 +106,9 @@ public:
     std::vector<double> scheduler_fairness_for_users; // За каждый TTI
     double scheduler_average_fairness_for_users = 0;  // Среднее за весь период работы
 
-    std::vector<PacketStats> queue_stats;
-    std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов (секунды)
+    std::vector<PacketStats> packet_stats;
+    std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов по очередям (секунды)
+    std::map<int, double> user_average_packet_processing_delay; // Средние задержки обработки пакетов по пользователям (секунды)
     double scheduler_average_packet_processing_delay = 0; // Общее среднее время задержки обработки пакетов (секунды)
 
     // Общее время работы (сумма processing, idle, wait)

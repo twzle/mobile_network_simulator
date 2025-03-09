@@ -9,6 +9,8 @@
 
 #include "iteration_stats.hpp"
 
+
+// Средняя статистика за все итерации моделирования 
 class MeanStats
 {
 public:
@@ -16,7 +18,9 @@ public:
     MeanStats(const MeanStats &) = delete;
     void calculate();
     void calculate_mean_values();
-    void calculate_mean_delays();
+    void calculate_mean_queue_packet_processing_delays();
+    void calculate_mean_user_packet_processing_delays();
+    void calculate_mean_scheduler_packet_processing_delay();
     void calculate_mean_packet_scheduling_time();
     void calculate_mean_queue_processing_time();
 
@@ -35,13 +39,15 @@ public:
         const double &accuracy = 1);
 
     void evaluate_confidence_intervals();
-    void evaluate_confidence_queue_processing_delay_intervals();
+    void evaluate_confidence_queue_packet_processing_delay_intervals();
+    void evaluate_confidence_user_packet_processing_delay_intervals();
 
     void init_history();
     void init_queue_processing_delay_history();
 
-        void collect_history();
-    void collect_queue_processing_delay_history();
+    void collect_history();
+    void collect_queue_packet_processing_delay_history();
+    void collect_user_packet_processing_delay_history();
 
     void show();
     void draw_delay_plot();
@@ -91,17 +97,15 @@ public:
     std::vector<double> queue_mean_processing_time; // TODO: поменять на std::map<int, double>
     double total_mean_processing_time_by_scheduler = 0;
 
-    // История ср. времени задержек обработки пакетов в очередях по запускам
-    std::map<int, std::vector<double>> queue_processing_delay_history;
-    std::map<int, double> mean_queue_processing_delay;
-    // История ср. задержек обработки пакетов в планировщике (во всех очередях) по запускам
-    std::vector<double> scheduler_processing_delay_history;
-    double mean_scheduler_processing_delay = 0;
+    // История ср. времени задержек обработки пакетов в очередям по итерациям
+    std::map<int, std::vector<double> > queue_packet_processing_delay_history;
+    std::map<int, double> mean_queue_packet_processing_delays;
+    // История ср. времени задержек обработки пакетов по пользователям по итерациям
+    std::map<int, std::vector<double> > user_packet_processing_delay_history;
+    std::map<int, double> mean_user_packet_processing_delays;
+    // История ср. задержек обработки пакетов в планировщике по итерациям
+    std::vector<double> scheduler_packet_processing_delay_history;
+    double mean_scheduler_packet_processing_delay = 0;
 
     std::vector<IterationStats> stats_array;
-
-    // История ср. времени работы каждой очереди по запускам
-    std::map<int, std::vector<double>> mean_processing_time_by_queue_history;
-    // История ср. времени работы планировщика по запускам
-    std::vector<double> mean_processing_time_by_scheduler_history;
 };

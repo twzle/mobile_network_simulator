@@ -158,10 +158,12 @@ void IterationStats::update_scheduler_throughput(
 
 void IterationStats::add_queue_packet_stats(
     size_t queue_id,
+    int user_id,
     double processing_delay)
 {
-    queue_stats.emplace_back(
+    packet_stats.emplace_back(
         queue_id,
+        user_id,
         processing_delay);
 }
 
@@ -318,15 +320,24 @@ void IterationStats::evaluate_throughput_stats()
 
 void IterationStats::evaluate_delay_stats()
 {
+    // Статистика по очередям
     std::map<int, double> total_queue_packet_processing_delay;
     std::map<int, double> total_queue_processed_packets;
 
+    // Статистика по пользователям
+    std::map<int, double> total_user_packet_processing_delay;
+    std::map<int, double> total_user_processed_packets;
+
     // Подсчет времени задержек обслуживания пакетов по очередям
-    for (auto &stats : queue_stats)
+    for (auto &stats : packet_stats)
     {
         total_queue_packet_processing_delay[stats.queue_id] +=
             stats.processing_delay;
         total_queue_processed_packets[stats.queue_id] += 1;
+
+        total_user_packet_processing_delay[stats.user_id] +=
+            stats.processing_delay;
+        total_user_processed_packets[stats.user_id] += 1;
     }
 
     double total_average_scheduler_packet_processing_delay = 0;
@@ -345,6 +356,17 @@ void IterationStats::evaluate_delay_stats()
             this->queue_average_packet_processing_delay[queue_delay_stats.first];
     }
 
+    for (auto &queue_delay_stats : total_user_packet_processing_delay)
+    {
+        double total_packet_processing_delay_for_user =
+            total_user_packet_processing_delay[queue_delay_stats.first];
+        size_t total_packet_count_for_user =
+            total_user_processed_packets[queue_delay_stats.first];
+
+        this->user_average_packet_processing_delay[queue_delay_stats.first] =
+            total_packet_processing_delay_for_user / total_packet_count_for_user;
+    }
+
     size_t queue_count = total_queue_packet_processing_delay.size();
     this->scheduler_average_packet_processing_delay =
         total_average_scheduler_packet_processing_delay / queue_count;
@@ -352,5 +374,5 @@ void IterationStats::evaluate_delay_stats()
 
 void IterationStats::release_memory_resources()
 {
-    queue_stats.clear();
+    packet_stats.clear();
 }

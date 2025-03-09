@@ -141,6 +141,7 @@ void FixedDRRScheduler::run()
 
                         stats.add_queue_packet_stats(
                             packet.get_queue(),
+                            packet.get_user_ptr()->get_id(),
                             current_time - packet.get_scheduled_at());
 
                         queue_state = set_processing(queue_state);
