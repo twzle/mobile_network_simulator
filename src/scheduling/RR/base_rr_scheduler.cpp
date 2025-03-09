@@ -128,7 +128,7 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_queue_quant(
                         packet.get_user_ptr(), packet_size_in_bytes);
 
                 // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-                if (packet_size_in_rb < current_deficit - epsilon)
+                if (packet_size_in_rb <= current_deficit - epsilon)
                 {
                     // Отметка очереди как активного претендента на ресурсы
                     tti_stats.mark_queue_as_resource_candidate(
@@ -204,7 +204,7 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_user_quant(
                     current_user_deficit[packet.get_user_ptr()->get_id()];
 
                     // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-                    if (packet_size_in_rb < current_deficit - epsilon)
+                    if (packet_size_in_rb <= current_deficit - epsilon)
                 {
                     // Отметка очереди как активного претендента на ресурсы
                     tti_stats.mark_user_as_resource_candidate(
