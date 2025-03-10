@@ -203,6 +203,11 @@ void Settings::validate_scheduler_specific_parameters()
         {
             throw std::invalid_argument("Allowed base CQI value for PF scheduler is 1.");
         }
+
+        if (queue_count != 1)
+        {
+            throw std::invalid_argument("Allowed queue count for PF scheduler is 1.");
+        }
     }
 
     if (scheduler_type == "DefaultRRScheduler" ||
