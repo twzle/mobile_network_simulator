@@ -22,6 +22,8 @@ public:
     void evaluate_stats() override;
     void sync_user_channels() override;
 
+    void reset_served_users();
+
 protected:
     PacketQueue main_queue;              // Основная очередь для обслуживания
     RelevantPacketQueue relevant_queue;  // Вспомогательная очередь пакетов готовых к обслуживанию

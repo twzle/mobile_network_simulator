@@ -18,6 +18,7 @@ void BasePFScheduler::schedule(PacketQueue &&packet_queue)
 void BasePFScheduler::run()
 {
     std::cout << "PF START\n";
+
     // Метка времени в момент запуска планировщика
     session.set_scheduling_start_time(0.0);
     double current_time = session.get_scheduling_start_time();
@@ -26,20 +27,21 @@ void BasePFScheduler::run()
     // Цикл до обслуживания всех пакетов во всех очередях
     while (session.get_processed_packet_count() < this->total_packets)
     {
-        std::cout << "TTI START\n";
+        // std::cout << "TTI START\n";
         // Начало TTI
         TTIStats tti_stats = TTIStats(
             1,
             connected_users.size(),
             tti_duration);
 
+        reset_served_users();
         flush_user_context();
         sync_user_channels();
         update_user_priorities();
 
         collect_relevant_packets(current_time, tti_stats);
-        exculde_users_from_scheduling();
-        filter_packets_of_excluded_from_scheduling_users();
+        // exculde_users_from_scheduling();
+        // filter_packets_of_excluded_from_scheduling_users();
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
@@ -110,11 +112,10 @@ void BasePFScheduler::run()
             }
         }
 
-        std::cout << "TTI END\n";
+        // std::cout << "TTI END\n";
         // Конец TTI
         current_time += this->tti_duration;
-        sorted_resource_candidates_for_tti.clear();
-        
+
         update_user_throughputs();
 
         stats.update_scheduler_time_stats(
@@ -143,8 +144,6 @@ void BasePFScheduler::run()
 // Фильтрация актуальных пакетов по времени прихода на текущий момент
 void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tti_stats)
 {
-    current_time = 100;
-
     while (main_queue.size() > 0)
     {
         Packet packet = main_queue.front();
@@ -207,7 +206,7 @@ void BasePFScheduler::sync_user_channels()
         // Периодеческая синхронизация позиции пользователя
         if (time_from_last_channel_sync <= epsilon)
         {
-            std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
+            // std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
             user.move(channel_sync_interval);
 
             double user_to_bs_distance =
@@ -215,7 +214,7 @@ void BasePFScheduler::sync_user_channels()
                     base_station.get_position()) /
                 1000; // (метры -> км)
 
-            std::cout << "Distance = " << user_to_bs_distance << "\n";
+            // std::cout << "Distance = " << user_to_bs_distance << "\n";
 
             double user_height = user.get_position().get_z();
             double bs_height = base_station.get_position().get_z();
@@ -235,10 +234,10 @@ void BasePFScheduler::sync_user_channels()
                 user_received_signal_power,
                 noise_power, interference_power);
 
-            std::cout << "SINR = " << sinr << "\n";
+            // std::cout << "SINR = " << sinr << "\n";
 
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
-            std::cout << "CQI = " << cqi << "\n";
+            // std::cout << "CQI = " << cqi << "\n";
 
             user.set_cqi(cqi);
         }
@@ -275,7 +274,7 @@ void BasePFScheduler::update_user_priorities()
 
         user_info.second.set_priority(priority);
 
-        std::cout << "User #" << user_info.first << ". Priority = " << priority << ", AV TPUT = " << average_throughput << "\n";
+        // std::cout << "User #" << user_info.first << ". Priority = " << priority << ", AV TPUT = " << average_throughput << "\n";
     }
 }
 
@@ -376,4 +375,9 @@ void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users()
     }
 
     relevant_queue = std::move(tmp_queue);
+}
+
+void BasePFScheduler::reset_served_users()
+{
+    sorted_resource_candidates_for_tti.clear();
 }

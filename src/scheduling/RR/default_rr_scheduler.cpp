@@ -23,7 +23,8 @@ void DefaultRRScheduler::run()
             scheduled_queues.size(),
             connected_users.size(),
             tti_duration);
-
+        
+        reset_served_users();
         sync_user_channels();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;

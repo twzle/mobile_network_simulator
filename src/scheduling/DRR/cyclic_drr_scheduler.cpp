@@ -24,6 +24,7 @@ void CyclicDRRScheduler::run()
             connected_users.size(),
             tti_duration);
 
+        reset_served_users();
         sync_user_channels();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
@@ -90,14 +91,16 @@ void CyclicDRRScheduler::run()
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit){
+                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
+                    {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
-                        
+
                         // Не найден в списке пользователей на текущий TTI
-                        if (it == users_served_in_tti.end()){
+                        if (it == users_served_in_tti.end())
+                        {
                             queue_state = set_idle(queue_state);
                             scheduler_state = set_idle(scheduler_state);
-    
+
                             // Кандидаты на получение ресурсов пользователь и очередь
                             tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                             tti_stats.mark_queue_as_resource_candidate(packet.get_queue());

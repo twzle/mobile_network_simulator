@@ -24,6 +24,7 @@ void FixedDRRSchedulerWithUserQuant::run()
             connected_users.size(),
             tti_duration);
 
+        reset_served_users();
         sync_user_channels();
         update_users_deficit();
 
@@ -55,7 +56,7 @@ void FixedDRRSchedulerWithUserQuant::run()
                 {
                     // Проверка первого пакета в очереди
                     Packet packet = queue.front();
-                    User* user_ptr = packet.get_user_ptr();
+                    User *user_ptr = packet.get_user_ptr();
 
                     int packet_size_in_bytes = packet.get_size();
                     int packet_size_in_rb =
@@ -95,7 +96,7 @@ void FixedDRRSchedulerWithUserQuant::run()
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit)
+                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
                     {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
 
@@ -204,10 +205,10 @@ int FixedDRRSchedulerWithUserQuant::get_next_initial_queue()
 // Обновление дефицитов пользователей
 void FixedDRRSchedulerWithUserQuant::update_users_deficit()
 {
-    for (auto& user_info : connected_users){
+    for (auto &user_info : connected_users)
+    {
         user_info.second.set_deficit(
-            user_info.second.get_deficit() + 
-            user_info.second.get_quant()
-        );
+            user_info.second.get_deficit() +
+            user_info.second.get_quant());
     }
 }

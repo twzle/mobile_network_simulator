@@ -9,7 +9,7 @@ Executor::Executor(Settings settings)
     TimeGenerator::set_distribution(
         std::exponential_distribution<>(settings.get_time_lambda()));
     UserGenerator::set_user_id_distribution(
-        std::uniform_int_distribution<>(1, settings.get_user_count()));
+        std::uniform_int_distribution<>(0, settings.get_user_count() - 1));
     UserGenerator::set_user_move_direction_distribution(
         std::uniform_int_distribution<>(1, 4));
 }
@@ -82,7 +82,7 @@ void Executor::execute()
     scheduler->run();
 
     IterationStats &stats = scheduler->get_stats();
-    stats.evaluate();
+    stats.evaluate(settings.get_queue_count(), settings.get_user_count());
     stats.release_memory_resources();
     stats.print();
 

@@ -303,3 +303,8 @@ void BaseRRScheduler::sync_user_channels()
         }
     }
 }
+
+
+void BaseRRScheduler::reset_served_users(){
+    users_served_in_tti.clear();
+}

@@ -100,6 +100,10 @@ void Settings::validate()
         throw std::invalid_argument("Base station should be place in {0, 0, 25}.");
     }
 
+    if (user_configs.size() < 1){
+        throw std::invalid_argument("At least 1 user required.");
+    }
+
     int user_id = 0;
     for (auto &user : user_configs)
     {

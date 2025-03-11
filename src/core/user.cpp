@@ -24,7 +24,7 @@ void User::initialize()
 
 void User::reset_last_id()
 {
-    last_id = 0;
+    last_id = -1;
 }
 
 int User::get_id() const

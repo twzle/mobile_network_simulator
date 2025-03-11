@@ -24,6 +24,7 @@ void FixedDRRScheduler::run()
             connected_users.size(),
             tti_duration);
 
+        reset_served_users();
         sync_user_channels();
 
         SchedulerState scheduler_state = SchedulerState::UNDEFINED;
@@ -92,7 +93,7 @@ void FixedDRRScheduler::run()
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit)
+                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
                     {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
 

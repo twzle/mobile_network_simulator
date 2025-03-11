@@ -383,7 +383,7 @@ void MeanStats::evaluate_confidence_queue_packet_processing_delay_intervals()
     {
         // Задержка обработки пакетов по очередям
         std::cout << "\nОбщая средняя задержка обслуживания пакетов в очереди №"
-                  << queue_id
+                  << queue_id + 1
                   << " (queue_packet_processing_delay)" << std::endl;
         calculate_confidence_interval(
             queue_packet_processing_delay_history[queue_id],
@@ -400,7 +400,7 @@ void MeanStats::evaluate_confidence_user_packet_processing_delay_intervals()
     {
         // Задержка обработки пакетов по пользователям
         std::cout << "\nОбщая средняя задержка обслуживания пакетов пользователя №"
-                  << user_id
+                  << user_id + 1
                   << " (user_packet_processing_delay)" << std::endl;
         calculate_confidence_interval(
             user_packet_processing_delay_history[user_id],
@@ -446,14 +446,19 @@ void MeanStats::show()
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета
 
-    for (size_t queue_id = 0;
-         queue_id < queue_packet_processing_delay_history.size();
-         ++queue_id)
+    for (auto& queue : queue_packet_processing_delay_history)
     {
         std::cout << "Mean queue packet processing delay time "
-                  << "(Queue #" << queue_id << ") = "
-                  << mean_queue_packet_processing_delays[queue_id] * 1000 << " ms\n";
+                  << "(Queue #" << queue.first<< ") = "
+                  << mean_queue_packet_processing_delays[queue.first] * 1000 << " ms\n";
     }
+
+    for (auto& user : user_packet_processing_delay_history)
+   {
+       std::cout << "Mean user packet processing delay time "
+                 << "(User #" << user.first << ") = "
+                 << mean_user_packet_processing_delays[user.first] * 1000 << " ms\n";
+   }
 }
 
 std::string MeanStats::write_yaml()

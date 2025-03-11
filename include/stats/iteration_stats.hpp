@@ -73,7 +73,7 @@ public:
         double throughput,
         bool is_valid);
 
-    void evaluate();
+    void evaluate(int queue_count, int user_count);
 
     void evaluate_queue_idle_time_stats();
     void evaluate_queue_wait_time_stats();
@@ -83,7 +83,7 @@ public:
     void evaluate_fairness_for_queues_stats();
     void evaluate_fairness_for_users_stats();
 
-    void evaluate_delay_stats();
+    void evaluate_delay_stats(int queue_count, int user_count);
 
     void evaluate_scheduling_stats();
 

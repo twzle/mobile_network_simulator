@@ -38,6 +38,8 @@ public:
     void sync_user_channels() override;
     void evaluate_stats() override;
 
+    void reset_served_users();
+
 protected:
     size_t current_initial_absolute_queue_id = 0; // Абсолютный ID начальной очереди
     std::vector<PacketQueue> scheduled_queues;    // Очереди для обслуживания

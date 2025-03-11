@@ -24,6 +24,7 @@ void CyclicDRRSchedulerWithUserQuant::run()
             connected_users.size(),
             tti_duration);
 
+        reset_served_users();
         sync_user_channels();
         update_users_deficit();
 
@@ -55,7 +56,7 @@ void CyclicDRRSchedulerWithUserQuant::run()
                 {
                     // Проверка первого пакета в очереди
                     Packet packet = queue.front();
-                    User* user_ptr = packet.get_user_ptr();
+                    User *user_ptr = packet.get_user_ptr();
 
                     int packet_size_in_bytes = packet.get_size();
                     int packet_size_in_rb =
@@ -93,14 +94,16 @@ void CyclicDRRSchedulerWithUserQuant::run()
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit){
+                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
+                    {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
-                        
+
                         // Не найден в списке пользователей на текущий TTI
-                        if (it == users_served_in_tti.end()){
+                        if (it == users_served_in_tti.end())
+                        {
                             queue_state = set_idle(queue_state);
                             scheduler_state = set_idle(scheduler_state);
-    
+
                             // Кандидаты на получение ресурсов пользователь и очередь
                             tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                             tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
@@ -206,10 +209,10 @@ int CyclicDRRSchedulerWithUserQuant::get_next_initial_queue()
 // Обновление дефицитов пользователей
 void CyclicDRRSchedulerWithUserQuant::update_users_deficit()
 {
-    for (auto& user_info : connected_users){
+    for (auto &user_info : connected_users)
+    {
         user_info.second.set_deficit(
-            user_info.second.get_deficit() + 
-            user_info.second.get_quant()
-        );
+            user_info.second.get_deficit() +
+            user_info.second.get_quant());
     }
 }
