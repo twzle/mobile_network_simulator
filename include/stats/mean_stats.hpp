@@ -50,6 +50,9 @@ public:
     void collect_user_packet_processing_delay_history();
 
     void show();
+    void show_queue_delays();
+    void show_user_delays();
+
     void draw_delay_plot();
     void draw_scheduling_plot();
     void draw_queue_processing_time_plot();

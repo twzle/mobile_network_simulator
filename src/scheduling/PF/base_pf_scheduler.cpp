@@ -27,7 +27,7 @@ void BasePFScheduler::run()
     // Цикл до обслуживания всех пакетов во всех очередях
     while (session.get_processed_packet_count() < this->total_packets)
     {
-        // std::cout << "TTI START\n";
+        std::cout << "TTI START\n";
         // Начало TTI
         TTIStats tti_stats = TTIStats(
             1,
@@ -40,7 +40,7 @@ void BasePFScheduler::run()
         update_user_priorities();
 
         collect_relevant_packets(current_time, tti_stats);
-        // exculde_users_from_scheduling();
+        exclude_users_from_scheduling();
         // filter_packets_of_excluded_from_scheduling_users();
 
         int available_resource_blocks = this->resource_blocks_per_tti;
@@ -112,7 +112,7 @@ void BasePFScheduler::run()
             }
         }
 
-        // std::cout << "TTI END\n";
+        std::cout << "TTI END\n";
         // Конец TTI
         current_time += this->tti_duration;
 
@@ -289,7 +289,7 @@ void BasePFScheduler::update_user_throughputs()
     }
 }
 
-void BasePFScheduler::exculde_users_from_scheduling()
+void BasePFScheduler::exclude_users_from_scheduling()
 {
     if (sorted_resource_candidates_for_tti.size() <= (size_t)users_per_tti_limit)
     {

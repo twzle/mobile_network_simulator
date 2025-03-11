@@ -203,15 +203,22 @@ void IterationStats::print()
               << scheduler_average_packet_processing_delay * 1000
               << " ms\n"; // Среднее время задержки обслуживания пакета
 
-    for (size_t queue_id = 0;
-         queue_id < queue_average_packet_processing_delay.size();
-         ++queue_id)
-    {
-        std::cout << "Average queue packet processing delay time "
-                  << "(Queue #" << queue_id << ") = "
-                  << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
-    }
+    print_queue_delays();
+    print_user_delays();
+}
 
+void IterationStats::print_queue_delays(){
+    for (size_t queue_id = 0;
+        queue_id < queue_average_packet_processing_delay.size();
+        ++queue_id)
+   {
+       std::cout << "Average queue packet processing delay time "
+                 << "(Queue #" << queue_id << ") = "
+                 << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
+   }
+}
+
+void IterationStats::print_user_delays(){
     for (size_t user_id = 0;
         user_id < user_average_packet_processing_delay.size();
         ++user_id)
@@ -229,7 +236,10 @@ void IterationStats::evaluate(int queue_count, int user_count)
     evaluate_queue_processing_time_stats();
     evaluate_queue_total_time_stats();
 
-    evaluate_delay_stats(queue_count, user_count);
+    evaluate_user_delay_stats(user_count);
+    evaluate_queue_delay_stats(queue_count);
+    evaluate_scheduler_delay_stats();
+
     evaluate_fairness_for_queues_stats();
     evaluate_fairness_for_users_stats();
 
@@ -327,15 +337,11 @@ void IterationStats::evaluate_throughput_stats()
         sum_of_all_throughputs / scheduler_throughput.size();
 }
 
-void IterationStats::evaluate_delay_stats(int queue_count, int user_count)
+void IterationStats::evaluate_queue_delay_stats(int queue_count)
 {
     // Статистика по очередям
     std::map<int, double> total_queue_packet_processing_delay;
     std::map<int, double> total_queue_processed_packets;
-
-    // Статистика по пользователям
-    std::map<int, double> total_user_packet_processing_delay;
-    std::map<int, double> total_user_processed_packets;
 
     // Иницилизация
     for (int queue_id = 0; queue_id < queue_count; queue_id++)
@@ -344,25 +350,13 @@ void IterationStats::evaluate_delay_stats(int queue_count, int user_count)
         total_queue_processed_packets[queue_id] = 0;
     }
 
-    for (int user_id = 0; user_id < user_count; user_id++)
-    {
-        total_user_packet_processing_delay[user_id] = 0;
-        total_user_processed_packets[user_id] = 0;
-    }
-
     // Подсчет времени задержек обслуживания пакетов по очередям
     for (auto &stats : packet_stats)
     {
         total_queue_packet_processing_delay[stats.queue_id] +=
             stats.processing_delay;
         total_queue_processed_packets[stats.queue_id] += 1;
-
-        total_user_packet_processing_delay[stats.user_id] +=
-            stats.processing_delay;
-        total_user_processed_packets[stats.user_id] += 1;
     }
-
-    double total_average_scheduler_packet_processing_delay = 0;
 
     for (auto &queue_delay_stats : total_queue_packet_processing_delay)
     {
@@ -380,9 +374,28 @@ void IterationStats::evaluate_delay_stats(int queue_count, int user_count)
             this->queue_average_packet_processing_delay[queue_delay_stats.first] =
                 total_packet_processing_delay_in_queue / total_packet_count_in_queue;
         }
+    }
+}
 
-        total_average_scheduler_packet_processing_delay +=
-            this->queue_average_packet_processing_delay[queue_delay_stats.first];
+void IterationStats::evaluate_user_delay_stats(int user_count)
+{
+    // Статистика по пользователям
+    std::map<int, double> total_user_packet_processing_delay;
+    std::map<int, double> total_user_processed_packets;
+
+    // Иницилизация
+    for (int user_id = 0; user_id < user_count; user_id++)
+    {
+        total_user_packet_processing_delay[user_id] = 0;
+        total_user_processed_packets[user_id] = 0;
+    }
+
+    // Подсчет времени задержек обслуживания пакетов по пользователям
+    for (auto &stats : packet_stats)
+    {
+        total_user_packet_processing_delay[stats.user_id] +=
+            stats.processing_delay;
+        total_user_processed_packets[stats.user_id] += 1;
     }
 
     for (auto &user_delay_stats : total_user_packet_processing_delay)
@@ -402,10 +415,21 @@ void IterationStats::evaluate_delay_stats(int queue_count, int user_count)
                 total_packet_processing_delay_for_user / total_packet_count_for_user;
         }
     }
+}
+
+void IterationStats::evaluate_scheduler_delay_stats()
+{   
+    int queue_count = this->queue_average_packet_processing_delay.size();
+
+    double total_average_scheduler_packet_processing_delay = 0;
+
+    for (auto& queue_avg_delay_stats : this->queue_average_packet_processing_delay){
+        total_average_scheduler_packet_processing_delay += 
+            queue_avg_delay_stats.second;
+    }
 
     this->scheduler_average_packet_processing_delay =
         total_average_scheduler_packet_processing_delay / queue_count;
-
 }
 
 void IterationStats::release_memory_resources()

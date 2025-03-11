@@ -14,7 +14,7 @@ public:
     void flush_user_context();
     void update_user_priorities();
     void update_user_throughputs();
-    void exculde_users_from_scheduling();
+    void exclude_users_from_scheduling();
     void collect_relevant_packets(double current_time, TTIStats& tti_stats);
     void filter_packets_of_excluded_from_scheduling_users();
 

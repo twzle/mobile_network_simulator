@@ -83,7 +83,9 @@ public:
     void evaluate_fairness_for_queues_stats();
     void evaluate_fairness_for_users_stats();
 
-    void evaluate_delay_stats(int queue_count, int user_count);
+    void evaluate_user_delay_stats(int user_count);
+    void evaluate_queue_delay_stats(int queue_count);
+    void evaluate_scheduler_delay_stats();
 
     void evaluate_scheduling_stats();
 
@@ -92,6 +94,9 @@ public:
     void release_memory_resources();
 
     void print();
+    void print_user_delays();
+    void print_queue_delays();
+
     void draw_delay_plot();
     void draw_scheduling_plot();
 

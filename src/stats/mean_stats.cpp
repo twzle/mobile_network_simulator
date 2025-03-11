@@ -445,20 +445,27 @@ void MeanStats::show()
               << "Mean scheduler packet processing delay time = "
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета
+    
+    show_queue_delays();
+    show_user_delays();
+}
 
+void MeanStats::show_queue_delays(){
     for (auto& queue : queue_packet_processing_delay_history)
     {
         std::cout << "Mean queue packet processing delay time "
                   << "(Queue #" << queue.first<< ") = "
                   << mean_queue_packet_processing_delays[queue.first] * 1000 << " ms\n";
     }
+}
 
+void MeanStats::show_user_delays(){
     for (auto& user : user_packet_processing_delay_history)
-   {
-       std::cout << "Mean user packet processing delay time "
-                 << "(User #" << user.first << ") = "
-                 << mean_user_packet_processing_delays[user.first] * 1000 << " ms\n";
-   }
+    {
+        std::cout << "Mean user packet processing delay time "
+                  << "(User #" << user.first << ") = "
+                  << mean_user_packet_processing_delays[user.first] * 1000 << " ms\n";
+    }
 }
 
 std::string MeanStats::write_yaml()
