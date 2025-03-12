@@ -110,6 +110,11 @@ std::unique_ptr<BaseScheduler> Settings::get_scheduler_instance()
     return nullptr;
 }
 
+std::string Settings::get_scheduler_name()
+{
+    return this->scheduler_type;
+}
+
 double Settings::get_bandwidth()
 {
     return this->bandwidth;

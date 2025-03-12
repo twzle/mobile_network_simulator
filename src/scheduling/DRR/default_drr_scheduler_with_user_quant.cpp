@@ -9,7 +9,7 @@ DefaultDRRSchedulerWithUserQuant::DefaultDRRSchedulerWithUserQuant()
 void DefaultDRRSchedulerWithUserQuant::run()
 {
     // Метка времени в момент запуска планировщика
-    session.set_scheduling_start_time(0.0);
+    session.set_scheduling_start_time(tti_duration);
     double current_time = session.get_scheduling_start_time();
 
     // Перебор очередей начиная с очереди с индексом 0

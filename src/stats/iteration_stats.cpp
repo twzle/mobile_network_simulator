@@ -170,6 +170,7 @@ void IterationStats::add_queue_packet_stats(
 // Вывод статистики в stdout
 void IterationStats::print()
 {
+    std::cout << "\nITERATION STATS\n";
     std::cout << "\nPacket count = "
               << packet_count << "\n"
               << "Total scheduling time (total_time) = "

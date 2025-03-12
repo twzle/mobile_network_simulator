@@ -9,7 +9,7 @@ FixedDRRScheduler::FixedDRRScheduler()
 void FixedDRRScheduler::run()
 {
     // Метка времени в момент запуска планировщика
-    session.set_scheduling_start_time(0.0);
+    session.set_scheduling_start_time(tti_duration);
     double current_time = session.get_scheduling_start_time();
 
     // Начало следующего TTI всегда с 0 очереди

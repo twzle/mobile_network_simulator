@@ -58,6 +58,7 @@ public:
     std::string get_channel_sync_interval();
     double get_channel_sync_interval_value();
     std::unique_ptr<BaseScheduler> get_scheduler_instance();
+    std::string get_scheduler_name();
     double get_bandwidth();
     double get_time_lambda();
     int get_packet_count();

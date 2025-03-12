@@ -9,7 +9,7 @@ CyclicDRRSchedulerWithUserQuant::CyclicDRRSchedulerWithUserQuant()
 void CyclicDRRSchedulerWithUserQuant::run()
 {
     // Начало планирования
-    session.set_scheduling_start_time(0.0);
+    session.set_scheduling_start_time(tti_duration);
     double current_time = session.get_scheduling_start_time();
 
     // Перебор очередей начиная с очереди с индексом 0

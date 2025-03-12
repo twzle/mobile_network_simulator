@@ -17,17 +17,13 @@ void BasePFScheduler::schedule(PacketQueue &&packet_queue)
 */
 void BasePFScheduler::run()
 {
-    std::cout << "PF START\n";
-
     // Метка времени в момент запуска планировщика
-    session.set_scheduling_start_time(0.0);
+    session.set_scheduling_start_time(tti_duration);
     double current_time = session.get_scheduling_start_time();
 
-    std::cout << session.get_processed_packet_count() << "<" << total_packets << "\n";
     // Цикл до обслуживания всех пакетов во всех очередях
     while (session.get_processed_packet_count() < this->total_packets)
     {
-        std::cout << "TTI START\n";
         // Начало TTI
         TTIStats tti_stats = TTIStats(
             1,
@@ -41,7 +37,7 @@ void BasePFScheduler::run()
 
         collect_relevant_packets(current_time, tti_stats);
         exclude_users_from_scheduling();
-        // filter_packets_of_excluded_from_scheduling_users();
+        filter_packets_of_excluded_from_scheduling_users();
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
@@ -112,7 +108,6 @@ void BasePFScheduler::run()
             }
         }
 
-        std::cout << "TTI END\n";
         // Конец TTI
         current_time += this->tti_duration;
 
@@ -132,7 +127,6 @@ void BasePFScheduler::run()
             tti_stats.get_throughput_for_scheduler(),
             tti_stats.is_valid_throughput_for_scheduler());
     }
-    std::cout << "PF END\n";
 
     // Метка времени в момент завершения работы планировщика
     session.set_scheduling_end_time(current_time);
@@ -153,10 +147,10 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
         {
             // Конец перебора при встрече первого непришедшего пакета
             break;
-        }
-
+        
+        } 
         // Если пакет уже был доступен по времени
-        if (packet.get_scheduled_at() < current_time - epsilon)
+        else if (packet.get_scheduled_at() < current_time - epsilon)
         {
             // Отметка пользователя как активного претендента на ресурсы
             tti_stats.mark_user_as_resource_candidate(
@@ -164,12 +158,12 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
             packet.get_user_ptr()->set_resource_candidate(true);
 
             sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
-        }
 
-        // Удаление первого элемента для доступа к следующим
-        main_queue.pop();
-        // Перенос в промежуточную очередь
-        relevant_queue.push(packet);
+            // Удаление первого элемента для доступа к следующим
+            main_queue.pop();
+            // Перенос в промежуточную очередь
+            relevant_queue.push(packet);
+        }
     }
 }
 
@@ -290,10 +284,27 @@ void BasePFScheduler::update_user_throughputs()
 }
 
 void BasePFScheduler::exclude_users_from_scheduling()
-{
+{   
+    // Фильтрация неуникальных указателей на пользователей
+    std::sort(
+        sorted_resource_candidates_for_tti.begin(), 
+        sorted_resource_candidates_for_tti.end()
+    );
+
+    auto last = 
+        std::unique(
+            sorted_resource_candidates_for_tti.begin(), 
+            sorted_resource_candidates_for_tti.end()
+        );
+
+    sorted_resource_candidates_for_tti.erase(
+        last, sorted_resource_candidates_for_tti.end()
+    );
+
     if (sorted_resource_candidates_for_tti.size() <= (size_t)users_per_tti_limit)
     {
         return;
+        
     }
 
     std::sort(
@@ -363,12 +374,17 @@ void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users()
 
         auto it = std::find(
             sorted_resource_candidates_for_tti.begin(),
-            sorted_resource_candidates_for_tti.end(), user_ptr);
+            sorted_resource_candidates_for_tti.end(),
+            user_ptr);
 
         // Если пакет принадлежит разрешенному пользователю
         if (it != sorted_resource_candidates_for_tti.end())
         {
             tmp_queue.push(packet);
+        } 
+        else 
+        {
+            main_queue.push(packet);
         }
 
         relevant_queue.pop();
