@@ -73,8 +73,8 @@ void Settings::validate()
     {
         std::ostringstream msg;
         msg << "Invalid packet size (current range [1, "
-            << get_packet_size_limit() << "] bytes)."
-            << "Maximum defined by current bandwidth.";
+            << get_packet_size_limit() << "] bytes). "
+            << "Maximum defined by current bandwidth and base CQI.";
         throw std::invalid_argument(msg.str());
     }
 

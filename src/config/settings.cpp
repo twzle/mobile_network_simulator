@@ -195,15 +195,16 @@ int Settings::get_resource_block_per_tti_limit()
 
 int Settings::get_packet_size_limit()
 {
-    int rb_per_tti_limit = get_resource_block_per_tti_limit();
+    int rb_per_tti = get_resource_block_per_tti_limit();
 
-    double bit_per_re = StandardManager::get_cqi_efficiency(base_cqi);
-    uint8_t re_per_rb = StandardManager::get_resource_elements_in_resource_block();
+    int bytes_per_rb =
+        StandardManager::get_resource_block_effective_data_size(
+            base_cqi
+        );
 
-    double bit_per_tti_limit = rb_per_tti_limit * bit_per_re * re_per_rb;
-    int byte_per_tti_limit = bit_per_tti_limit / 8;
+    double bytes_per_tti = rb_per_tti * bytes_per_rb;
 
-    return byte_per_tti_limit;
+    return bytes_per_tti;
 }
 
 int Settings::get_throughput_history_size()

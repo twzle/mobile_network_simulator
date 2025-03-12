@@ -93,30 +93,29 @@ int StandardManager::get_cqi_from_sinr(
     return cqi;
 }
 
-uint8_t StandardManager::get_resource_elements_in_resource_block()
+int StandardManager::get_resource_elements_in_resource_block()
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
-    return standard_info.resource_elements;
+    return (int) standard_info.resource_elements;
 }
 
 int StandardManager::get_resource_block_effective_data_size(
     const uint8_t cqi)
 {
     const double effective_bits_per_resource_element =
-        static_cast<int>(
-            StandardManager::get_cqi_efficiency(
-                cqi));
+            StandardManager::get_cqi_efficiency(cqi);
 
     const int resource_elements_per_resource_block =
-        static_cast<int>(
-            StandardManager::get_resource_elements_in_resource_block());
+            StandardManager::get_resource_elements_in_resource_block();
 
-    // Используем int для предотвращения переполнения
-    const int effective_bits_per_resource_block =
+    const double effective_bits_per_resource_block =
         effective_bits_per_resource_element * resource_elements_per_resource_block;
 
     // Округление вниз — деление на 8 отбрасывает остаток
-    return effective_bits_per_resource_block / 8;
+    int effective_bytes_per_resource_block = 
+        effective_bits_per_resource_block / 8;
+
+    return effective_bytes_per_resource_block;
 }
 
 double StandardManager::get_channel_sync_interval(

@@ -86,9 +86,9 @@ int BaseScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
     double effective_data_size_per_rb_for_user_in_bytes =
-        (StandardManager::get_cqi_efficiency(user->get_cqi()) *
-         StandardManager::get_resource_elements_in_resource_block()) /
-        8;
+        StandardManager::get_resource_block_effective_data_size(
+            user->get_cqi()
+        );
 
     int rb_count =
         static_cast<int>(

@@ -25,10 +25,14 @@ void BasePFScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
+
+        std::cout << "\n\nTTI START, TIME " << current_time << "\n";
         TTIStats tti_stats = TTIStats(
             1,
             connected_users.size(),
             tti_duration);
+        
+        main_queue.print();
 
         reset_served_users();
         flush_user_context();
@@ -55,6 +59,10 @@ void BasePFScheduler::run()
             int packet_size_in_rb =
                 convert_packet_size_to_rb_number(
                     packet.get_user_ptr(), packet_size_in_bytes);
+            std::cout << "CHECKING PACKET (" << packet.get_scheduled_at() << ") " <<
+                    "USER #" << packet.get_user_ptr()->get_id() << ", CQI = " <<
+                    (int) packet.get_user_ptr()->get_cqi() <<
+                    ", RB = " << packet_size_in_rb << "\n";
 
             // Не хватает RB на обслуживание
             if (packet_size_in_rb > available_resource_blocks)
@@ -109,6 +117,7 @@ void BasePFScheduler::run()
         }
 
         // Конец TTI
+        std::cout << "TTI END\n";
         current_time += this->tti_duration;
 
         update_user_throughputs();
@@ -200,7 +209,7 @@ void BasePFScheduler::sync_user_channels()
         // Периодеческая синхронизация позиции пользователя
         if (time_from_last_channel_sync <= epsilon)
         {
-            // std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
+            std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
             user.move(channel_sync_interval);
 
             double user_to_bs_distance =
@@ -231,7 +240,7 @@ void BasePFScheduler::sync_user_channels()
             // std::cout << "SINR = " << sinr << "\n";
 
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
-            // std::cout << "CQI = " << cqi << "\n";
+            std::cout << "CQI = " << cqi << "\n";
 
             user.set_cqi(cqi);
         }
@@ -256,8 +265,8 @@ void BasePFScheduler::update_user_priorities()
     for (auto &user_info : connected_users)
     {
         // PF-metric = r_i / R_i
-        // r_i (bytes/ms)
-        double max_throughput_for_rb =
+        // r_i (bytes per RB)
+        int max_throughput_for_rb =
             StandardManager::get_resource_block_effective_data_size(
                 user_info.second.get_cqi());
 
@@ -268,7 +277,7 @@ void BasePFScheduler::update_user_priorities()
 
         user_info.second.set_priority(priority);
 
-        // std::cout << "User #" << user_info.first << ". Priority = " << priority << ", AV TPUT = " << average_throughput << "\n";
+        std::cout << "User #" << user_info.first << ". Priority = " << priority << ", MAX TPUT = " << max_throughput_for_rb << ", AV TPUT = " << average_throughput << "\n";
     }
 }
 

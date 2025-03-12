@@ -49,7 +49,7 @@ public:
         const double cqi);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
-    static uint8_t get_resource_elements_in_resource_block();
+    static int get_resource_elements_in_resource_block();
 
     static int get_resource_block_effective_data_size(
         const uint8_t cqi);
