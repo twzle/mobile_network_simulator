@@ -53,12 +53,12 @@ void TTIStats::add_allocated_effective_data_to_user(
     {
         int user_id = user->get_id();
         uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block();
-        int effective_data_size = rb_count * effective_data_size_per_rb;
+        int effective_data_size_in_bytes_per_rb = 
+            StandardManager::get_resource_block_effective_data_size(user_cqi);
 
-        user_statuses[user_id].allocated_effective_data_size += effective_data_size;
+        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
+
+        user_statuses[user_id].allocated_effective_data_size += effective_data_size_in_bytes;
     }
 }
 
@@ -68,12 +68,12 @@ void TTIStats::add_allocated_effective_data_to_queue(
     if (user != nullptr)
     {
         uint8_t user_cqi = user->get_cqi();
-        double effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block();
-        int effective_data_size = rb_count * effective_data_size_per_rb;
+        int effective_data_size_in_bytes_per_rb = 
+            StandardManager::get_resource_block_effective_data_size(user_cqi);
 
-        queue_statuses[queue_id].allocated_effective_data_size += effective_data_size;
+        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
+
+        queue_statuses[queue_id].allocated_effective_data_size += effective_data_size_in_bytes;
     }
 }
 
@@ -83,13 +83,12 @@ void TTIStats::add_allocated_effective_data_to_total(
     if (user != nullptr)
     {
         uint8_t user_cqi = user->get_cqi();
-        double effective_data_size_per_rb =
-            StandardManager::get_cqi_efficiency(user_cqi) *
-            StandardManager::get_resource_elements_in_resource_block();
+        int effective_data_size_in_bytes_per_rb = 
+            StandardManager::get_resource_block_effective_data_size(user_cqi);
+            
+        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
 
-        int effective_data_size = rb_count * effective_data_size_per_rb;
-
-        total_allocated_effective_data_size += effective_data_size;
+        total_allocated_effective_data_size += effective_data_size_in_bytes;
     }
 }
 
@@ -215,14 +214,11 @@ void TTIStats::calculate_throughput_for_scheduler()
     if (total_allocated_effective_data_size > 0)
     {
         /*
-        Пропускная способность (Кбайт/мс) = 
-        ((Размер данных выделенных за TTI (бит) / 8) / 1024) (Кбайт)
-        / 
-        (Длительность TTI (секунды) * 1000) (миллисекунды)
+        Пропускная способность (Мбайт/мс) = 
+        (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
         */
         throughput_for_scheduler =
-            (((double) total_allocated_effective_data_size / (double) 8) / (double) 1024) 
-            / (double)(tti_duration * 1000);
+            ((double) total_allocated_effective_data_size / (double) (1024 * 1024)); 
 
         _is_valid_throughput_for_scheduler = true;
     }

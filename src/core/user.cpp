@@ -234,7 +234,10 @@ double User::get_deficit() const
     return deficit;
 }
 
+
 void User::set_deficit(double deficit)
 {
-    this->deficit = deficit;
+    if (deficit <= DEFICIT_MAX){
+        this->deficit = deficit;
+    }
 }

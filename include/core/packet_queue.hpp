@@ -4,8 +4,6 @@
 #include "core/time_generator.hpp"
 #include "packet.hpp"
 
-const double DEFICIT_MAX = 1000000;
-
 class PacketQueue
 {
 public:

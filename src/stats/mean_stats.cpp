@@ -388,7 +388,7 @@ void MeanStats::evaluate_confidence_queue_packet_processing_delay_intervals()
         calculate_confidence_interval(
             queue_packet_processing_delay_history[queue_id],
             mean_queue_packet_processing_delays[queue_id],
-            0.001);
+            0.01);
     }
 }
 
@@ -405,7 +405,7 @@ void MeanStats::evaluate_confidence_user_packet_processing_delay_intervals()
         calculate_confidence_interval(
             user_packet_processing_delay_history[user_id],
             mean_user_packet_processing_delays[user_id],
-            0.001);
+            0.01);
     }
 }
 
@@ -438,10 +438,10 @@ void MeanStats::show()
               << mean_scheduler_fairness_for_users
               << "\n" // Средняя справедливость распределения RB по пользователям
               << "Mean scheduler throughput = "
-              << mean_scheduler_throughput
-              << " Kbytes/ms, " // Средняя пропускная способность (Кбайт/мс)
-              << mean_scheduler_throughput * 1024 * 1000
-              << " bytes/s\n" // Средняя пропускная способность (байт/с)
+              << mean_scheduler_throughput * 1000
+              << " Mbytes/ms, " // Средняя пропускная способность (Мбайт/с)
+              << mean_scheduler_throughput * 1024
+              << " Kbytes/ms\n" // Средняя пропускная способность (Кбайт/мс)
               << "Mean scheduler packet processing delay time = "
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета

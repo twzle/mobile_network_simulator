@@ -102,8 +102,8 @@ public:
 
     int packet_count = 0; // Общее число обслуженных пакетов
 
-    std::vector<double> scheduler_throughput; // За каждый TTI (Кбайт/мс)
-    double scheduler_average_throughput = 0;  // Среднее за весь период работы (Кбайт/мс)
+    std::vector<double> scheduler_throughput; // За каждый TTI (Мбайт/мс)
+    double scheduler_average_throughput = 0;  // Среднее за весь период работы (Мбайт/мс)
 
     std::vector<double> scheduler_fairness_for_queues; // За каждый TTI
     double scheduler_average_fairness_for_queues = 0;  // Среднее за весь период работы

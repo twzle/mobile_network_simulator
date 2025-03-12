@@ -10,4 +10,7 @@
 #define THROUGHPUT_MIN 0.001
 
 const int CARRIER_FREQUENCY = 2000; // Несущая частота в МГЦ
+
+const double DEFICIT_MAX = 1000000; // Максимальный дефицит
+
 const double epsilon = 1e-9;
