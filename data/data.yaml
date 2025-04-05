@@ -1,12 +1,9 @@
-average_queue_processing_time:
-  - 1000
-  - 1000
-  - 1000
-  - 1000
-total_average_queue_processing_time: 1000
-average_delays:
-  - 410.71624880779854
-  - 1077.1002083820042
-  - 1287.2185168596427
-  - 1229.5976944522868
-total_average_delay: 1001.158167125433
+scheduler_packet_processing_delay: 0.0010970997813395818
+queue_packet_processing_delays:
+  0: 0.000997363437581438
+user_packet_processing_delays:
+  0: 0.0005049304041876099
+  1: 0.0005018171297665371
+  2: 0.0005045262289993087
+  3: 0.0009115340877719116
+  4: 0.002577409867123426

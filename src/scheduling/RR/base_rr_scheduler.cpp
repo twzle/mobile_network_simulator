@@ -57,18 +57,16 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets(
         }
 
         // Если пакет уже был доступен по времени
-        if (packet.get_scheduled_at() < current_time - epsilon)
-        {
-            // Первый непришедший пакет учтен DRR, остальные нет
-            if (packet_count > 0)
-            {
-                // Отметка пользователя как активного претендента на ресурсы
-                tti_stats.mark_user_as_resource_candidate(
-                    packet.get_user_ptr());
 
-                tti_stats.mark_queue_as_resource_candidate(
-                    packet.get_queue());
-            }
+        // Первый непришедший пакет учтен DRR, остальные нет
+        if (packet_count > 0)
+        {
+            // Отметка пользователя как активного претендента на ресурсы
+            tti_stats.mark_user_as_resource_candidate(
+                packet.get_user_ptr());
+
+            tti_stats.mark_queue_as_resource_candidate(
+                packet.get_queue());
         }
 
         // Удаление первого элемента для доступа к следующим
@@ -113,29 +111,27 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_queue_quant(
         }
 
         // Если пакет уже был доступен по времени
-        if (packet.get_scheduled_at() < current_time - epsilon)
+
+        // Первый непришедший пакет учтен DRR, остальные нет
+        if (packet_count > 0)
         {
-            // Первый непришедший пакет учтен DRR, остальные нет
-            if (packet_count > 0)
+            // Отметка пользователя как активного претендента на ресурсы
+            tti_stats.mark_user_as_resource_candidate(
+                packet.get_user_ptr());
+
+            int packet_size_in_bytes = packet.get_size();
+            int packet_size_in_rb =
+                convert_packet_size_to_rb_number(
+                    packet.get_user_ptr(), packet_size_in_bytes);
+
+            // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
+            if (packet_size_in_rb <= current_deficit - epsilon)
             {
-                // Отметка пользователя как активного претендента на ресурсы
-                tti_stats.mark_user_as_resource_candidate(
-                    packet.get_user_ptr());
+                // Отметка очереди как активного претендента на ресурсы
+                tti_stats.mark_queue_as_resource_candidate(
+                    packet.get_queue());
 
-                int packet_size_in_bytes = packet.get_size();
-                int packet_size_in_rb =
-                    convert_packet_size_to_rb_number(
-                        packet.get_user_ptr(), packet_size_in_bytes);
-
-                // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-                if (packet_size_in_rb <= current_deficit - epsilon)
-                {
-                    // Отметка очереди как активного претендента на ресурсы
-                    tti_stats.mark_queue_as_resource_candidate(
-                        packet.get_queue());
-
-                    current_deficit -= packet_size_in_rb;
-                }
+                current_deficit -= packet_size_in_rb;
             }
         }
 
@@ -186,32 +182,29 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_user_quant(
         }
 
         // Если пакет уже был доступен по времени
-        if (packet.get_scheduled_at() < current_time - epsilon)
+        // Первый непришедший пакет учтен DRR, остальные нет
+        if (packet_count > 0)
         {
-            // Первый непришедший пакет учтен DRR, остальные нет
-            if (packet_count > 0)
+            // Отметка пользователя как активного претендента на ресурсы
+            tti_stats.mark_queue_as_resource_candidate(
+                packet.get_queue());
+
+            int packet_size_in_bytes = packet.get_size();
+            int packet_size_in_rb =
+                convert_packet_size_to_rb_number(
+                    packet.get_user_ptr(), packet_size_in_bytes);
+
+            double current_deficit =
+                current_user_deficit[packet.get_user_ptr()->get_id()];
+
+            // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
+            if (packet_size_in_rb <= current_deficit - epsilon)
             {
-                // Отметка пользователя как активного претендента на ресурсы
-                tti_stats.mark_queue_as_resource_candidate(
-                    packet.get_queue());
+                // Отметка очереди как активного претендента на ресурсы
+                tti_stats.mark_user_as_resource_candidate(
+                    packet.get_user_ptr());
 
-                int packet_size_in_bytes = packet.get_size();
-                int packet_size_in_rb =
-                    convert_packet_size_to_rb_number(
-                        packet.get_user_ptr(), packet_size_in_bytes);
-
-                double current_deficit =
-                    current_user_deficit[packet.get_user_ptr()->get_id()];
-
-                    // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-                    if (packet_size_in_rb <= current_deficit - epsilon)
-                {
-                    // Отметка очереди как активного претендента на ресурсы
-                    tti_stats.mark_user_as_resource_candidate(
-                        packet.get_user_ptr());
-
-                    current_user_deficit[packet.get_user_ptr()->get_id()] -= packet_size_in_rb;
-                }
+                current_user_deficit[packet.get_user_ptr()->get_id()] -= packet_size_in_rb;
             }
         }
 
@@ -304,7 +297,7 @@ void BaseRRScheduler::sync_user_channels()
     }
 }
 
-
-void BaseRRScheduler::reset_served_users(){
+void BaseRRScheduler::reset_served_users()
+{
     users_served_in_tti.clear();
 }

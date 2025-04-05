@@ -25,23 +25,29 @@ void BasePFScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
+        // std::cout << "TTI START: " << session.get_processed_packet_count() << " < " << this->total_packets << std::endl;
 
-        std::cout << "\n\nTTI START, TIME " << current_time << "\n";
+        // std::cout << "\n\nTTI START, TIME " << current_time << "\n";
         TTIStats tti_stats = TTIStats(
             1,
             connected_users.size(),
             tti_duration);
-        
-        main_queue.print();
+
+        // main_queue.print();
 
         reset_served_users();
         flush_user_context();
         sync_user_channels();
         update_user_priorities();
 
+        // std::cout << "USER CTX UPD" << std::endl;
+
         collect_relevant_packets(current_time, tti_stats);
+        // std::cout << "COLLECT PACKETS" << std::endl;
         exclude_users_from_scheduling();
+        // std::cout << "EXCLUDE USERS" << std::endl;
         filter_packets_of_excluded_from_scheduling_users();
+        // std::cout << "FILTER PACKETS" << std::endl;
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
@@ -59,10 +65,10 @@ void BasePFScheduler::run()
             int packet_size_in_rb =
                 convert_packet_size_to_rb_number(
                     packet.get_user_ptr(), packet_size_in_bytes);
-            std::cout << "CHECKING PACKET (" << packet.get_scheduled_at() << ") " <<
-                    "USER #" << packet.get_user_ptr()->get_id() << ", CQI = " <<
-                    (int) packet.get_user_ptr()->get_cqi() <<
-                    ", RB = " << packet_size_in_rb << "\n";
+            // std::cout << "CHECKING PACKET (" << packet.get_scheduled_at() << ") " <<
+            //         "USER #" << packet.get_user_ptr()->get_id() << ", CQI = " <<
+            //         (int) packet.get_user_ptr()->get_cqi() <<
+            //         ", RB = " << packet_size_in_rb << "\n";
 
             // Не хватает RB на обслуживание
             if (packet_size_in_rb > available_resource_blocks)
@@ -117,7 +123,7 @@ void BasePFScheduler::run()
         }
 
         // Конец TTI
-        std::cout << "TTI END\n";
+        // std::cout << "TTI END\n";
         current_time += this->tti_duration;
 
         update_user_throughputs();
@@ -156,23 +162,21 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
         {
             // Конец перебора при встрече первого непришедшего пакета
             break;
-        
-        } 
-        // Если пакет уже был доступен по времени
-        else if (packet.get_scheduled_at() < current_time - epsilon)
-        {
-            // Отметка пользователя как активного претендента на ресурсы
-            tti_stats.mark_user_as_resource_candidate(
-                packet.get_user_ptr());
-            packet.get_user_ptr()->set_resource_candidate(true);
-
-            sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
-
-            // Удаление первого элемента для доступа к следующим
-            main_queue.pop();
-            // Перенос в промежуточную очередь
-            relevant_queue.push(packet);
         }
+
+        // Если пакет уже был доступен по времени
+
+        // Отметка пользователя как активного претендента на ресурсы
+        tti_stats.mark_user_as_resource_candidate(
+            packet.get_user_ptr());
+        packet.get_user_ptr()->set_resource_candidate(true);
+
+        sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
+
+        // Удаление первого элемента для доступа к следующим
+        main_queue.pop();
+        // Перенос в промежуточную очередь
+        relevant_queue.push(packet);
     }
 }
 
@@ -209,7 +213,7 @@ void BasePFScheduler::sync_user_channels()
         // Периодеческая синхронизация позиции пользователя
         if (time_from_last_channel_sync <= epsilon)
         {
-            std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
+            // std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
             user.move(channel_sync_interval);
 
             double user_to_bs_distance =
@@ -240,7 +244,7 @@ void BasePFScheduler::sync_user_channels()
             // std::cout << "SINR = " << sinr << "\n";
 
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
-            std::cout << "CQI = " << cqi << "\n";
+            // std::cout << "CQI = " << cqi << "\n";
 
             user.set_cqi(cqi);
         }
@@ -277,7 +281,7 @@ void BasePFScheduler::update_user_priorities()
 
         user_info.second.set_priority(priority);
 
-        std::cout << "User #" << user_info.first << ". Priority = " << priority << ", MAX TPUT = " << max_throughput_for_rb << ", AV TPUT = " << average_throughput << "\n";
+        // std::cout << "User #" << user_info.first << ". Priority = " << priority << ", MAX TPUT = " << max_throughput_for_rb << ", AV TPUT = " << average_throughput << "\n";
     }
 }
 
@@ -293,27 +297,16 @@ void BasePFScheduler::update_user_throughputs()
 }
 
 void BasePFScheduler::exclude_users_from_scheduling()
-{   
+{
     // Фильтрация неуникальных указателей на пользователей
-    std::sort(
-        sorted_resource_candidates_for_tti.begin(), 
-        sorted_resource_candidates_for_tti.end()
-    );
-
-    auto last = 
-        std::unique(
-            sorted_resource_candidates_for_tti.begin(), 
-            sorted_resource_candidates_for_tti.end()
-        );
-
-    sorted_resource_candidates_for_tti.erase(
-        last, sorted_resource_candidates_for_tti.end()
-    );
+    std::unordered_set<User *> unique_users(
+        sorted_resource_candidates_for_tti.begin(),
+        sorted_resource_candidates_for_tti.end());
+    sorted_resource_candidates_for_tti.assign(unique_users.begin(), unique_users.end());
 
     if (sorted_resource_candidates_for_tti.size() <= (size_t)users_per_tti_limit)
     {
         return;
-        
     }
 
     std::sort(
@@ -390,8 +383,8 @@ void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users()
         if (it != sorted_resource_candidates_for_tti.end())
         {
             tmp_queue.push(packet);
-        } 
-        else 
+        }
+        else
         {
             main_queue.push(packet);
         }

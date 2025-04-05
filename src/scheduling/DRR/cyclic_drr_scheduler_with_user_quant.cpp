@@ -76,9 +76,10 @@ void CyclicDRRSchedulerWithUserQuant::run()
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
-                        // Кандидаты на получение ресурсов только пользователь,
-                        // Пользователь без дефицита не кандидат
+                        // Кандидаты на получение ресурсов пользователь и очередь, но
+                        // не хватило дефицита
                         tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         break;
                     }
 
@@ -87,14 +88,15 @@ void CyclicDRRSchedulerWithUserQuant::run()
                         queue_state = set_idle(queue_state);
                         scheduler_state = set_idle(scheduler_state);
 
-                        // Кандидаты на получение ресурсов пользователь и очередь
+                        // Кандидаты на получение ресурсов пользователь и очередь, но 
+                        // не хватило канала 
                         tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                         tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
+                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit)
                     {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
 
@@ -104,7 +106,8 @@ void CyclicDRRSchedulerWithUserQuant::run()
                             queue_state = set_idle(queue_state);
                             scheduler_state = set_idle(scheduler_state);
 
-                            // Кандидаты на получение ресурсов пользователь и очередь
+                            // Кандидаты на получение ресурсов пользователь и очередь, но
+                            // ограничены лимитом пользователей в TTI
                             tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
                             tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
                             break;

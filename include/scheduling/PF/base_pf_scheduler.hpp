@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "scheduling/base_scheduler.hpp"
 #include "core/relevant_packet_queue.hpp"
 

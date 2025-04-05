@@ -53,7 +53,7 @@ void TTIStats::add_allocated_effective_data_to_user(
     {
         int user_id = user->get_id();
         uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb = 
+        int effective_data_size_in_bytes_per_rb =
             StandardManager::get_resource_block_effective_data_size(user_cqi);
 
         int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
@@ -68,7 +68,7 @@ void TTIStats::add_allocated_effective_data_to_queue(
     if (user != nullptr)
     {
         uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb = 
+        int effective_data_size_in_bytes_per_rb =
             StandardManager::get_resource_block_effective_data_size(user_cqi);
 
         int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
@@ -83,9 +83,9 @@ void TTIStats::add_allocated_effective_data_to_total(
     if (user != nullptr)
     {
         uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb = 
+        int effective_data_size_in_bytes_per_rb =
             StandardManager::get_resource_block_effective_data_size(user_cqi);
-            
+
         int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
 
         total_allocated_effective_data_size += effective_data_size_in_bytes;
@@ -127,8 +127,8 @@ void TTIStats::calculate_fairness_for_queues()
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_effective_data_allocation_for_queues =
-            (double) squared_sum_of_allocated_effective_data_size /
-            (double) (candidate_queue_count *
+            (double)squared_sum_of_allocated_effective_data_size /
+            (double)(candidate_queue_count *
                      sum_of_squared_allocated_effective_data_size_by_queue);
 
         _is_valid_fairness_for_queues = true;
@@ -170,8 +170,8 @@ void TTIStats::calculate_fairness_for_users()
 
         // ((sum(RB_i))^2)/(N * sum(RB_i^2))
         fairness_of_effective_data_allocation_for_users =
-            (double) squared_sum_of_allocated_effective_data_size /
-            (double) (candidate_user_count *
+            (double)squared_sum_of_allocated_effective_data_size /
+            (double)(candidate_user_count *
                      sum_of_squared_allocated_effective_data_size_by_user);
 
         _is_valid_fairness_for_users = true;
@@ -211,16 +211,46 @@ void TTIStats::calculate_throughput_for_scheduler()
 {
     _is_valid_throughput_for_scheduler = false;
 
+    // Если было передано ненулевое число байт, значит нужно учесть throughput
     if (total_allocated_effective_data_size > 0)
     {
         /*
-        Пропускная способность (Мбайт/мс) = 
+        Пропускная способность (Мбайт/мс) =
         (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
         */
         throughput_for_scheduler =
-            ((double) total_allocated_effective_data_size / (double) (1024 * 1024)); 
+            ((double)total_allocated_effective_data_size / (double)(1024 * 1024));
 
         _is_valid_throughput_for_scheduler = true;
+
+        return;
+    }
+
+    // Если было передано ненулевое число байт, значит перед учетом throughput
+    // нужно проверить были ли кандидаты на ресурсы 
+    if (total_allocated_effective_data_size == 0)
+    {
+        // Подсчет очередей имевших трафик в этом TTI
+        int candidate_queue_count = 0;
+        for (auto &queue : queue_statuses)
+        {
+            if (queue.second.is_resource_candidate)
+            {
+                ++candidate_queue_count;
+            }
+        }
+
+        // Если были участники распределения (очереди), имевшие трафик 
+        if (candidate_queue_count > 0)
+        {
+            /*
+            Пропускная способность (Мбайт/мс) =
+            (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
+            */
+            throughput_for_scheduler = 0;
+
+            _is_valid_throughput_for_scheduler = true;
+        }
     }
 }
 
