@@ -12,7 +12,8 @@
 #include "core/base_station.hpp"
 #include "core/channel.hpp"
 #include "stats/iteration_stats.hpp"
-#include "stats/tti_stats.hpp"
+#include "stats/fairness_stats.hpp"
+#include "stats/throughput_stats.hpp"
 #include "scheduling/scheduler_session.hpp"
 
 class BaseScheduler
@@ -41,21 +42,31 @@ public:
     void set_channel(Channel channel);
     // Установка лимита пользователей
     void set_users_per_tti_limit(int users_per_tti_limit);
+    // Инициализация статистики по TTI
+    void set_tti_stats(
+        size_t queue_count, size_t user_count,
+        double tti_duration, int history_size_limit);
 
     // Подключение пользователей для обслуживания
     void set_users(
         std::vector<UserConfig> user_count,
-        int throughput_history_size
-    );
+        int throughput_history_size);
     User *get_user_ptr(int user_id);
 
     // Получение статистики выполнения
     IterationStats &get_stats();
     virtual void evaluate_stats() = 0;
+    virtual void evaluate_fairness_stats() = 0;
+    virtual void evaluate_throughput_stats() = 0;
 
 protected:
     int convert_packet_size_to_rb_number(User *user, int packet_size);
     virtual void sync_user_channels() = 0;
+
+    void save_processed_packet_stats(
+        Packet &packet, int packet_size_in_rb, double current_time);
+
+    void mark_as_resource_candidate(int queue, User* user);
 
 protected:
     int total_packets = 0;                      // Общее число пакетов для обслуживания
@@ -64,12 +75,14 @@ protected:
     uint8_t base_cqi = 0;                       // Базовый CQI
     int resource_block_effective_data_size = 0; // Размер полезных данных (байт) в одном RB
     int resource_blocks_per_tti = 0;            // Общее число RB на TTI
-    int users_per_tti_limit = 0;                 // Лимит пользователей обслуживаемых за TTI
+    int users_per_tti_limit = 0;                // Лимит пользователей обслуживаемых за TTI
 
     std::map<int, User> connected_users; // Подключенные пользователи (id -> ptr)
     BaseStation base_station;            // Базовая станция
     Channel channel;                     // Канал связи
 
-    SchedulerSession session; // Данные сессии работы планировщика
-    IterationStats stats;     // Статистика с минимальным необходимым набором полей для дальнейших расчетов
+    SchedulerSession session;         // Данные сессии работы планировщика
+    IterationStats stats;             // Статистика с минимальным необходимым набором полей для дальнейших расчетов
+    FairnessStats fairness_stats;     // Подробная статистика справедливости распределения ресурсов за указаное число TTI
+    ThroughputStats throughput_stats; // Подробная статистика пропускной способности за указаное число TTI
 };

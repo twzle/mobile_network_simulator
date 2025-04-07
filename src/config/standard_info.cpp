@@ -1,4 +1,5 @@
 #include "config/standard_info.hpp"
+#include <iostream>
 
 // Статическое объявление мап
 std::map<std::string, StandardInfo> StandardManager::standard_info_map;
@@ -41,14 +42,10 @@ double StandardManager::get_cqi_efficiency(
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
 
-    auto mcs = standard_info.cqi_to_mcs.at(cqi);
-    std::string modulation_scheme = mcs.first;
-    double code_rate = mcs.second;
+    std::tuple<std::string, double, double> mcs = standard_info.cqi_to_mcs.at(cqi);
 
-    int bit_per_re = standard_info.modulation_schemes.at(modulation_scheme);
-
-    double efficiency = bit_per_re * code_rate;
-    return efficiency;
+    double spectral_efficiency = std::get<2>(mcs);
+    return spectral_efficiency;
 }
 
 // Статическая функция для получения количества RB в канале
@@ -102,14 +99,14 @@ int StandardManager::get_resource_elements_in_resource_block()
 int StandardManager::get_resource_block_effective_data_size(
     const uint8_t cqi)
 {
-    const double effective_bits_per_resource_element =
+    const double spectral_efficiency =
             StandardManager::get_cqi_efficiency(cqi);
 
     const int resource_elements_per_resource_block =
             StandardManager::get_resource_elements_in_resource_block();
 
     const double effective_bits_per_resource_block =
-        effective_bits_per_resource_element * resource_elements_per_resource_block;
+        spectral_efficiency * resource_elements_per_resource_block;
 
     // Округление вниз — деление на 8 отбрасывает остаток
     int effective_bytes_per_resource_block = 
@@ -145,11 +142,11 @@ void StandardManager::initialize()
                 {{"10ms", 0.010}},
                 {
                     // 3GPP Table 7.2.3-1
-                    {1, {"QPSK", 0.1523}}, {2, {"QPSK", 0.2344}}, {3, {"QPSK", 0.3770}}, 
-                    {4, {"QPSK", 0.6016}}, {5, {"QPSK", 0.8770}}, {6, {"QPSK", 1.1758}}, 
-                    {7, {"16-QAM", 1.4766}}, {8, {"16-QAM", 1.9141}}, {9, {"16-QAM", 2.4063}}, 
-                    {10, {"64-QAM", 2.7305}}, {11, {"64-QAM", 3.3223}}, {12, {"64-QAM", 3.9023}}, 
-                    {13, {"64-QAM", 4.5234}}, {14, {"64-QAM", 5.1152}}, {15, {"64-QAM", 5.5547}}
+                    {1, {"QPSK", 0.0762, 0.1523}}, {2, {"QPSK", 0.1172, 0.2344}}, {3, {"QPSK", 0.1885, 0.3770}}, 
+                    {4, {"QPSK", 0.3008, 0.6016}}, {5, {"QPSK", 0.4385, 0.8770}}, {6, {"QPSK", 0.5879, 1.1758}}, 
+                    {7, {"16-QAM", 0.3691, 1.4766}}, {8, {"16-QAM", 0.4785, 1.9141}}, {9, {"16-QAM", 0.6016, 2.4063}}, 
+                    {10, {"64-QAM", 0.4551, 2.7305}}, {11, {"64-QAM", 0.5537, 3.3223}}, {12, {"64-QAM", 0.6504, 3.9023}}, 
+                    {13, {"64-QAM", 0.7539, 4.5234}}, {14, {"64-QAM", 0.8525, 5.1152}}, {15, {"64-QAM", 0.9258, 5.5547}}
                 },
                 {
                     {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}
@@ -165,7 +162,7 @@ void StandardManager::initialize()
                 {"Dense Urban", "Urban", "Suburban"},
                 {4, 8}, // Лимит пользователей обслуживаемых за TTI 
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)
-            }, // 168 * 2 * 0.1523 * 25 / 8 =  
+            }, // 168 * 0.1523 * 100 / 8 = 319 байт  
         },
     };
 }

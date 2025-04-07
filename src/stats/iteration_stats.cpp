@@ -132,6 +132,7 @@ void IterationStats::update_scheduler_fairness_for_queues(
 {
     if (is_valid)
     {
+        std::cout << "UPDATED QUEUE FAIRNESS = " << fairness_for_queues << "\n";
         scheduler_fairness_for_queues.emplace_back(fairness_for_queues);
     }
 }
@@ -142,6 +143,7 @@ void IterationStats::update_scheduler_fairness_for_users(
 {
     if (is_valid)
     {
+        std::cout << "UPDATED USER FAIRNESS = " << fairness_for_users << "\n";
         scheduler_fairness_for_users.emplace_back(fairness_for_users);
     }
 }

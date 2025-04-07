@@ -1,38 +1,84 @@
-#include "stats/tti_stats.hpp"
+#include "stats/fairness_stats.hpp"
 
-TTIStats::TTIStats(
+FairnessStats::FairnessStats() {}
+
+FairnessStats::FairnessStats(
     size_t queue_count, size_t user_count,
     double tti_duration)
-    : total_allocated_effective_data_size(0), tti_duration(tti_duration),
+    : history_size_limit(1), current_history_size(0),
+      total_allocated_effective_data_size(0), tti_duration(tti_duration),
       queue_count(queue_count), candidate_queue_count(0),
       fairness_of_effective_data_allocation_for_queues(0),
       _is_valid_fairness_for_queues(false),
       user_count(user_count), candidate_user_count(0),
       fairness_of_effective_data_allocation_for_users(0),
-      _is_valid_fairness_for_users(false),
-      throughput_for_scheduler(0), _is_valid_throughput_for_scheduler(false)
+      _is_valid_fairness_for_users(false)
 {
     initialize_queue_stats();
     initialize_user_stats();
 }
 
-void TTIStats::initialize_user_stats()
+void FairnessStats::initialize(
+    size_t queue_count, size_t user_count,
+    double tti_duration, int history_size_limit)
 {
-    for (size_t user_id = 1; user_id <= user_count; ++user_id)
+    this->history_size_limit = history_size_limit;
+
+    this->queue_count = queue_count;
+    this->user_count = user_count;
+    this->tti_duration = tti_duration;
+
+    reset();
+}
+
+void FairnessStats::reset()
+{
+    current_history_size = 0;
+
+    total_allocated_effective_data_size = 0;
+    candidate_queue_count = 0;
+    candidate_user_count = 0;
+    fairness_of_effective_data_allocation_for_queues = 0;
+    fairness_of_effective_data_allocation_for_users = 0;
+    _is_valid_fairness_for_queues = false;
+    _is_valid_fairness_for_users = false;
+
+    initialize_queue_stats();
+    initialize_user_stats();
+
+    // std::cout << "AFTER RESET USERS = " << user_statuses.size() << "\n";
+    // for (auto& user: user_statuses){
+    //     std::cout << "ID = " << user.first << ", DATA = "<< user.second.allocated_effective_data_size << "\n";
+    // }
+}
+
+void FairnessStats::increment_current_history_size()
+{
+    current_history_size++;
+}
+
+bool FairnessStats::is_history_size_limit_reached()
+{
+    return current_history_size == history_size_limit;
+}
+
+void FairnessStats::initialize_user_stats()
+{
+    for (size_t user_id = 0; user_id < user_count; ++user_id)
     {
-        user_statuses[user_id] = UserStatus();
+        user_statuses[user_id] = UserFairnessStatus();
     }
 }
 
-void TTIStats::initialize_queue_stats()
+void FairnessStats::initialize_queue_stats()
 {
     for (size_t queue_id = 0; queue_id < queue_count; ++queue_id)
     {
-        queue_statuses[queue_id] = QueueStatus();
+        queue_statuses[queue_id] = QueueFairnessStatus();
     }
 }
 
-void TTIStats::mark_user_as_resource_candidate(User *user)
+void FairnessStats::mark_user_as_resource_candidate(User *user)
 {
     if (user != nullptr)
     {
@@ -41,12 +87,12 @@ void TTIStats::mark_user_as_resource_candidate(User *user)
     }
 }
 
-void TTIStats::mark_queue_as_resource_candidate(size_t queue_id)
+void FairnessStats::mark_queue_as_resource_candidate(size_t queue_id)
 {
     queue_statuses[queue_id].is_resource_candidate = true;
 }
 
-void TTIStats::add_allocated_effective_data_to_user(
+void FairnessStats::add_allocated_effective_data_to_user(
     User *user, int rb_count)
 {
     if (user != nullptr)
@@ -62,7 +108,7 @@ void TTIStats::add_allocated_effective_data_to_user(
     }
 }
 
-void TTIStats::add_allocated_effective_data_to_queue(
+void FairnessStats::add_allocated_effective_data_to_queue(
     User *user, size_t queue_id, int rb_count)
 {
     if (user != nullptr)
@@ -77,7 +123,7 @@ void TTIStats::add_allocated_effective_data_to_queue(
     }
 }
 
-void TTIStats::add_allocated_effective_data_to_total(
+void FairnessStats::add_allocated_effective_data_to_total(
     User *user, int rb_count)
 {
     if (user != nullptr)
@@ -100,7 +146,7 @@ RB_i - кол-во RB выделенных очереди i,
 N - кол-во очередей
 */
 
-void TTIStats::calculate_fairness_for_queues()
+void FairnessStats::calculate_fairness_for_queues()
 {
     _is_valid_fairness_for_queues = false;
 
@@ -143,7 +189,7 @@ RB_i - кол-во RB выделенных пользователю i,
 N - кол-во пользователей
 */
 
-void TTIStats::calculate_fairness_for_users()
+void FairnessStats::calculate_fairness_for_users()
 {
     _is_valid_fairness_for_users = false;
 
@@ -161,6 +207,7 @@ void TTIStats::calculate_fairness_for_users()
             {
                 candidate_user_count += 1;
 
+                std::cout << "ID = " << user.first << ", USER DATA = " << user.second.allocated_effective_data_size << "\n";
                 long long squared_allocated_effective_data_size_by_user =
                     std::pow(user.second.allocated_effective_data_size, 2);
                 sum_of_squared_allocated_effective_data_size_by_user +=
@@ -174,92 +221,28 @@ void TTIStats::calculate_fairness_for_users()
             (double)(candidate_user_count *
                      sum_of_squared_allocated_effective_data_size_by_user);
 
+        std::cout << "JFI = " << squared_sum_of_allocated_effective_data_size << " / " << candidate_user_count << " * " << sum_of_squared_allocated_effective_data_size_by_user << "\n";
+
         _is_valid_fairness_for_users = true;
     }
 }
 
-double TTIStats::get_fairness_for_queues()
+double FairnessStats::get_fairness_for_queues()
 {
     return fairness_of_effective_data_allocation_for_queues;
 }
 
-double TTIStats::get_fairness_for_users()
+double FairnessStats::get_fairness_for_users()
 {
     return fairness_of_effective_data_allocation_for_users;
 }
 
-bool TTIStats::is_valid_fairness_for_queues()
+bool FairnessStats::is_valid_fairness_for_queues()
 {
     return _is_valid_fairness_for_queues;
 }
 
-bool TTIStats::is_valid_fairness_for_users()
+bool FairnessStats::is_valid_fairness_for_users()
 {
     return _is_valid_fairness_for_users;
-}
-
-/*
-Пропускная способность планировщика (байт/мс)
-
-Общая формула: THROUGHPUT = (sum(RB_i) * S_RB)/(T_tti)
-RB_i - кол-во RB выделенных пользователю i,
-S_RB - размер полезных данных (байт) в одном RB,
-T_tti - интервал времени TTI (секунды)
-*/
-
-void TTIStats::calculate_throughput_for_scheduler()
-{
-    _is_valid_throughput_for_scheduler = false;
-
-    // Если было передано ненулевое число байт, значит нужно учесть throughput
-    if (total_allocated_effective_data_size > 0)
-    {
-        /*
-        Пропускная способность (Мбайт/мс) =
-        (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
-        */
-        throughput_for_scheduler =
-            ((double)total_allocated_effective_data_size / (double)(1024 * 1024));
-
-        _is_valid_throughput_for_scheduler = true;
-
-        return;
-    }
-
-    // Если было передано ненулевое число байт, значит перед учетом throughput
-    // нужно проверить были ли кандидаты на ресурсы 
-    if (total_allocated_effective_data_size == 0)
-    {
-        // Подсчет очередей имевших трафик в этом TTI
-        int candidate_queue_count = 0;
-        for (auto &queue : queue_statuses)
-        {
-            if (queue.second.is_resource_candidate)
-            {
-                ++candidate_queue_count;
-            }
-        }
-
-        // Если были участники распределения (очереди), имевшие трафик 
-        if (candidate_queue_count > 0)
-        {
-            /*
-            Пропускная способность (Мбайт/мс) =
-            (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
-            */
-            throughput_for_scheduler = 0;
-
-            _is_valid_throughput_for_scheduler = true;
-        }
-    }
-}
-
-double TTIStats::get_throughput_for_scheduler()
-{
-    return throughput_for_scheduler;
-}
-
-bool TTIStats::is_valid_throughput_for_scheduler()
-{
-    return _is_valid_throughput_for_scheduler;
 }

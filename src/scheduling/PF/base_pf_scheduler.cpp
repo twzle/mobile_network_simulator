@@ -25,14 +25,6 @@ void BasePFScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
-        // std::cout << "TTI START: " << session.get_processed_packet_count() << " < " << this->total_packets << std::endl;
-
-        // std::cout << "\n\nTTI START, TIME " << current_time << "\n";
-        TTIStats tti_stats = TTIStats(
-            1,
-            connected_users.size(),
-            tti_duration);
-
         // main_queue.print();
 
         reset_served_users();
@@ -40,14 +32,9 @@ void BasePFScheduler::run()
         sync_user_channels();
         update_user_priorities();
 
-        // std::cout << "USER CTX UPD" << std::endl;
-
-        collect_relevant_packets(current_time, tti_stats);
-        // std::cout << "COLLECT PACKETS" << std::endl;
+        collect_relevant_packets(current_time);
         exclude_users_from_scheduling();
-        // std::cout << "EXCLUDE USERS" << std::endl;
         filter_packets_of_excluded_from_scheduling_users();
-        // std::cout << "FILTER PACKETS" << std::endl;
 
         int available_resource_blocks = this->resource_blocks_per_tti;
 
@@ -65,10 +52,6 @@ void BasePFScheduler::run()
             int packet_size_in_rb =
                 convert_packet_size_to_rb_number(
                     packet.get_user_ptr(), packet_size_in_bytes);
-            // std::cout << "CHECKING PACKET (" << packet.get_scheduled_at() << ") " <<
-            //         "USER #" << packet.get_user_ptr()->get_id() << ", CQI = " <<
-            //         (int) packet.get_user_ptr()->get_cqi() <<
-            //         ", RB = " << packet_size_in_rb << "\n";
 
             // Не хватает RB на обслуживание
             if (packet_size_in_rb > available_resource_blocks)
@@ -77,7 +60,10 @@ void BasePFScheduler::run()
                 scheduler_state = set_idle(scheduler_state);
 
                 // Кандидаты на получение ресурсов пользователь и очередь
-                tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                mark_as_resource_candidate(
+                    packet.get_queue(), 
+                    packet.get_user_ptr()
+                );
 
                 // Возврат в исходную очередь вместо обслуживания
                 relevant_queue.pop();
@@ -97,25 +83,15 @@ void BasePFScheduler::run()
                 available_resource_blocks -= packet_size_in_rb;
 
                 // Кандидаты на получение ресурсов пользователь и очередь
-                tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                mark_as_resource_candidate(
+                    packet.get_queue(), 
+                    packet.get_user_ptr()
+                );
 
-                tti_stats.add_allocated_effective_data_to_queue(
-                    packet.get_user_ptr(),
-                    packet.get_queue(),
-                    packet_size_in_rb);
-
-                tti_stats.add_allocated_effective_data_to_user(
-                    packet.get_user_ptr(),
-                    packet_size_in_rb);
-
-                tti_stats.add_allocated_effective_data_to_total(
-                    packet.get_user_ptr(),
-                    packet_size_in_rb);
-
-                stats.add_queue_packet_stats(
-                    packet.get_queue(),
-                    packet.get_user_ptr()->get_id(),
-                    current_time - packet.get_scheduled_at());
+                save_processed_packet_stats(
+                    packet,
+                    packet_size_in_rb,
+                    current_time);
 
                 queue_state = set_processing(queue_state);
                 scheduler_state = set_processing(scheduler_state);
@@ -123,7 +99,6 @@ void BasePFScheduler::run()
         }
 
         // Конец TTI
-        // std::cout << "TTI END\n";
         current_time += this->tti_duration;
 
         update_user_throughputs();
@@ -132,15 +107,8 @@ void BasePFScheduler::run()
             scheduler_state,
             tti_duration);
 
-        tti_stats.calculate_fairness_for_users();
-        stats.update_scheduler_fairness_for_users(
-            tti_stats.get_fairness_for_users(),
-            tti_stats.is_valid_fairness_for_users());
-
-        tti_stats.calculate_throughput_for_scheduler();
-        stats.update_scheduler_throughput(
-            tti_stats.get_throughput_for_scheduler(),
-            tti_stats.is_valid_throughput_for_scheduler());
+        evaluate_fairness_stats();
+        evaluate_throughput_stats();
     }
 
     // Метка времени в момент завершения работы планировщика
@@ -151,7 +119,7 @@ void BasePFScheduler::run()
 }
 
 // Фильтрация актуальных пакетов по времени прихода на текущий момент
-void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tti_stats)
+void BasePFScheduler::collect_relevant_packets(double current_time)
 {
     while (main_queue.size() > 0)
     {
@@ -167,8 +135,11 @@ void BasePFScheduler::collect_relevant_packets(double current_time, TTIStats &tt
         // Если пакет уже был доступен по времени
 
         // Отметка пользователя как активного претендента на ресурсы
-        tti_stats.mark_user_as_resource_candidate(
-            packet.get_user_ptr());
+        mark_as_resource_candidate(
+            packet.get_queue(), 
+            packet.get_user_ptr()
+        );
+
         packet.get_user_ptr()->set_resource_candidate(true);
 
         sorted_resource_candidates_for_tti.push_back(packet.get_user_ptr());
@@ -213,15 +184,12 @@ void BasePFScheduler::sync_user_channels()
         // Периодеческая синхронизация позиции пользователя
         if (time_from_last_channel_sync <= epsilon)
         {
-            // std::cout << "User #" << user.get_id() << ". " << user.get_position() << std::endl;
             user.move(channel_sync_interval);
 
             double user_to_bs_distance =
                 user.get_position().get_distance_2d(
                     base_station.get_position()) /
                 1000; // (метры -> км)
-
-            // std::cout << "Distance = " << user_to_bs_distance << "\n";
 
             double user_height = user.get_position().get_z();
             double bs_height = base_station.get_position().get_z();
@@ -241,10 +209,7 @@ void BasePFScheduler::sync_user_channels()
                 user_received_signal_power,
                 noise_power, interference_power);
 
-            // std::cout << "SINR = " << sinr << "\n";
-
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
-            // std::cout << "CQI = " << cqi << "\n";
 
             user.set_cqi(cqi);
         }
@@ -281,7 +246,6 @@ void BasePFScheduler::update_user_priorities()
 
         user_info.second.set_priority(priority);
 
-        // std::cout << "User #" << user_info.first << ". Priority = " << priority << ", MAX TPUT = " << max_throughput_for_rb << ", AV TPUT = " << average_throughput << "\n";
     }
 }
 
@@ -398,4 +362,43 @@ void BasePFScheduler::filter_packets_of_excluded_from_scheduling_users()
 void BasePFScheduler::reset_served_users()
 {
     sorted_resource_candidates_for_tti.clear();
+}
+
+/*
+Подсчет статистики за TTI по результатам работы планировщика
+*/
+void BasePFScheduler::evaluate_fairness_stats()
+{
+    if (fairness_stats.is_history_size_limit_reached())
+    {
+        fairness_stats.calculate_fairness_for_queues();
+        stats.update_scheduler_fairness_for_queues(
+            fairness_stats.get_fairness_for_queues(),
+            fairness_stats.is_valid_fairness_for_queues());
+
+        fairness_stats.calculate_fairness_for_users();
+        stats.update_scheduler_fairness_for_users(
+            fairness_stats.get_fairness_for_users(),
+            fairness_stats.is_valid_fairness_for_users());
+
+        if (fairness_stats.is_valid_fairness_for_queues() ||
+            fairness_stats.is_valid_fairness_for_users())
+        {
+            fairness_stats.increment_current_history_size();
+        }
+
+        fairness_stats.reset();
+    }
+}
+
+/*
+Подсчет статистики за TTI по результатам работы планировщика
+*/
+void BasePFScheduler::evaluate_throughput_stats()
+{
+    throughput_stats.calculate_throughput_for_scheduler();
+    stats.update_scheduler_throughput(
+        throughput_stats.get_throughput_for_scheduler(),
+        throughput_stats.is_valid_throughput_for_scheduler());
+    throughput_stats.reset();
 }

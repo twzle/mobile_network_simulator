@@ -27,7 +27,7 @@ void BaseScheduler::set_users(
         Mobility mobility = Mobility(
             user_cfg.get_speed(),
             user_cfg.get_direction());
-        
+
         double quant = user_cfg.get_quant();
 
         User user(base_cqi, position, mobility, throughput_history_size, quant);
@@ -68,12 +68,27 @@ void BaseScheduler::set_base_cqi(uint8_t base_cqi)
     this->base_cqi = base_cqi;
 }
 
-void BaseScheduler::set_channel(Channel channel){
+void BaseScheduler::set_channel(Channel channel)
+{
     this->channel = channel;
 }
 
-void BaseScheduler::set_users_per_tti_limit(int users_per_tti_limit){
+void BaseScheduler::set_users_per_tti_limit(int users_per_tti_limit)
+{
     this->users_per_tti_limit = users_per_tti_limit;
+}
+
+void BaseScheduler::set_tti_stats(
+    size_t queue_count, size_t user_count,
+    double tti_duration, int history_size_limit)
+{
+    fairness_stats.initialize(
+        queue_count, user_count,
+        tti_duration, history_size_limit);
+
+    throughput_stats.initialize(
+        queue_count, user_count,
+        tti_duration, history_size_limit);
 }
 
 IterationStats &BaseScheduler::get_stats()
@@ -87,8 +102,7 @@ int BaseScheduler::convert_packet_size_to_rb_number(
 {
     double effective_data_size_per_rb_for_user_in_bytes =
         StandardManager::get_resource_block_effective_data_size(
-            user->get_cqi()
-        );
+            user->get_cqi());
 
     int rb_count =
         static_cast<int>(
@@ -97,4 +111,45 @@ int BaseScheduler::convert_packet_size_to_rb_number(
                 effective_data_size_per_rb_for_user_in_bytes));
 
     return rb_count;
+}
+
+void BaseScheduler::save_processed_packet_stats(
+    Packet &packet, int packet_size_in_rb, double current_time)
+{
+    fairness_stats.add_allocated_effective_data_to_queue(
+        packet.get_user_ptr(),
+        packet.get_queue(),
+        packet_size_in_rb);
+    throughput_stats.add_allocated_effective_data_to_queue(
+        packet.get_user_ptr(),
+        packet.get_queue(),
+        packet_size_in_rb);
+
+    fairness_stats.add_allocated_effective_data_to_user(
+        packet.get_user_ptr(),
+        packet_size_in_rb);
+    throughput_stats.add_allocated_effective_data_to_user(
+        packet.get_user_ptr(),
+        packet_size_in_rb);
+
+    fairness_stats.add_allocated_effective_data_to_total(
+        packet.get_user_ptr(),
+        packet_size_in_rb);
+    throughput_stats.add_allocated_effective_data_to_total(
+        packet.get_user_ptr(),
+        packet_size_in_rb);
+
+    stats.add_queue_packet_stats(
+        packet.get_queue(),
+        packet.get_user_ptr()->get_id(),
+        current_time - packet.get_scheduled_at());
+}
+
+void BaseScheduler::mark_as_resource_candidate(int queue, User *user)
+{
+    fairness_stats.mark_user_as_resource_candidate(user);
+    throughput_stats.mark_user_as_resource_candidate(user);
+    
+    fairness_stats.mark_queue_as_resource_candidate(queue);
+    throughput_stats.mark_queue_as_resource_candidate(queue);
 }

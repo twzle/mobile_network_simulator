@@ -21,22 +21,14 @@ public:
 
     void check_queue_remaining_scheduled_packets(
         PacketQueue &queue,
-        double current_time,
-        TTIStats &tti_stats);
-
-    void check_queue_remaining_scheduled_packets_with_queue_quant(
-        PacketQueue &queue,
-        double current_time,
-        TTIStats &tti_stats);
-
-    void check_queue_remaining_scheduled_packets_with_user_quant(
-        PacketQueue &queue,
-        double current_time,
-        TTIStats &tti_stats);
+        double current_time
+    );
 
     void schedule(PacketQueue &&packet_queue) override;
     void sync_user_channels() override;
     void evaluate_stats() override;
+    void evaluate_fairness_stats() override;
+    void evaluate_throughput_stats() override;
 
     void reset_served_users();
 

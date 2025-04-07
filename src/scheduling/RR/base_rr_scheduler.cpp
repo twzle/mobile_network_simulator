@@ -38,7 +38,7 @@ size_t BaseRRScheduler::get_relative_queue_id(size_t current_absolute_queue_id)
 }
 
 void BaseRRScheduler::check_queue_remaining_scheduled_packets(
-    PacketQueue &queue, double current_time, TTIStats &tti_stats)
+    PacketQueue &queue, double current_time)
 {
     PacketQueue tmp(queue.get_quant(), queue.get_limit());
 
@@ -58,154 +58,13 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets(
 
         // Если пакет уже был доступен по времени
 
-        // Первый непришедший пакет учтен DRR, остальные нет
+        // Первый необслуженный пакет учтен DRR, остальные нет
         if (packet_count > 0)
         {
-            // Отметка пользователя как активного претендента на ресурсы
-            tti_stats.mark_user_as_resource_candidate(
-                packet.get_user_ptr());
-
-            tti_stats.mark_queue_as_resource_candidate(
-                packet.get_queue());
-        }
-
-        // Удаление первого элемента для доступа к следующим
-        queue.pop();
-        // Сохранение во временной очереди пакета для восстановления
-        tmp.push(packet);
-
-        ++packet_count;
-    }
-
-    // Восстановление пакетов в исходной очереди из временной
-    while (tmp.size() > 0)
-    {
-        Packet packet = tmp.front();
-
-        // Удаление первого элемента для доступа к следующим
-        tmp.pop();
-        // Восстановление пакета из временной очереди
-        queue.push(packet);
-    }
-}
-
-void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_queue_quant(
-    PacketQueue &queue, double current_time, TTIStats &tti_stats)
-{
-    PacketQueue tmp(queue.get_quant(), queue.get_limit());
-
-    double current_deficit = queue.get_deficit();
-
-    int packet_count = 0;
-
-    // Проверка пакетов исходной очереди на факт доступности
-    while (queue.size() > 0)
-    {
-        Packet packet = queue.front();
-
-        // Если пакет не пришел, его время больше текущего
-        if (current_time + epsilon < packet.get_scheduled_at())
-        {
-            // Конец перебора при встрече первого непришедшего пакета
-            break;
-        }
-
-        // Если пакет уже был доступен по времени
-
-        // Первый непришедший пакет учтен DRR, остальные нет
-        if (packet_count > 0)
-        {
-            // Отметка пользователя как активного претендента на ресурсы
-            tti_stats.mark_user_as_resource_candidate(
-                packet.get_user_ptr());
-
-            int packet_size_in_bytes = packet.get_size();
-            int packet_size_in_rb =
-                convert_packet_size_to_rb_number(
-                    packet.get_user_ptr(), packet_size_in_bytes);
-
-            // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-            if (packet_size_in_rb <= current_deficit - epsilon)
-            {
-                // Отметка очереди как активного претендента на ресурсы
-                tti_stats.mark_queue_as_resource_candidate(
-                    packet.get_queue());
-
-                current_deficit -= packet_size_in_rb;
-            }
-        }
-
-        // Удаление первого элемента для доступа к следующим
-        queue.pop();
-        // Сохранение во временной очереди пакета для восстановления
-        tmp.push(packet);
-
-        ++packet_count;
-    }
-
-    // Восстановление пакетов в исходной очереди из временной
-    while (tmp.size() > 0)
-    {
-        Packet packet = tmp.front();
-
-        // Удаление первого элемента для доступа к следующим
-        tmp.pop();
-        // Восстановление пакета из временной очереди
-        queue.push(packet);
-    }
-}
-
-void BaseRRScheduler::check_queue_remaining_scheduled_packets_with_user_quant(
-    PacketQueue &queue, double current_time, TTIStats &tti_stats)
-{
-    PacketQueue tmp(queue.get_quant(), queue.get_limit());
-
-    std::map<int, double> current_user_deficit;
-
-    for (auto &user_info : connected_users)
-    {
-        current_user_deficit[user_info.first] = user_info.second.get_deficit();
-    }
-
-    int packet_count = 0;
-
-    // Проверка пакетов исходной очереди на факт доступности
-    while (queue.size() > 0)
-    {
-        Packet packet = queue.front();
-
-        // Если пакет не пришел, его время больше текущего
-        if (current_time + epsilon < packet.get_scheduled_at())
-        {
-            // Конец перебора при встрече первого непришедшего пакета
-            break;
-        }
-
-        // Если пакет уже был доступен по времени
-        // Первый непришедший пакет учтен DRR, остальные нет
-        if (packet_count > 0)
-        {
-            // Отметка пользователя как активного претендента на ресурсы
-            tti_stats.mark_queue_as_resource_candidate(
-                packet.get_queue());
-
-            int packet_size_in_bytes = packet.get_size();
-            int packet_size_in_rb =
-                convert_packet_size_to_rb_number(
-                    packet.get_user_ptr(), packet_size_in_bytes);
-
-            double current_deficit =
-                current_user_deficit[packet.get_user_ptr()->get_id()];
-
-            // Если в очереди был пакет, которые можно обслужить с текущим дефицитом очереди
-            if (packet_size_in_rb <= current_deficit - epsilon)
-            {
-                // Отметка очереди как активного претендента на ресурсы
-                tti_stats.mark_user_as_resource_candidate(
-                    packet.get_user_ptr());
-
-                current_user_deficit[packet.get_user_ptr()->get_id()] -= packet_size_in_rb;
-            }
+            mark_as_resource_candidate(
+                packet.get_queue(), 
+                packet.get_user_ptr()
+            );
         }
 
         // Удаление первого элемента для доступа к следующим
@@ -245,6 +104,45 @@ void BaseRRScheduler::evaluate_stats()
 
         stats.set_queue_total_time(queue_id, queue_total_time);
     }
+}
+
+/*
+Подсчет статистики за TTI по результатам работы планировщика
+*/
+void BaseRRScheduler::evaluate_fairness_stats()
+{
+    if (fairness_stats.is_history_size_limit_reached())
+    {
+        fairness_stats.calculate_fairness_for_queues();
+        stats.update_scheduler_fairness_for_queues(
+            fairness_stats.get_fairness_for_queues(),
+            fairness_stats.is_valid_fairness_for_queues());
+
+        fairness_stats.calculate_fairness_for_users();
+        stats.update_scheduler_fairness_for_users(
+            fairness_stats.get_fairness_for_users(),
+            fairness_stats.is_valid_fairness_for_users());
+
+        if (fairness_stats.is_valid_fairness_for_queues() ||
+            fairness_stats.is_valid_fairness_for_users())
+        {
+            fairness_stats.increment_current_history_size();
+        }
+
+        fairness_stats.reset();
+    }
+}
+
+/*
+Подсчет статистики за TTI по результатам работы планировщика
+*/
+void BaseRRScheduler::evaluate_throughput_stats()
+{
+    throughput_stats.calculate_throughput_for_scheduler();
+    stats.update_scheduler_throughput(
+        throughput_stats.get_throughput_for_scheduler(),
+        throughput_stats.is_valid_throughput_for_scheduler());
+    throughput_stats.reset();
 }
 
 void BaseRRScheduler::sync_user_channels()

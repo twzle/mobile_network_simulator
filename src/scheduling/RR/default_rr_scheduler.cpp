@@ -19,11 +19,6 @@ void DefaultRRScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
-        TTIStats tti_stats = TTIStats(
-            scheduled_queues.size(),
-            connected_users.size(),
-            tti_duration);
-        
         reset_served_users();
         sync_user_channels();
 
@@ -78,13 +73,15 @@ void DefaultRRScheduler::run()
                         scheduler_state = set_idle(scheduler_state);
 
                         // Кандидаты на получение ресурсов пользователь и очередь
-                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
                         break;
                     }
 
                     // Если лимит обслуженных пользователей достигнут
-                    if (users_served_in_tti.size() == (size_t) users_per_tti_limit)
+                    if (users_served_in_tti.size() == (size_t)users_per_tti_limit)
                     {
                         auto it = users_served_in_tti.find(packet.get_user_ptr());
 
@@ -95,8 +92,10 @@ void DefaultRRScheduler::run()
                             scheduler_state = set_idle(scheduler_state);
 
                             // Кандидаты на получение ресурсов пользователь и очередь
-                            tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                            tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                            fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                            fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                            throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                            throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
                             break;
                         }
                     }
@@ -114,26 +113,16 @@ void DefaultRRScheduler::run()
                         available_resource_blocks -= packet_size_in_rb;
 
                         // Кандидаты на получение ресурсов пользователь и очередь
-                        tti_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        tti_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
+                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
 
-                        tti_stats.add_allocated_effective_data_to_queue(
-                            packet.get_user_ptr(),
-                            packet.get_queue(),
-                            packet_size_in_rb);
-
-                        tti_stats.add_allocated_effective_data_to_user(
-                            packet.get_user_ptr(),
-                            packet_size_in_rb);
-
-                        tti_stats.add_allocated_effective_data_to_total(
-                            packet.get_user_ptr(),
-                            packet_size_in_rb);
-
-                        stats.add_queue_packet_stats(
-                            packet.get_queue(),
-                            packet.get_user_ptr()->get_id(),
-                            current_time - packet.get_scheduled_at());
+                        save_processed_packet_stats(
+                            packet,
+                            packet_size_in_rb,
+                            current_time
+                        );
 
                         queue_state = set_processing(queue_state);
                         scheduler_state = set_processing(scheduler_state);
@@ -142,7 +131,7 @@ void DefaultRRScheduler::run()
             }
 
             check_queue_remaining_scheduled_packets(
-                queue, current_time, tti_stats);
+                queue, current_time);
 
             stats.update_queue_time_stats(
                 queue_state,
@@ -156,20 +145,8 @@ void DefaultRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        tti_stats.calculate_fairness_for_queues();
-        stats.update_scheduler_fairness_for_queues(
-            tti_stats.get_fairness_for_queues(),
-            tti_stats.is_valid_fairness_for_queues());
-
-        tti_stats.calculate_fairness_for_users();
-        stats.update_scheduler_fairness_for_users(
-            tti_stats.get_fairness_for_users(),
-            tti_stats.is_valid_fairness_for_users());
-
-        tti_stats.calculate_throughput_for_scheduler();
-        stats.update_scheduler_throughput(
-            tti_stats.get_throughput_for_scheduler(),
-            tti_stats.is_valid_throughput_for_scheduler());
+        evaluate_fairness_stats();
+        evaluate_throughput_stats();
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());
