@@ -73,10 +73,11 @@ void DefaultRRScheduler::run()
                         scheduler_state = set_idle(scheduler_state);
 
                         // Кандидаты на получение ресурсов пользователь и очередь
-                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        mark_as_resource_candidate(
+                            packet.get_queue(), 
+                            packet.get_user_ptr()
+                        );
+
                         break;
                     }
 
@@ -92,10 +93,11 @@ void DefaultRRScheduler::run()
                             scheduler_state = set_idle(scheduler_state);
 
                             // Кандидаты на получение ресурсов пользователь и очередь
-                            fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                            fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                            throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                            throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                            mark_as_resource_candidate(
+                                packet.get_queue(), 
+                                packet.get_user_ptr()
+                            );
+    
                             break;
                         }
                     }
@@ -113,10 +115,10 @@ void DefaultRRScheduler::run()
                         available_resource_blocks -= packet_size_in_rb;
 
                         // Кандидаты на получение ресурсов пользователь и очередь
-                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        mark_as_resource_candidate(
+                            packet.get_queue(), 
+                            packet.get_user_ptr()
+                        );
 
                         save_processed_packet_stats(
                             packet,
@@ -145,8 +147,8 @@ void DefaultRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        evaluate_fairness_stats();
-        evaluate_throughput_stats();
+        evaluate_fairness_stats(false);
+        evaluate_throughput_stats(false);
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());

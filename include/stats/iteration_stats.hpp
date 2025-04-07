@@ -64,9 +64,11 @@ public:
         SchedulerState scheduler_state,
         double tti_duration);
     void update_scheduler_fairness_for_queues(
+        int tti_count,
         double fairness_for_queues,
         bool is_valid);
     void update_scheduler_fairness_for_users(
+        int tti_count,
         double fairness_for_users,
         bool is_valid);
     void update_scheduler_throughput(
@@ -105,11 +107,11 @@ public:
     std::vector<double> scheduler_throughput; // За каждый TTI (Мбайт/мс)
     double scheduler_average_throughput = 0;  // Среднее за весь период работы (Мбайт/мс)
 
-    std::vector<double> scheduler_fairness_for_queues; // За каждый TTI
-    double scheduler_average_fairness_for_queues = 0;  // Среднее за весь период работы
+    std::vector<std::pair<int, double>> scheduler_fairness_for_queues; // За несколько TTI пара (число TTI, результат)
+    double scheduler_average_fairness_for_queues = 0;  // Взвешенное среднее за весь период работы
 
-    std::vector<double> scheduler_fairness_for_users; // За каждый TTI
-    double scheduler_average_fairness_for_users = 0;  // Среднее за весь период работы
+    std::vector<std::pair<int, double>> scheduler_fairness_for_users; // За несколько TTI пара (число TTI, результат)
+    double scheduler_average_fairness_for_users = 0;  // Взвешенное среднее за весь период работы
 
     std::vector<PacketStats> packet_stats;
     std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов по очередям (секунды)

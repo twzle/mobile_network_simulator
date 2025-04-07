@@ -72,10 +72,11 @@ void DefaultDRRScheduler::run()
 
                         // Кандидаты на получение ресурсов пользователь и очередь, но
                         // не хватило дефицита
-                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        mark_as_resource_candidate(
+                            packet.get_queue(), 
+                            packet.get_user_ptr()
+                        );
+
                         break;
                     }
 
@@ -90,10 +91,11 @@ void DefaultDRRScheduler::run()
 
                         // Кандидаты на получение ресурсов пользователь и очередь, но
                         // не хватило канала
-                        fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                        throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                        throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                        mark_as_resource_candidate(
+                            packet.get_queue(), 
+                            packet.get_user_ptr()
+                        );
+
                         break;
                     }
 
@@ -110,10 +112,10 @@ void DefaultDRRScheduler::run()
 
                             // Кандидаты на получение ресурсов пользователь и очередь, но
                             // ограничены лимитом пользователей в TTI
-                            fairness_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                            fairness_stats.mark_queue_as_resource_candidate(packet.get_queue());
-                            throughput_stats.mark_user_as_resource_candidate(packet.get_user_ptr());
-                            throughput_stats.mark_queue_as_resource_candidate(packet.get_queue());
+                            mark_as_resource_candidate(
+                                packet.get_queue(), 
+                                packet.get_user_ptr()
+                            );    
                             break;
                         }
                     }
@@ -164,8 +166,8 @@ void DefaultDRRScheduler::run()
             scheduler_state,
             tti_duration);
 
-        evaluate_fairness_stats();
-        evaluate_throughput_stats();
+        evaluate_fairness_stats(false);
+        evaluate_throughput_stats(false);
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());

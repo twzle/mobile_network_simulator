@@ -52,6 +52,16 @@ void FairnessStats::reset()
     // }
 }
 
+int FairnessStats::get_current_history_size()
+{
+    return current_history_size;
+}
+
+int FairnessStats::get_history_size_limit()
+{
+    return history_size_limit;
+}
+
 void FairnessStats::increment_current_history_size()
 {
     current_history_size++;

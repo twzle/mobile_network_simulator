@@ -38,6 +38,7 @@ public:
     void initialize_user_stats();
 
     void reset();
+    int get_current_history_size();
     void increment_current_history_size();
     bool is_history_size_limit_reached();
 

@@ -127,24 +127,29 @@ void IterationStats::update_scheduler_time_stats(
 }
 
 void IterationStats::update_scheduler_fairness_for_queues(
+    int tti_count,
     double fairness_for_queues,
     bool is_valid)
 {
     if (is_valid)
     {
-        std::cout << "UPDATED QUEUE FAIRNESS = " << fairness_for_queues << "\n";
-        scheduler_fairness_for_queues.emplace_back(fairness_for_queues);
+        scheduler_fairness_for_queues.emplace_back(
+            std::make_pair(tti_count, fairness_for_queues)
+        );
     }
 }
 
 void IterationStats::update_scheduler_fairness_for_users(
+    int tti_count,
     double fairness_for_users,
     bool is_valid)
 {
     if (is_valid)
     {
         std::cout << "UPDATED USER FAIRNESS = " << fairness_for_users << "\n";
-        scheduler_fairness_for_users.emplace_back(fairness_for_users);
+        scheduler_fairness_for_users.emplace_back(
+            std::make_pair(tti_count, fairness_for_users)
+        );
     }
 }
 
@@ -304,27 +309,38 @@ void IterationStats::evaluate_queue_wait_time_stats()
 void IterationStats::evaluate_fairness_for_queues_stats()
 {
     double sum_of_all_fairness_for_queues = 0;
+    int sum_of_all_repetitions = 0;
+
     // Подсчет суммы справедливостей за все время работы планировщика
     for (auto &stats : scheduler_fairness_for_queues)
     {
-        sum_of_all_fairness_for_queues += stats;
+        sum_of_all_fairness_for_queues += stats.first * stats.second;
+        sum_of_all_repetitions += stats.first;
     }
 
     scheduler_average_fairness_for_queues =
-        sum_of_all_fairness_for_queues / scheduler_fairness_for_queues.size();
+        sum_of_all_fairness_for_queues / sum_of_all_repetitions;
 }
 
 void IterationStats::evaluate_fairness_for_users_stats()
 {
     double sum_of_all_fairness_for_users = 0;
+    int sum_of_all_repetitions = 0;
+
+    std::cout << "SIZE = " << scheduler_fairness_for_users.size() << "\n";
+    std::cout << "REP = " << scheduler_fairness_for_users[0].first << ", EL =" <<
+    scheduler_fairness_for_users[0].second << "\n";
     // Подсчет суммы справедливостей за все время работы планировщика
     for (auto &stats : scheduler_fairness_for_users)
     {
-        sum_of_all_fairness_for_users += stats;
+        sum_of_all_fairness_for_users += stats.first * stats.second;
+        sum_of_all_repetitions += stats.first;
     }
 
+    std::cout << "REP = " << sum_of_all_repetitions << ", SUM FAIRNESS = " << sum_of_all_fairness_for_users << "\n";
+
     scheduler_average_fairness_for_users =
-        sum_of_all_fairness_for_users / scheduler_fairness_for_users.size();
+        sum_of_all_fairness_for_users / sum_of_all_repetitions;
 }
 
 void IterationStats::evaluate_throughput_stats()

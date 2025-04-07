@@ -56,8 +56,8 @@ public:
     // Получение статистики выполнения
     IterationStats &get_stats();
     virtual void evaluate_stats() = 0;
-    virtual void evaluate_fairness_stats() = 0;
-    virtual void evaluate_throughput_stats() = 0;
+    virtual void evaluate_fairness_stats(bool force_update) = 0;
+    virtual void evaluate_throughput_stats(bool force_update) = 0;
 
 protected:
     int convert_packet_size_to_rb_number(User *user, int packet_size);

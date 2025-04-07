@@ -62,9 +62,8 @@ void BaseRRScheduler::check_queue_remaining_scheduled_packets(
         if (packet_count > 0)
         {
             mark_as_resource_candidate(
-                packet.get_queue(), 
-                packet.get_user_ptr()
-            );
+                packet.get_queue(),
+                packet.get_user_ptr());
         }
 
         // Удаление первого элемента для доступа к следующим
@@ -104,30 +103,52 @@ void BaseRRScheduler::evaluate_stats()
 
         stats.set_queue_total_time(queue_id, queue_total_time);
     }
+
+    evaluate_fairness_stats(true);
+    evaluate_throughput_stats(true);
 }
 
 /*
 Подсчет статистики за TTI по результатам работы планировщика
 */
-void BaseRRScheduler::evaluate_fairness_stats()
+void BaseRRScheduler::evaluate_fairness_stats(bool force_update)
 {
-    if (fairness_stats.is_history_size_limit_reached())
+    fairness_stats.increment_current_history_size();
+
+    if (force_update)
     {
         fairness_stats.calculate_fairness_for_queues();
+        fairness_stats.calculate_fairness_for_users();
+
         stats.update_scheduler_fairness_for_queues(
+            fairness_stats.get_current_history_size(),
             fairness_stats.get_fairness_for_queues(),
             fairness_stats.is_valid_fairness_for_queues());
 
-        fairness_stats.calculate_fairness_for_users();
         stats.update_scheduler_fairness_for_users(
+            fairness_stats.get_current_history_size(),
             fairness_stats.get_fairness_for_users(),
             fairness_stats.is_valid_fairness_for_users());
 
-        if (fairness_stats.is_valid_fairness_for_queues() ||
-            fairness_stats.is_valid_fairness_for_users())
-        {
-            fairness_stats.increment_current_history_size();
-        }
+        fairness_stats.reset();
+
+        return;
+    }
+
+    if (fairness_stats.is_history_size_limit_reached())
+    {
+        fairness_stats.calculate_fairness_for_queues();
+        fairness_stats.calculate_fairness_for_users();
+
+        stats.update_scheduler_fairness_for_queues(
+            fairness_stats.get_current_history_size(),
+            fairness_stats.get_fairness_for_queues(),
+            fairness_stats.is_valid_fairness_for_queues());
+
+        stats.update_scheduler_fairness_for_users(
+            fairness_stats.get_current_history_size(),
+            fairness_stats.get_fairness_for_users(),
+            fairness_stats.is_valid_fairness_for_users());
 
         fairness_stats.reset();
     }
@@ -136,8 +157,20 @@ void BaseRRScheduler::evaluate_fairness_stats()
 /*
 Подсчет статистики за TTI по результатам работы планировщика
 */
-void BaseRRScheduler::evaluate_throughput_stats()
+void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
 {
+    if (force_update)
+    {
+        throughput_stats.calculate_throughput_for_scheduler();
+        stats.update_scheduler_throughput(
+            throughput_stats.get_throughput_for_scheduler(),
+            throughput_stats.is_valid_throughput_for_scheduler());
+
+        throughput_stats.reset();
+
+        return;
+    }
+
     throughput_stats.calculate_throughput_for_scheduler();
     stats.update_scheduler_throughput(
         throughput_stats.get_throughput_for_scheduler(),

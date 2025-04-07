@@ -75,9 +75,8 @@ void FixedDRRSchedulerWithUserQuant::run()
                         // Кандидаты на получение ресурсов пользователь и очередь, но
                         // не хватило дефицита
                         mark_as_resource_candidate(
-                            packet.get_queue(), 
-                            packet.get_user_ptr()
-                        );
+                            packet.get_queue(),
+                            packet.get_user_ptr());
                         break;
                     }
 
@@ -90,9 +89,8 @@ void FixedDRRSchedulerWithUserQuant::run()
                         // Кандидаты на получение ресурсов пользователь и очередь, но
                         // не хватило канала
                         mark_as_resource_candidate(
-                            packet.get_queue(), 
-                            packet.get_user_ptr()
-                        );
+                            packet.get_queue(),
+                            packet.get_user_ptr());
                         break;
                     }
 
@@ -110,9 +108,8 @@ void FixedDRRSchedulerWithUserQuant::run()
                             // Кандидаты на получение ресурсов пользователь и очередь, но
                             // ограничены лимитом пользователей в TTI
                             mark_as_resource_candidate(
-                                packet.get_queue(), 
-                                packet.get_user_ptr()
-                            );
+                                packet.get_queue(),
+                                packet.get_user_ptr());
                             break;
                         }
                     }
@@ -132,15 +129,13 @@ void FixedDRRSchedulerWithUserQuant::run()
 
                         // Кандидаты на получение ресурсов пользователь и очередь
                         mark_as_resource_candidate(
-                            packet.get_queue(), 
-                            packet.get_user_ptr()
-                        );
+                            packet.get_queue(),
+                            packet.get_user_ptr());
 
                         save_processed_packet_stats(
                             packet,
                             packet_size_in_rb,
-                            current_time
-                        );
+                            current_time);
 
                         queue_state = set_processing(queue_state);
                         scheduler_state = set_processing(scheduler_state);
@@ -164,8 +159,8 @@ void FixedDRRSchedulerWithUserQuant::run()
             scheduler_state,
             tti_duration);
 
-        evaluate_fairness_stats();
-        evaluate_throughput_stats();
+        evaluate_fairness_stats(false);
+        evaluate_throughput_stats(false);
 
         // Обновление начальной очереди
         set_initial_queue(get_next_initial_queue());

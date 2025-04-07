@@ -27,8 +27,8 @@ public:
     void schedule(PacketQueue &&packet_queue) override;
     void sync_user_channels() override;
     void evaluate_stats() override;
-    void evaluate_fairness_stats() override;
-    void evaluate_throughput_stats() override;
+    void evaluate_fairness_stats(bool force_update) override;
+    void evaluate_throughput_stats(bool force_update) override;
 
     void reset_served_users();
 

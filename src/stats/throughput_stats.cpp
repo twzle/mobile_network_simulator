@@ -43,6 +43,11 @@ void ThroughputStats::reset()
     initialize_user_stats();
 }
 
+int ThroughputStats::get_current_history_size()
+{
+    return current_history_size;
+}
+
 void ThroughputStats::increment_current_history_size()
 {
     current_history_size++;
