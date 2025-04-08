@@ -45,11 +45,6 @@ void FairnessStats::reset()
 
     initialize_queue_stats();
     initialize_user_stats();
-
-    // std::cout << "AFTER RESET USERS = " << user_statuses.size() << "\n";
-    // for (auto& user: user_statuses){
-    //     std::cout << "ID = " << user.first << ", DATA = "<< user.second.allocated_effective_data_size << "\n";
-    // }
 }
 
 int FairnessStats::get_current_history_size()
@@ -217,7 +212,6 @@ void FairnessStats::calculate_fairness_for_users()
             {
                 candidate_user_count += 1;
 
-                std::cout << "ID = " << user.first << ", USER DATA = " << user.second.allocated_effective_data_size << "\n";
                 long long squared_allocated_effective_data_size_by_user =
                     std::pow(user.second.allocated_effective_data_size, 2);
                 sum_of_squared_allocated_effective_data_size_by_user +=
@@ -230,8 +224,6 @@ void FairnessStats::calculate_fairness_for_users()
             (double)squared_sum_of_allocated_effective_data_size /
             (double)(candidate_user_count *
                      sum_of_squared_allocated_effective_data_size_by_user);
-
-        std::cout << "JFI = " << squared_sum_of_allocated_effective_data_size << " / " << candidate_user_count << " * " << sum_of_squared_allocated_effective_data_size_by_user << "\n";
 
         _is_valid_fairness_for_users = true;
     }

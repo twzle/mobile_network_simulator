@@ -7,6 +7,7 @@
 #include "scenarios/scenarios.hpp"
 #include "config/user_config.hpp"
 #include "config/bs_config.hpp"
+#include "config/tbs.hpp"
 #include <stdint.h>
 
 // Место для указания используемого сценария
@@ -36,6 +37,9 @@ Settings initialize_settings(int argc, char* argv[]) {
 
 int main(int argc, char* argv[])
 {
+    TBS::initialize();
+    std::cout << "TBS: " << TBS::find_min_rb_for_packet(0, 400) << "\n";
+
     TimeGenerator::initialize();
     UserGenerator::initialize();
 
