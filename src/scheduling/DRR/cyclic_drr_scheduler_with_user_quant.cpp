@@ -156,7 +156,7 @@ void CyclicDRRSchedulerWithUserQuant::run()
             scheduler_state,
             tti_duration);
 
-        evaluate_fairness_stats(false);
+        evaluate_fairness_stats(scheduler_state, false);
         evaluate_throughput_stats(false);
 
         // Обновление начальной очереди

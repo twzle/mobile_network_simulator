@@ -22,7 +22,8 @@ public:
 
     void schedule(PacketQueue &&packet_queue) override;
     void evaluate_stats() override;
-    void evaluate_fairness_stats(bool force_update) override;
+    void evaluate_fairness_stats(
+        SchedulerState scheduler_state, bool force_update) override;
     void evaluate_throughput_stats(bool force_update) override;
     
     void sync_user_channels() override;

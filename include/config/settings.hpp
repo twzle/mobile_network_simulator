@@ -46,7 +46,9 @@ public:
         int bs_transmission_power,
         std::string area_type,
         int users_per_tti_limit,
-        double throughput_history_size);
+        int throughput_history_size,
+        int fairness_history_size
+    );
 
     void validate();
     void validate_scheduler_specific_parameters();
@@ -76,6 +78,7 @@ public:
     std::string get_area_type();
     int get_users_per_tti_limit();
     int get_throughput_history_size();
+    int get_fairness_history_size();
 
 private:
     int launches;                         // Количество повторов
@@ -99,6 +102,7 @@ private:
     std::string area_type;                // Тип местности
     int users_per_tti_limit;              // Лимит обслуживаемых пользователей за TTI
     int throughput_history_size;          // Размер истории пропускной способности (PF)
+    int fairness_history_size;            // Размер истории справедливости распределения ресурсов (число TTI)
 };
 
 Settings load_settings_from_yaml(const std::string &filename);

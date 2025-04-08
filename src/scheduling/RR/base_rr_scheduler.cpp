@@ -104,19 +104,21 @@ void BaseRRScheduler::evaluate_stats()
         stats.set_queue_total_time(queue_id, queue_total_time);
     }
 
-    evaluate_fairness_stats(true);
+    evaluate_fairness_stats(SchedulerState::UNDEFINED, true);
     evaluate_throughput_stats(true);
 }
 
 /*
 Подсчет статистики за TTI по результатам работы планировщика
 */
-void BaseRRScheduler::evaluate_fairness_stats(bool force_update)
+void BaseRRScheduler::evaluate_fairness_stats(
+    SchedulerState scheduler_state, bool force_update)
 {
-    fairness_stats.increment_current_history_size();
+    std::cout << "EVAL FAIRNESS\n";
 
     if (force_update)
     {
+        std::cout << "FORCE UPDATE\n";
         fairness_stats.calculate_fairness_for_queues();
         fairness_stats.calculate_fairness_for_users();
 
@@ -135,8 +137,14 @@ void BaseRRScheduler::evaluate_fairness_stats(bool force_update)
         return;
     }
 
+    if (scheduler_state > SchedulerState::WAIT){
+        std::cout << "INCR FAIRNESS\n";
+        fairness_stats.increment_current_history_size();
+    }
+
     if (fairness_stats.is_history_size_limit_reached())
     {
+        std::cout << "HSITORY SIZE LIMIT REACHED\n";
         fairness_stats.calculate_fairness_for_queues();
         fairness_stats.calculate_fairness_for_users();
 

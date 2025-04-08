@@ -56,7 +56,8 @@ public:
     // Получение статистики выполнения
     IterationStats &get_stats();
     virtual void evaluate_stats() = 0;
-    virtual void evaluate_fairness_stats(bool force_update) = 0;
+    virtual void evaluate_fairness_stats(
+        SchedulerState scheduler_state, bool force_update) = 0;
     virtual void evaluate_throughput_stats(bool force_update) = 0;
 
 protected:

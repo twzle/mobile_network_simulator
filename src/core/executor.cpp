@@ -51,7 +51,7 @@ std::unique_ptr<BaseScheduler> Executor::initialize_scheduler(){
     scheduler->set_users_per_tti_limit(settings.get_users_per_tti_limit());
     scheduler->set_tti_stats(
         settings.get_queue_count(), settings.get_user_count(),
-        settings.get_tti_value(), 1
+        settings.get_tti_value(), settings.get_fairness_history_size()
     );
     
     return scheduler;

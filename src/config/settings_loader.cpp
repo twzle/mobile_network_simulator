@@ -48,10 +48,12 @@ Settings load_settings_from_yaml(const std::string &filename)
     }
 
     int throughput_history_size = config["throughput_history_size"].as<int>();
+    int fairness_history_size = config["fairness_history_size"].as<int>();
 
     return Settings(
         launches, standard_type, base_cqi, tti_duration, channel_sync_interval,
         scheduler_type, bandwidth, packet_count, packet_size, queue_count, queue_quant,
         queue_limit, time_lambda, user_configs, bs_config, carrier_frequency,
-        bs_transmission_power, area_type, users_per_tti_limit, throughput_history_size);
+        bs_transmission_power, area_type, users_per_tti_limit, 
+        throughput_history_size, fairness_history_size);
 }

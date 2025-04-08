@@ -18,7 +18,9 @@ Settings::Settings(
     int bs_transmission_power,
     std::string area_type,
     int users_per_tti_limit,
-    double throughput_history_size)
+    int throughput_history_size,
+    int fairness_history_size
+)
 {
     this->launches = launches;
     this->standard_type = standard_type;
@@ -41,6 +43,7 @@ Settings::Settings(
     this->area_type = area_type;
     this->users_per_tti_limit = users_per_tti_limit;
     this->throughput_history_size = throughput_history_size;
+    this->fairness_history_size = fairness_history_size;
 }
 
 int Settings::get_launches()
@@ -61,6 +64,11 @@ uint8_t Settings::get_base_cqi()
 double Settings::get_tti_value()
 {
     return StandardManager::get_tti(tti_duration);
+}
+
+int Settings::get_fairness_history_size()
+{
+    return this->fairness_history_size;
 }
 
 std::string Settings::get_channel_sync_interval()

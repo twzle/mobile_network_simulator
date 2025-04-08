@@ -107,7 +107,7 @@ void BasePFScheduler::run()
             scheduler_state,
             tti_duration);
 
-        evaluate_fairness_stats(false);
+        evaluate_fairness_stats(scheduler_state, false);
         evaluate_throughput_stats(false);
     }
 
@@ -166,7 +166,7 @@ void BasePFScheduler::evaluate_stats()
 
     stats.set_queue_total_time(0, queue_total_time);
 
-    evaluate_fairness_stats(true);
+    evaluate_fairness_stats(SchedulerState::UNDEFINED, true);
     evaluate_throughput_stats(true);
 }
 
@@ -370,10 +370,9 @@ void BasePFScheduler::reset_served_users()
 /*
 Подсчет статистики за TTI по результатам работы планировщика
 */
-void BasePFScheduler::evaluate_fairness_stats(bool force_update)
+void BasePFScheduler::evaluate_fairness_stats(
+    SchedulerState scheduler_state, bool force_update)
 {
-    fairness_stats.increment_current_history_size();
-
     if (force_update)
     {
         fairness_stats.calculate_fairness_for_queues();
@@ -392,6 +391,10 @@ void BasePFScheduler::evaluate_fairness_stats(bool force_update)
         fairness_stats.reset();
 
         return;
+    }
+
+    if (scheduler_state > SchedulerState::WAIT){
+        fairness_stats.increment_current_history_size();
     }
 
     if (fairness_stats.is_history_size_limit_reached())

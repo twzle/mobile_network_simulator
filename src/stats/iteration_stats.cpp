@@ -146,7 +146,7 @@ void IterationStats::update_scheduler_fairness_for_users(
 {
     if (is_valid)
     {
-        std::cout << "UPDATED USER FAIRNESS = " << fairness_for_users << "\n";
+        std::cout << "UPDATE FAIRNESS, HISTORY SIZE = " << tti_count << "\n";
         scheduler_fairness_for_users.emplace_back(
             std::make_pair(tti_count, fairness_for_users)
         );
@@ -328,8 +328,8 @@ void IterationStats::evaluate_fairness_for_users_stats()
     int sum_of_all_repetitions = 0;
 
     std::cout << "SIZE = " << scheduler_fairness_for_users.size() << "\n";
-    std::cout << "REP = " << scheduler_fairness_for_users[0].first << ", EL =" <<
-    scheduler_fairness_for_users[0].second << "\n";
+    std::cout << "REP = " << scheduler_fairness_for_users[scheduler_fairness_for_users.size() - 1].first << ", EL =" <<
+    scheduler_fairness_for_users[scheduler_fairness_for_users.size() - 1].second << "\n";
     // Подсчет суммы справедливостей за все время работы планировщика
     for (auto &stats : scheduler_fairness_for_users)
     {

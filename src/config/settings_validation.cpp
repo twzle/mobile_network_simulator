@@ -197,6 +197,10 @@ void Settings::validate()
     {
         throw std::invalid_argument("Invalid users limit, allowed (4, 8).");
     }
+
+    if (fairness_history_size < 1 || fairness_history_size > 1000){
+        throw std::invalid_argument("Invalid fairness history size, allowed [1, 1000].");
+    }
 }
 
 void Settings::validate_scheduler_specific_parameters()
