@@ -42,7 +42,7 @@ double StandardManager::get_cqi_efficiency(
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
 
-    std::tuple<std::string, double, double> mcs = standard_info.cqi_to_mcs.at(cqi);
+    std::tuple<std::string, double, double, int> mcs = standard_info.cqi_to_mcs.at(cqi);
 
     double spectral_efficiency = std::get<2>(mcs);
     return spectral_efficiency;
@@ -88,6 +88,28 @@ int StandardManager::get_cqi_from_sinr(
     }
 
     return cqi;
+}
+
+// Статическая функция для получения CQI по SINR
+std::tuple<std::string, double, double, int> StandardManager::get_mcs_from_cqi(
+    const int cqi)
+{
+    StandardInfo standard_info = get_standard_info(current_standard_name);
+
+    auto mcs = standard_info.cqi_to_mcs[cqi];
+
+    return mcs;
+}
+
+// Статическая функция для получения CQI по SINR
+int StandardManager::get_tbs_from_mcs(
+    const int imcs)
+{
+    StandardInfo standard_info = get_standard_info(current_standard_name);
+
+    int itbs = standard_info.mcs_to_tbs[imcs];
+
+    return itbs;
 }
 
 int StandardManager::get_resource_elements_in_resource_block()
@@ -142,11 +164,22 @@ void StandardManager::initialize()
                 {{"10ms", 0.010}},
                 {
                     // 3GPP Table 7.2.3-1
-                    {1, {"QPSK", 0.0762, 0.1523}}, {2, {"QPSK", 0.1172, 0.2344}}, {3, {"QPSK", 0.1885, 0.3770}}, 
-                    {4, {"QPSK", 0.3008, 0.6016}}, {5, {"QPSK", 0.4385, 0.8770}}, {6, {"QPSK", 0.5879, 1.1758}}, 
-                    {7, {"16-QAM", 0.3691, 1.4766}}, {8, {"16-QAM", 0.4785, 1.9141}}, {9, {"16-QAM", 0.6016, 2.4063}}, 
-                    {10, {"64-QAM", 0.4551, 2.7305}}, {11, {"64-QAM", 0.5537, 3.3223}}, {12, {"64-QAM", 0.6504, 3.9023}}, 
-                    {13, {"64-QAM", 0.7539, 4.5234}}, {14, {"64-QAM", 0.8525, 5.1152}}, {15, {"64-QAM", 0.9258, 5.5547}}
+                    {1, {"QPSK", 0.0762, 0.1523, 5}}, {2, {"QPSK", 0.1172, 0.2344, 6}}, 
+                    {3, {"QPSK", 0.1885, 0.3770, 8}}, {4, {"QPSK", 0.3008, 0.6016, 9}}, 
+                    {5, {"QPSK", 0.4385, 0.8770, 10}}, {6, {"QPSK", 0.5879, 1.1758, 12}}, 
+                    {7, {"16-QAM", 0.3691, 1.4766, 13}}, {8, {"16-QAM", 0.4785, 1.9141, 14}},
+                    {9, {"16-QAM", 0.6016, 2.4063, 16}}, {10, {"64-QAM", 0.4551, 2.7305, 17}}, 
+                    {11, {"64-QAM", 0.5537, 3.3223, 19}}, {12, {"64-QAM", 0.6504, 3.9023, 20}}, 
+                    {13, {"64-QAM", 0.7539, 4.5234, 21}}, {14, {"64-QAM", 0.8525, 5.1152, 23}}, 
+                    {15, {"64-QAM", 0.9258, 5.5547, 24}}
+                },
+                {
+                    // 3GPP Table 7.1.7.1-1
+                    {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, 
+                    {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 9}, {11, 10}, 
+                    {12, 11}, {13, 12}, {14, 13}, {15, 14}, {16, 15}, {17, 15}, 
+                    {18, 16}, {19, 17}, {20, 18}, {21, 19}, {22, 20}, {23, 21}, 
+                    {24, 22}, {25, 23}, {26, 24}, {27, 25}, {28, 26}                  
                 },
                 {
                     {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}

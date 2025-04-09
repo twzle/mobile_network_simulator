@@ -100,44 +100,39 @@ IterationStats &BaseScheduler::get_stats()
 int BaseScheduler::convert_packet_size_to_rb_number(
     User *user, int packet_size)
 {
-    double effective_data_size_per_rb_for_user_in_bytes =
-        StandardManager::get_resource_block_effective_data_size(
+    std::tuple<std::string, double, double, int> mcs =
+        StandardManager::get_mcs_from_cqi(
             user->get_cqi());
+    
+    int imcs = std::get<3>(mcs);
+    int itbs = StandardManager::get_tbs_from_mcs(imcs);
 
-    int rb_count =
-        static_cast<int>(
-            std::ceil(
-                static_cast<double>(packet_size) /
-                effective_data_size_per_rb_for_user_in_bytes));
+    int rb_count = TBS::find_min_rb_for_packet(itbs, packet_size);
 
     return rb_count;
 }
 
 void BaseScheduler::save_processed_packet_stats(
-    Packet &packet, int packet_size_in_rb, double current_time)
+    Packet &packet, int packet_size_in_bytes, double current_time)
 {
     fairness_stats.add_allocated_effective_data_to_queue(
-        packet.get_user_ptr(),
         packet.get_queue(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
     throughput_stats.add_allocated_effective_data_to_queue(
-        packet.get_user_ptr(),
         packet.get_queue(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
 
     fairness_stats.add_allocated_effective_data_to_user(
         packet.get_user_ptr(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
     throughput_stats.add_allocated_effective_data_to_user(
         packet.get_user_ptr(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
 
     fairness_stats.add_allocated_effective_data_to_total(
-        packet.get_user_ptr(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
     throughput_stats.add_allocated_effective_data_to_total(
-        packet.get_user_ptr(),
-        packet_size_in_rb);
+        packet_size_in_bytes);
 
     stats.add_queue_packet_stats(
         packet.get_queue(),

@@ -89,49 +89,24 @@ void ThroughputStats::mark_queue_as_resource_candidate(size_t queue_id)
 }
 
 void ThroughputStats::add_allocated_effective_data_to_user(
-    User *user, int rb_count)
+    User *user, int packet_size_in_bytes)
 {
     if (user != nullptr)
     {
         int user_id = user->get_id();
-        uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb =
-            StandardManager::get_resource_block_effective_data_size(user_cqi);
-
-        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
-
-        user_statuses[user_id].allocated_effective_data_size += effective_data_size_in_bytes;
+        user_statuses[user_id].allocated_effective_data_size += packet_size_in_bytes;
     }
 }
 
 void ThroughputStats::add_allocated_effective_data_to_queue(
-    User *user, size_t queue_id, int rb_count)
+    size_t queue_id, int packet_size_in_bytes)
 {
-    if (user != nullptr)
-    {
-        uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb =
-            StandardManager::get_resource_block_effective_data_size(user_cqi);
-
-        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
-
-        queue_statuses[queue_id].allocated_effective_data_size += effective_data_size_in_bytes;
-    }
+    queue_statuses[queue_id].allocated_effective_data_size += packet_size_in_bytes;
 }
 
-void ThroughputStats::add_allocated_effective_data_to_total(
-    User *user, int rb_count)
+void ThroughputStats::add_allocated_effective_data_to_total(int packet_size_in_bytes)
 {
-    if (user != nullptr)
-    {
-        uint8_t user_cqi = user->get_cqi();
-        int effective_data_size_in_bytes_per_rb =
-            StandardManager::get_resource_block_effective_data_size(user_cqi);
-
-        int effective_data_size_in_bytes = rb_count * effective_data_size_in_bytes_per_rb;
-
-        total_allocated_effective_data_size += effective_data_size_in_bytes;
-    }
+    total_allocated_effective_data_size += packet_size_in_bytes;
 }
 
 /*

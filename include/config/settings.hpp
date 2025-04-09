@@ -20,6 +20,7 @@
 #include "config/standard_info.hpp"
 #include "config/user_config.hpp"
 #include "config/bs_config.hpp"
+#include "config/tbs.hpp"
 #include "const.hpp"
 
 class Settings

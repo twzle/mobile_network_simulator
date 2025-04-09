@@ -46,11 +46,11 @@ public:
     void mark_user_as_resource_candidate(User *user);
 
     void add_allocated_effective_data_to_queue(
-        User *user, size_t queue_id, int rb_count);
+        size_t queue_id, int rb_count);
     void add_allocated_effective_data_to_user(
         User *user, int rb_count);
     void add_allocated_effective_data_to_total(
-        User *user, int rb_count);
+        int rb_count);
 
     void calculate_throughput_for_scheduler();
     double get_throughput_for_scheduler();

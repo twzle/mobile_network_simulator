@@ -47,11 +47,11 @@ public:
     void mark_user_as_resource_candidate(User *user);
 
     void add_allocated_effective_data_to_queue(
-        User *user, size_t queue_id, int rb_count);
+        size_t queue_id, int packet_size_in_bytes);
     void add_allocated_effective_data_to_user(
-        User *user, int rb_count);
+        User *user, int packet_size_in_bytes);
     void add_allocated_effective_data_to_total(
-        User *user, int rb_count);
+        int packet_size_in_bytes);
 
     void calculate_fairness_for_queues();
     double get_fairness_for_queues();

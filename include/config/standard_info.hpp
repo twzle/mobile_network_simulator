@@ -11,19 +11,34 @@
 
 struct StandardInfo
 {
-    std::string name;                                                       // Название стандарта
-    std::string description;                                                // Краткое описание
-    std::map<std::string, double> ttis;                                     // Доступные интервалы TTI (строковое обозначение к числу секунд)
-    std::map<std::string, double> channel_sync_intervals;                   // Доступные интервалы синхронизации канала (строковое обозначение к числу секунд)
-    std::map<uint8_t, std::tuple<std::string, double, double> > cqi_to_mcs; // CQI (Номер к спектральной эффективности)
-    std::map<std::string, int> modulation_schemes;                          // Схемы модуляции канала (название -> бит/RE)
-    std::map<double, uint8_t> sinr_to_cqi;                                  // SINR to CQI
-    std::map<double, int> bandwidth_to_rb;                                  // Доступные полосы пропускания (в МГц) к максимальному числу RB в них
-    std::vector<std::string> schedulers;                                    // Доступные планировщики
-    std::map<uint8_t, std::string> mobility_directions;                     // Направления перемещения пользователя
-    std::vector<std::string> area_types;                                    // Типы местности
-    std::vector<int> users_per_tti_limits;                                  // Лимит пользователей обслуживаемых за TTI
-    uint8_t resource_elements;                                              // Количество доступных ресурсных элементов (RE) в одном ресурсном блоке (RB)
+    // Название стандарта
+    std::string name;
+    // Краткое описание
+    std::string description;
+    // Доступные интервалы TTI (строковое обозначение к числу секунд)
+    std::map<std::string, double> ttis;
+    // Доступные интервалы синхронизации канала (строковое обозначение к числу секунд)
+    std::map<std::string, double> channel_sync_intervals;
+    // CQI (Номер -> модуляция, code rate, спектральная эффективность, IMCS)
+    std::map<uint8_t, std::tuple<std::string, double, double, int> > cqi_to_mcs;
+    // MCS to TBS (IMCS -> ITBS)
+    std::map<int, int> mcs_to_tbs;
+    // Схемы модуляции канала (название -> бит/RE)
+    std::map<std::string, int> modulation_schemes;
+    // SINR to CQI
+    std::map<double, uint8_t> sinr_to_cqi;
+    // Доступные полосы пропускания (в МГц) к максимальному числу RB в них
+    std::map<double, int> bandwidth_to_rb;
+    // Доступные планировщики
+    std::vector<std::string> schedulers;
+    // Направления перемещения пользователя
+    std::map<uint8_t, std::string> mobility_directions;
+    // Типы местности
+    std::vector<std::string> area_types;
+    // Лимит пользователей обслуживаемых за TTI
+    std::vector<int> users_per_tti_limits;
+    // Количество доступных ресурсных элементов (RE) в одном ресурсном блоке (RB)
+    uint8_t resource_elements;
 };
 
 class StandardManager
@@ -47,7 +62,13 @@ public:
 
     // Статическая функция для получения числа полезных в RE по строковому ключу
     static int get_cqi_from_sinr(
-        const double cqi);
+        const double sinr);
+
+    // Статическая функция для получения числа полезных в RE по строковому ключу
+    static std::tuple<std::string, double, double, int> get_mcs_from_cqi(const int cqi);
+
+    // Статическая функция для получения числа полезных в RE по строковому ключу
+    static int get_tbs_from_mcs(const int imcs);
 
     // Статическая функция для получения количества ресурсных элементов по строковому ключу
     static int get_resource_elements_in_resource_block();

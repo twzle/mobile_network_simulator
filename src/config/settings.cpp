@@ -205,14 +205,16 @@ int Settings::get_packet_size_limit()
 {
     int rb_per_tti = get_resource_block_per_tti_limit();
 
-    int bytes_per_rb =
-        StandardManager::get_resource_block_effective_data_size(
-            base_cqi
-        );
+    std::tuple<std::string, double, double, int> mcs = 
+        StandardManager::get_mcs_from_cqi(base_cqi);
+    
+    int imcs = std::get<3>(mcs);
 
-    double bytes_per_tti = rb_per_tti * bytes_per_rb;
+    int itbs = StandardManager::get_tbs_from_mcs(imcs);
 
-    return bytes_per_tti;
+    int max_bytes_per_rb = TBS::get_size_for_rb(itbs, rb_per_tti);
+
+    return max_bytes_per_rb;
 }
 
 int Settings::get_throughput_history_size()

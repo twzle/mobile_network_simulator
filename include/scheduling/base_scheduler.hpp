@@ -6,6 +6,7 @@
 
 #include "config/user_config.hpp"
 #include "config/bs_config.hpp"
+#include "config/tbs.hpp"
 #include "core/state.hpp"
 #include "core/packet_queue.hpp"
 #include "core/user.hpp"
@@ -65,7 +66,7 @@ protected:
     virtual void sync_user_channels() = 0;
 
     void save_processed_packet_stats(
-        Packet &packet, int packet_size_in_rb, double current_time);
+        Packet &packet, int packet_size_in_bytes, double current_time);
 
     void mark_as_resource_candidate(int queue, User* user);
 
