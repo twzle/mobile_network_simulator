@@ -70,6 +70,6 @@ private:
     size_t candidate_user_count;                     // Количество пользователей нуждающихся в RB
     std::map<int, UserThroughputStatus> user_statuses; // Число выделенных RB по пользователям
 
-    double throughput_for_scheduler;         // Пропускная способность планировщиках (Кбайт/мс)
+    double throughput_for_scheduler;         // Пропускная способность планировщика (Мбит/мс)
     bool _is_valid_throughput_for_scheduler; // Стоит ли учитывать пропускную сп-ность в расчетах
 };

@@ -126,11 +126,15 @@ void ThroughputStats::calculate_throughput_for_scheduler()
     if (total_allocated_effective_data_size > 0)
     {
         /*
-        Пропускная способность (Мбайт/мс) =
-        (Размер данных выделенных за TTI (байт/мс) / 1024 * 1024)
+        Пропускная способность (Мбит/мс) =
+        (Размер данных выделенных за TTI (байт/мс) * 8 / (1000 * 1000) / )
         */
-        throughput_for_scheduler =
-            ((double)total_allocated_effective_data_size / (double)(1024 * 1024));
+
+        // Пропускная способность (байт/мс) -> (бит/мс)
+        double bits_per_ms = total_allocated_effective_data_size * 8;
+
+        // Пропускная способность (Мбит/мс)
+        throughput_for_scheduler = bits_per_ms / (1000 * 1000);
 
         _is_valid_throughput_for_scheduler = true;
 

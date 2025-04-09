@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 
+#include "config/standard_info.hpp"
+#include "config/tbs.hpp"
 #include "iteration_stats.hpp"
 
 
@@ -16,13 +18,14 @@ class MeanStats
 public:
     MeanStats() = default;
     MeanStats(const MeanStats &) = delete;
-    void calculate();
+    void calculate(double bandwidth);
     void calculate_mean_values();
     void calculate_mean_queue_packet_processing_delays();
     void calculate_mean_user_packet_processing_delays();
     void calculate_mean_scheduler_packet_processing_delay();
     void calculate_mean_packet_scheduling_time();
     void calculate_mean_queue_processing_time();
+    void calculate_max_scheduler_throughput(double bandwidth);
 
     // Подсчет стандартного отклонения величины
     double calculate_standard_deviation_for_metric(
@@ -91,8 +94,9 @@ public:
 
     // История средней суммарной пропускной способности по итерациям
     std::vector<double> scheduler_throughput_history;
-    double mean_scheduler_throughput = 0;   // (Кбайт/мс)
-    double common_scheduler_throughput = 0; // (Кбайт/мс)
+    double mean_scheduler_throughput = 0;   // (Мбит/мс)
+    double common_scheduler_throughput = 0; // (Мбит/мс)
+    double max_scheduler_throughput = 0; // (Мбит/мс)
 
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;

@@ -204,8 +204,8 @@ void IterationStats::print()
               << "Average fairness for users = "
               << scheduler_average_fairness_for_users << "\n"
               << "Average scheduler throughput = "
-              << scheduler_average_throughput * 1000 << " Mbytes/s, "
-              << scheduler_average_throughput * 1024 << " Kbytes/ms\n"
+              << scheduler_average_throughput * 1000 << " Mbit/s, "
+              << scheduler_average_throughput * 1000 * 1000 << " Kbit/s\n"
               << "Average scheduler packet processing delay = "
               << scheduler_average_packet_processing_delay * 1000
               << " ms\n"; // Среднее время задержки обслуживания пакета

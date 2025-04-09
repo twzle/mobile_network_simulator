@@ -7,9 +7,10 @@
 #define FILE_NAME "data.yaml"
 
 // Подсчет средних значений
-void MeanStats::calculate()
+void MeanStats::calculate(double bandwidth)
 {
     calculate_mean_values();
+    calculate_max_scheduler_throughput(bandwidth);
     collect_history();
 }
 
@@ -375,6 +376,26 @@ void MeanStats::evaluate_confidence_intervals()
     evaluate_confidence_user_packet_processing_delay_intervals();
 }
 
+void MeanStats::calculate_max_scheduler_throughput(double bandwidth)
+{
+    int max_cqi = 15;
+
+    std::tuple<std::string, double, double, int> max_mcs = 
+        StandardManager::get_mcs_from_cqi(max_cqi);
+
+    int max_imcs = std::get<3>(max_mcs);
+
+    int max_itbs = StandardManager::get_tbs_from_mcs(max_imcs);
+
+    int max_rb_number = StandardManager::get_rb_number_from_bandwidth(bandwidth);
+
+    int max_bits_per_ms = TBS::get_size_for_rb(max_itbs, max_rb_number) * 8;
+
+    double max_mbits_per_ms = ((double) max_bits_per_ms / (1000 * 1000));
+
+    this->max_scheduler_throughput = max_mbits_per_ms;
+}
+
 void MeanStats::evaluate_confidence_queue_packet_processing_delay_intervals()
 {
     for (size_t queue_id = 0;
@@ -439,9 +460,12 @@ void MeanStats::show()
               << "\n" // Средняя справедливость распределения RB по пользователям
               << "Mean scheduler throughput = "
               << mean_scheduler_throughput * 1000
-              << " Mbytes/ms, " // Средняя пропускная способность (Мбайт/с)
-              << mean_scheduler_throughput * 1024
-              << " Kbytes/ms\n" // Средняя пропускная способность (Кбайт/мс)
+              << " Mbit/s, " // Средняя пропускная способность (Мбит/с)
+              << mean_scheduler_throughput * 1000 * 1000
+              << " Kbit/s\n" // Средняя пропускная способность (Кбит/с)
+              << "Max scheduler throughput = "
+              << max_scheduler_throughput * 1000
+              << " Mbit/s\n" // Максимальная пропускная способность (Мбит/с)
               << "Mean scheduler packet processing delay time = "
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета

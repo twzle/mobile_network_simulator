@@ -49,7 +49,7 @@ double StandardManager::get_cqi_efficiency(
 }
 
 // Статическая функция для получения количества RB в канале
-double StandardManager::get_rb_number_from_bandwidth(
+int StandardManager::get_rb_number_from_bandwidth(
     const double bandwidth)
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);

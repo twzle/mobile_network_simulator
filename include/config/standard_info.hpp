@@ -57,7 +57,7 @@ public:
         const uint8_t cqi);
 
     // Статическая функция для получения числа полезных в RE по строковому ключу
-    static double get_rb_number_from_bandwidth(
+    static int get_rb_number_from_bandwidth(
         const double bandwidth);
 
     // Статическая функция для получения числа полезных в RE по строковому ключу

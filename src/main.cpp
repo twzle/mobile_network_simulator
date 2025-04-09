@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     executor.run();
 
     MeanStats &stats = executor.get_stats();
-    stats.calculate();
+    stats.calculate(settings.get_bandwidth());
     stats.show();
     stats.evaluate_confidence_intervals();
 
