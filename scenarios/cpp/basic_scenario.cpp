@@ -13,14 +13,14 @@ namespace BasicScenario {
         double carrier_frequency = 2000;
         int bs_transmission_power = 46;
     
-        double bandwidth = 20;
+        double bandwidth = 5;
         uint8_t base_cqi = 1;
     
         int packet_count = 1000;
-        int packet_size = 300;
-        double time_lambda = 2000;
+        int packet_size = 150;
+        double time_lambda = 10000;
     
-        int queue_count = 5;
+        int queue_count = 1;
         double queue_quant = 100;
         int queue_limit = 10000;
         int users_per_tti_limit = 4;
@@ -29,12 +29,13 @@ namespace BasicScenario {
     
         std::vector<UserConfig> user_configs = {
             {1000, 1000, 1.5, 0, "random", 10},
-            {1000, 1000, 1.5, 0, "random", 10},
-            {1000, 1000, 1.5, 0, "random", 10},
-            {1000, 1000, 1.5, 0, "random", 10},
+            {6500, 6500, 1.5, 0, "random", 10},
+            {8000, 8000, 1.5, 0, "random", 10},
+            {10000, 10000, 1.5, 0, "random", 10},
+            {11000, 11000, 1.5, 0, "random", 10},
         };
         int throughput_history_size = 200;
-        int fairness_history_size = 20;
+        int fairness_history_size = 500;
     
         return Settings(
             launches, standard_type, base_cqi, tti_duration, channel_sync_interval,
