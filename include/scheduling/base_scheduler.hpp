@@ -45,6 +45,7 @@ public:
     void set_users_per_tti_limit(int users_per_tti_limit);
     // Инициализация статистики по TTI
     void set_tti_stats(
+        int resource_block_limit_per_tti,
         size_t queue_count, size_t user_count,
         double tti_duration, int history_size_limit);
 
@@ -66,7 +67,9 @@ protected:
     virtual void sync_user_channels() = 0;
 
     void save_processed_packet_stats(
-        Packet &packet, int packet_size_in_bytes, double current_time);
+        Packet &packet, 
+        int packet_size_in_bytes, int packet_size_in_rb, 
+        double current_time);
 
     void mark_as_resource_candidate(int queue, User* user);
 

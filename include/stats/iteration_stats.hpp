@@ -74,6 +74,9 @@ public:
     void update_scheduler_throughput(
         double throughput,
         bool is_valid);
+    void update_scheduler_unused_resources(
+        double unused_resources,
+        bool is_valid);
 
     void evaluate(int queue_count, int user_count);
 
@@ -92,6 +95,7 @@ public:
     void evaluate_scheduling_stats();
 
     void evaluate_throughput_stats();
+    void evaluate_unused_resources_stats();
 
     void release_memory_resources();
 
@@ -107,16 +111,19 @@ public:
     std::vector<double> scheduler_throughput; // За каждый TTI (Мбит/мс)
     double scheduler_average_throughput = 0;  // Среднее за весь период работы (Мбит/мс)
 
-    std::vector<std::pair<int, double>> scheduler_fairness_for_queues; // За несколько TTI пара (число TTI, результат)
-    double scheduler_average_fairness_for_queues = 0;  // Взвешенное среднее за весь период работы
+    std::vector<double> scheduler_unused_resources; // За каждый TTI (доля RB от максимума)
+    double scheduler_average_unused_resources = 0;  // Среднее за весь период работы (доля RB от максимума)
 
-    std::vector<std::pair<int, double>> scheduler_fairness_for_users; // За несколько TTI пара (число TTI, результат)
-    double scheduler_average_fairness_for_users = 0;  // Взвешенное среднее за весь период работы
+    std::vector<std::pair<int, double> > scheduler_fairness_for_queues; // За несколько TTI пара (число TTI, результат)
+    double scheduler_average_fairness_for_queues = 0;                   // Взвешенное среднее за весь период работы
+
+    std::vector<std::pair<int, double> > scheduler_fairness_for_users; // За несколько TTI пара (число TTI, результат)
+    double scheduler_average_fairness_for_users = 0;                   // Взвешенное среднее за весь период работы
 
     std::vector<PacketStats> packet_stats;
     std::map<int, double> queue_average_packet_processing_delay; // Средние задержки обработки пакетов по очередям (секунды)
-    std::map<int, double> user_average_packet_processing_delay; // Средние задержки обработки пакетов по пользователям (секунды)
-    double scheduler_average_packet_processing_delay = 0; // Общее среднее время задержки обработки пакетов (секунды)
+    std::map<int, double> user_average_packet_processing_delay;  // Средние задержки обработки пакетов по пользователям (секунды)
+    double scheduler_average_packet_processing_delay = 0;        // Общее среднее время задержки обработки пакетов (секунды)
 
     // Общее время работы (сумма processing, idle, wait)
     std::map<int, double> queue_total_time;

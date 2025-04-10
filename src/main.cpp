@@ -67,10 +67,10 @@ int main(int argc, char* argv[])
     stats.show();
     stats.evaluate_confidence_intervals();
 
-    // std::string stats_file_path = stats.write_yaml();
-    // std::cout << "STATS FILE: " << stats_file_path << "\n";
+    std::string stats_file_path = stats.write_yaml();
+    std::cout << "STATS FILE: " << stats_file_path << "\n";
 
-    // Plotter plotter = Plotter();
-    // plotter.run(stats_file_path);
+    Plotter plotter = Plotter();
+    plotter.run(stats_file_path);
     return 0;
 }

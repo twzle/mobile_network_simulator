@@ -11,8 +11,7 @@
 #include "config/tbs.hpp"
 #include "iteration_stats.hpp"
 
-
-// Средняя статистика за все итерации моделирования 
+// Средняя статистика за все итерации моделирования
 class MeanStats
 {
 public:
@@ -96,7 +95,12 @@ public:
     std::vector<double> scheduler_throughput_history;
     double mean_scheduler_throughput = 0;   // (Мбит/мс)
     double common_scheduler_throughput = 0; // (Мбит/мс)
-    double max_scheduler_throughput = 0; // (Мбит/мс)
+    double max_scheduler_throughput = 0;    // (Мбит/мс)
+
+    // История средней суммарной пропускной способности по итерациям
+    std::vector<double> scheduler_unused_resources_history;
+    double mean_scheduler_unused_resources = 0;   // (доля RB от максимума)
+    double common_scheduler_unused_resources = 0; // (доля RB от максимума)
 
     double mean_scheduler_packet_count = 0;
     double common_scheduler_packet_count = 0;

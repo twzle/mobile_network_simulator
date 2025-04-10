@@ -91,6 +91,7 @@ void BasePFScheduler::run()
                 save_processed_packet_stats(
                     packet,
                     packet_size_in_bytes,
+                    packet_size_in_rb,
                     current_time);
 
                 queue_state = set_processing(queue_state);
@@ -421,11 +422,17 @@ void BasePFScheduler::evaluate_fairness_stats(
 */
 void BasePFScheduler::evaluate_throughput_stats(bool force_update)
 {
-    if (force_update){
+    if (force_update)
+    {
         throughput_stats.calculate_throughput_for_scheduler();
         stats.update_scheduler_throughput(
             throughput_stats.get_throughput_for_scheduler(),
             throughput_stats.is_valid_throughput_for_scheduler());
+
+        throughput_stats.calculate_unused_resources_for_scheduler();
+        stats.update_scheduler_unused_resources(
+            throughput_stats.get_unused_resources_for_scheduler(),
+            throughput_stats.is_valid_unused_resources_for_scheduler());
 
         throughput_stats.reset();
 
@@ -436,5 +443,11 @@ void BasePFScheduler::evaluate_throughput_stats(bool force_update)
     stats.update_scheduler_throughput(
         throughput_stats.get_throughput_for_scheduler(),
         throughput_stats.is_valid_throughput_for_scheduler());
+
+    throughput_stats.calculate_unused_resources_for_scheduler();
+    stats.update_scheduler_unused_resources(
+        throughput_stats.get_unused_resources_for_scheduler(),
+        throughput_stats.is_valid_unused_resources_for_scheduler());
+
     throughput_stats.reset();
 }

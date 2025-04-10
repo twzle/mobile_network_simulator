@@ -162,6 +162,16 @@ void IterationStats::update_scheduler_throughput(
     }
 }
 
+void IterationStats::update_scheduler_unused_resources(
+    double unused_resources,
+    bool is_valid)
+{
+    if (is_valid)
+    {
+        scheduler_unused_resources.emplace_back(unused_resources);
+    }
+}
+
 void IterationStats::add_queue_packet_stats(
     size_t queue_id,
     int user_id,
@@ -348,6 +358,19 @@ void IterationStats::evaluate_throughput_stats()
 
     scheduler_average_throughput =
         sum_of_all_throughputs / scheduler_throughput.size();
+}
+
+void IterationStats::evaluate_unused_resources_stats()
+{
+    double sum_of_all_unused_resources = 0;
+    // Подсчет суммы справедливостей за все время работы планировщика
+    for (auto &stats : scheduler_unused_resources)
+    {
+        sum_of_all_unused_resources += stats;
+    }
+
+    scheduler_average_unused_resources =
+        sum_of_all_unused_resources / scheduler_unused_resources.size();
 }
 
 void IterationStats::evaluate_queue_delay_stats(int queue_count)

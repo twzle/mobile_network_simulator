@@ -79,6 +79,7 @@ void BaseScheduler::set_users_per_tti_limit(int users_per_tti_limit)
 }
 
 void BaseScheduler::set_tti_stats(
+    int resource_block_limit_per_tti,
     size_t queue_count, size_t user_count,
     double tti_duration, int history_size_limit)
 {
@@ -87,6 +88,7 @@ void BaseScheduler::set_tti_stats(
         tti_duration, history_size_limit);
 
     throughput_stats.initialize(
+        resource_block_limit_per_tti,
         queue_count, user_count,
         tti_duration, history_size_limit);
 }
@@ -113,7 +115,8 @@ int BaseScheduler::convert_packet_size_to_rb_number(
 }
 
 void BaseScheduler::save_processed_packet_stats(
-    Packet &packet, int packet_size_in_bytes, double current_time)
+    Packet &packet, int packet_size_in_bytes, int packet_size_in_rb, 
+    double current_time)
 {
     fairness_stats.add_allocated_effective_data_to_queue(
         packet.get_queue(),
@@ -132,7 +135,7 @@ void BaseScheduler::save_processed_packet_stats(
     fairness_stats.add_allocated_effective_data_to_total(
         packet_size_in_bytes);
     throughput_stats.add_allocated_effective_data_to_total(
-        packet_size_in_bytes);
+        packet_size_in_bytes, packet_size_in_rb);
 
     stats.add_queue_packet_stats(
         packet.get_queue(),

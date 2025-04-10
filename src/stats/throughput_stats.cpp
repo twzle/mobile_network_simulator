@@ -6,16 +6,19 @@ ThroughputStats::ThroughputStats(
     size_t queue_count, size_t user_count,
     double tti_duration)
     : history_size_limit(1), current_history_size(0),
-      total_allocated_effective_data_size(0), tti_duration(tti_duration),
+      total_allocated_effective_data_size(0), total_allocated_resource_blocks(0),
+      max_allocated_resource_blocks(0), tti_duration(tti_duration),
       queue_count(queue_count), candidate_queue_count(0),
       user_count(user_count), candidate_user_count(0),
-      throughput_for_scheduler(0), _is_valid_throughput_for_scheduler(false)
+      throughput_for_scheduler(0), _is_valid_throughput_for_scheduler(false),
+      unused_resources_for_scheduler(0), _is_valid_unused_resources_for_scheduler(false)
 {
     initialize_queue_stats();
     initialize_user_stats();
 }
 
 void ThroughputStats::initialize(
+    int resource_block_limit_per_tti,
     size_t queue_count, size_t user_count,
     double tti_duration, int history_size_limit)
 {
@@ -25,6 +28,8 @@ void ThroughputStats::initialize(
     this->user_count = user_count;
     this->tti_duration = tti_duration;
 
+    this->max_allocated_resource_blocks = resource_block_limit_per_tti;
+
     reset();
 }
 
@@ -33,11 +38,14 @@ void ThroughputStats::reset()
     current_history_size = 0;
 
     total_allocated_effective_data_size = 0;
+    total_allocated_resource_blocks = 0;
     candidate_queue_count = 0;
     candidate_user_count = 0;
 
     throughput_for_scheduler = 0;
+    unused_resources_for_scheduler = 0;
     _is_valid_throughput_for_scheduler = false;
+    _is_valid_unused_resources_for_scheduler = false;
 
     initialize_queue_stats();
     initialize_user_stats();
@@ -104,9 +112,11 @@ void ThroughputStats::add_allocated_effective_data_to_queue(
     queue_statuses[queue_id].allocated_effective_data_size += packet_size_in_bytes;
 }
 
-void ThroughputStats::add_allocated_effective_data_to_total(int packet_size_in_bytes)
+void ThroughputStats::add_allocated_effective_data_to_total(
+    int packet_size_in_bytes, int resource_blocks)
 {
     total_allocated_effective_data_size += packet_size_in_bytes;
+    total_allocated_resource_blocks += resource_blocks;
 }
 
 /*
@@ -141,7 +151,7 @@ void ThroughputStats::calculate_throughput_for_scheduler()
         return;
     }
 
-    // Если было передано ненулевое число байт, значит перед учетом throughput
+    // Если было передано нулевое число байт, значит перед учетом throughput
     // нужно проверить были ли кандидаты на ресурсы
     if (total_allocated_effective_data_size == 0)
     {
@@ -178,3 +188,64 @@ bool ThroughputStats::is_valid_throughput_for_scheduler()
 {
     return _is_valid_throughput_for_scheduler;
 }
+
+void ThroughputStats::calculate_unused_resources_for_scheduler()
+{
+    _is_valid_unused_resources_for_scheduler = false;
+
+    // Если было передано ненулевое число байт, значит нужно учесть throughput
+    if (total_allocated_resource_blocks > 0)
+    {
+        /*
+        Доля неиспользованных ресурсов = 1 - (RB/RB_max) 
+        */
+
+        double used_resources_for_scheduler = 
+            (double) total_allocated_resource_blocks / 
+            (double) max_allocated_resource_blocks;
+        
+        unused_resources_for_scheduler = 1 - used_resources_for_scheduler;
+
+        _is_valid_throughput_for_scheduler = true;
+
+        return;
+    }
+
+    // Если было передано нулевое число байт, значит перед учетом throughput
+    // нужно проверить были ли кандидаты на ресурсы
+    if (total_allocated_resource_blocks == 0)
+    {
+        // Подсчет очередей имевших трафик в этом TTI
+        int candidate_queue_count = 0;
+        for (auto &queue : queue_statuses)
+        {
+            if (queue.second.is_resource_candidate)
+            {
+                ++candidate_queue_count;
+            }
+        }
+
+        // Если были участники распределения (очереди), имевшие трафик
+        if (candidate_queue_count > 0)
+        {
+            /*
+            Доля неиспользованных ресурсов =
+            Максимальное число ресурсных блоков за TTI
+            */
+            unused_resources_for_scheduler = 1;
+
+            _is_valid_unused_resources_for_scheduler = true;
+        }
+    }
+}
+
+double ThroughputStats::get_unused_resources_for_scheduler()
+{
+    return unused_resources_for_scheduler;
+}
+
+bool ThroughputStats::is_valid_unused_resources_for_scheduler()
+{
+    return _is_valid_unused_resources_for_scheduler;
+}
+

@@ -114,11 +114,8 @@ void BaseRRScheduler::evaluate_stats()
 void BaseRRScheduler::evaluate_fairness_stats(
     SchedulerState scheduler_state, bool force_update)
 {
-    std::cout << "EVAL FAIRNESS\n";
-
     if (force_update)
     {
-        std::cout << "FORCE UPDATE\n";
         fairness_stats.calculate_fairness_for_queues();
         fairness_stats.calculate_fairness_for_users();
 
@@ -137,14 +134,13 @@ void BaseRRScheduler::evaluate_fairness_stats(
         return;
     }
 
-    if (scheduler_state > SchedulerState::WAIT){
-        std::cout << "INCR FAIRNESS\n";
+    if (scheduler_state > SchedulerState::WAIT)
+    {
         fairness_stats.increment_current_history_size();
     }
 
     if (fairness_stats.is_history_size_limit_reached())
     {
-        std::cout << "HSITORY SIZE LIMIT REACHED\n";
         fairness_stats.calculate_fairness_for_queues();
         fairness_stats.calculate_fairness_for_users();
 
@@ -174,6 +170,11 @@ void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
             throughput_stats.get_throughput_for_scheduler(),
             throughput_stats.is_valid_throughput_for_scheduler());
 
+        throughput_stats.calculate_unused_resources_for_scheduler();
+        stats.update_scheduler_unused_resources(
+            throughput_stats.get_unused_resources_for_scheduler(),
+            throughput_stats.is_valid_unused_resources_for_scheduler());
+
         throughput_stats.reset();
 
         return;
@@ -183,6 +184,12 @@ void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
     stats.update_scheduler_throughput(
         throughput_stats.get_throughput_for_scheduler(),
         throughput_stats.is_valid_throughput_for_scheduler());
+
+    throughput_stats.calculate_unused_resources_for_scheduler();
+    stats.update_scheduler_unused_resources(
+        throughput_stats.get_unused_resources_for_scheduler(),
+        throughput_stats.is_valid_unused_resources_for_scheduler());
+
     throughput_stats.reset();
 }
 

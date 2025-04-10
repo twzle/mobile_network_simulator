@@ -133,6 +133,7 @@ void CyclicDRRSchedulerWithUserQuant::run()
                         save_processed_packet_stats(
                             packet,
                             packet_size_in_bytes,
+                            packet_size_in_rb,
                             current_time);
 
                         queue_state = set_processing(queue_state);

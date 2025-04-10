@@ -65,6 +65,8 @@ void MeanStats::collect_history()
             stats.scheduler_average_fairness_for_users);
         this->scheduler_throughput_history.push_back(
             stats.scheduler_average_throughput);
+        this->scheduler_unused_resources_history.push_back(
+                stats.scheduler_average_unused_resources);
 
         this->scheduler_packet_processing_delay_history.push_back(
             stats.scheduler_average_packet_processing_delay);
@@ -115,6 +117,7 @@ void MeanStats::calculate_mean_values()
         common_scheduler_fairness_for_queues += stats.scheduler_average_fairness_for_queues;
         common_scheduler_fairness_for_users += stats.scheduler_average_fairness_for_users;
         common_scheduler_throughput += stats.scheduler_average_throughput;
+        common_scheduler_unused_resources += stats.scheduler_average_unused_resources;
 
         common_scheduler_packet_count += stats.packet_count;
     }
@@ -134,6 +137,8 @@ void MeanStats::calculate_mean_values()
         common_scheduler_fairness_for_users / stats_array.size();
     mean_scheduler_throughput =
         common_scheduler_throughput / stats_array.size();
+    mean_scheduler_unused_resources =
+        common_scheduler_unused_resources / stats_array.size();
 
     mean_scheduler_packet_count =
         common_scheduler_packet_count / stats_array.size();
@@ -160,17 +165,12 @@ void MeanStats::calculate_mean_queue_packet_processing_delays()
             mean_queue_packet_processing_delays[i] +=
                 stats.queue_average_packet_processing_delay[i];
         }
-
-        mean_scheduler_packet_processing_delay +=
-            stats.scheduler_average_packet_processing_delay;
     }
 
     for (int i = 0; i < queue_count; ++i)
     {
         mean_queue_packet_processing_delays[i] /= stats_array.size();
     }
-
-    mean_scheduler_packet_processing_delay /= stats_array.size();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов по пользователям
@@ -357,11 +357,11 @@ void MeanStats::evaluate_confidence_intervals()
         0.001);
 
     // Доверительный интервал для справделивости распределения RB между очередями
-    std::cout << "\nОбщая пропускная способность"
-              << " (scheduler_throughput)" << std::endl;
+    std::cout << "\nОбщая доля неиспользованных ресурсов"
+              << " (scheduler_unused_resources)" << std::endl;
     calculate_confidence_interval(
-        scheduler_throughput_history,
-        mean_scheduler_throughput,
+        scheduler_unused_resources_history,
+        mean_scheduler_unused_resources,
         0.001);
 
     // Доверительный интервал для средней задержки обслуживания пакетов
@@ -380,7 +380,7 @@ void MeanStats::calculate_max_scheduler_throughput(double bandwidth)
 {
     int max_cqi = 15;
 
-    std::tuple<std::string, double, double, int> max_mcs = 
+    std::tuple<std::string, double, double, int> max_mcs =
         StandardManager::get_mcs_from_cqi(max_cqi);
 
     int max_imcs = std::get<3>(max_mcs);
@@ -391,7 +391,7 @@ void MeanStats::calculate_max_scheduler_throughput(double bandwidth)
 
     int max_bits_per_ms = TBS::get_size_for_rb(max_itbs, max_rb_number) * 8;
 
-    double max_mbits_per_ms = ((double) max_bits_per_ms / (1000 * 1000));
+    double max_mbits_per_ms = ((double)max_bits_per_ms / (1000 * 1000));
 
     this->max_scheduler_throughput = max_mbits_per_ms;
 }
@@ -469,22 +469,24 @@ void MeanStats::show()
               << "Mean scheduler packet processing delay time = "
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета
-    
+
     show_queue_delays();
     show_user_delays();
 }
 
-void MeanStats::show_queue_delays(){
-    for (auto& queue : queue_packet_processing_delay_history)
+void MeanStats::show_queue_delays()
+{
+    for (auto &queue : queue_packet_processing_delay_history)
     {
         std::cout << "Mean queue packet processing delay time "
-                  << "(Queue #" << queue.first<< ") = "
+                  << "(Queue #" << queue.first << ") = "
                   << mean_queue_packet_processing_delays[queue.first] * 1000 << " ms\n";
     }
 }
 
-void MeanStats::show_user_delays(){
-    for (auto& user : user_packet_processing_delay_history)
+void MeanStats::show_user_delays()
+{
+    for (auto &user : user_packet_processing_delay_history)
     {
         std::cout << "Mean user packet processing delay time "
                   << "(User #" << user.first << ") = "
@@ -496,21 +498,51 @@ std::string MeanStats::write_yaml()
 {
     YAML::Emitter out;
 
+    out.SetFloatPrecision(6);
+    out.SetDoublePrecision(6);
+
     out << YAML::BeginMap;
+
+    // Modeling time
+
+    // Total time (секунды)
+    out << YAML::Key << "scheduler_total_time"
+        << YAML::Value << mean_scheduler_total_time;
+
+    // Processing time (секунды)
+    out << YAML::Key << "scheduler_processing_time"
+        << YAML::Value << mean_scheduler_processing_time;
+
+    // Idle time (секунды)
+    out << YAML::Key << "scheduler_idle_time"
+        << YAML::Value << mean_scheduler_idle_time;
+
+    // Wait time (секунды)
+    out << YAML::Key << "scheduler_wait_time"
+        << YAML::Value << mean_scheduler_wait_time;
 
     // Average delays
 
-    // Scheduler
+    // Scheduler (секунды)
     out << YAML::Key << "scheduler_packet_processing_delay"
         << YAML::Value << mean_scheduler_packet_processing_delay;
 
-    // Queues
+    // Queues (секунды)
     out << YAML::Key << "queue_packet_processing_delays"
         << YAML::Value << mean_queue_packet_processing_delays;
 
-    // Users
+    // Users (секунды)
     out << YAML::Key << "user_packet_processing_delays"
         << YAML::Value << mean_user_packet_processing_delays;
+
+    // Average throughput
+
+    // Scheduler (Мбит/мс)
+    out << YAML::Key << "scheduler_throughput"
+        << YAML::Value << mean_scheduler_throughput;
+
+    out << YAML::Key << "max_scheduler_throughput"
+        << YAML::Value << max_scheduler_throughput;
 
     out << YAML::EndMap;
 

@@ -142,6 +142,7 @@ void DefaultDRRScheduler::run()
                         save_processed_packet_stats(
                             packet,
                             packet_size_in_bytes,
+                            packet_size_in_rb,
                             current_time
                         );
 
