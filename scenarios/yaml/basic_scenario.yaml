@@ -27,11 +27,22 @@ bs_config:
   z: 25
 
 user_configs:
-  - x: 8000
-    y: 8000
+  - x: 1000
+    y: 1000
     z: 1.5
     speed: 0
     direction: "random"
     quant: 10
+    packet_size: 100
+    traffic_part: 0.5
+  # - x: 8000
+  #   y: 8000
+  #   z: 1.5
+  #   speed: 0
+  #   direction: "random"
+  #   quant: 10
+  #   packet_size: 100
+  #   traffic_part: 0.5
 
 throughput_history_size: 2000
+fairness_history_size: 100

@@ -2,7 +2,7 @@
 
 namespace BasicScenario {
     Settings create_settings() {
-        int launches = 1;
+        int launches = 5;
         std::string standard_type = "LTE";
         std::string scheduler_type = "DefaultDRRScheduler";
         std::string area_type = "Dense Urban";
@@ -16,26 +16,26 @@ namespace BasicScenario {
         double bandwidth = 5;
         uint8_t base_cqi = 1;
     
-        int packet_count = 1000;
-        int packet_size = 150;
-        double time_lambda = 10000;
+        int packet_count = 10;
+        int packet_size = 125;
+        double time_lambda = 100;
     
         int queue_count = 1;
-        double queue_quant = 100;
+        double queue_quant = 10;
         int queue_limit = 10000;
         int users_per_tti_limit = 4;
     
         BSConfig bs_config = {0, 0, 25};
     
         std::vector<UserConfig> user_configs = {
-            {1000, 1000, 1.5, 0, "random", 10},
-            {6500, 6500, 1.5, 0, "random", 10},
-            {8000, 8000, 1.5, 0, "random", 10},
-            {10000, 10000, 1.5, 0, "random", 10},
-            {11000, 11000, 1.5, 0, "random", 10},
+            {1000, 1000, 1.5, 0, "random", 10, 125, 0.8},
+            {6500, 6500, 1.5, 0, "random", 10, 100, 0.2},
+            {8000, 8000, 1.5, 0, "random", 10, 125, 0.0},
+            {10000, 10000, 1.5, 0, "random", 10, 100, 0.0},
+            {11000, 11000, 1.5, 0, "random", 10, 125, 0.0},
         };
-        int throughput_history_size = 200;
-        int fairness_history_size = 500;
+        int throughput_history_size = 50;
+        int fairness_history_size = 2;
     
         return Settings(
             launches, standard_type, base_cqi, tti_duration, channel_sync_interval,
