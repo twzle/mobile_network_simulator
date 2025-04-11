@@ -6,10 +6,17 @@ Executor::Executor(Settings settings)
 {
     this->settings = settings;
 
+    std::vector<double> traffic_parts;
+
+    for (int user_id = 0; user_id < settings.get_user_count(); ++user_id){
+        UserConfig user_config = settings.get_user_config(user_id);
+        traffic_parts.push_back(user_config.get_traffic_part());
+    }
+
     TimeGenerator::set_distribution(
         std::exponential_distribution<>(settings.get_time_lambda()));
     UserGenerator::set_user_id_distribution(
-        std::uniform_int_distribution<>(0, settings.get_user_count() - 1));
+        std::discrete_distribution<>(traffic_parts.begin(), traffic_parts.end()));
     UserGenerator::set_user_move_direction_distribution(
         std::uniform_int_distribution<>(1, 4));
 }
@@ -76,7 +83,10 @@ void Executor::execute()
             User *user = scheduler->get_user_ptr(UserGenerator::generate_user_id());
             if (user != nullptr)
             {
-                Packet packet(queue_id, settings.get_packet_size(), user);
+                UserConfig user_config = settings.get_user_config(user->get_id());
+                int packet_size = user_config.get_packet_size();
+
+                Packet packet(queue_id, packet_size, user);
                 queue.schedule_packet(packet);
             }
         }

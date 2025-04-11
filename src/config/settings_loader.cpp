@@ -44,7 +44,9 @@ Settings load_settings_from_yaml(const std::string &filename)
                                 user["z"].as<double>(),
                                 user["speed"].as<double>(),
                                 user["direction"].as<std::string>(),
-                                user["quant"].as<double>()});
+                                user["quant"].as<double>(),
+                                user["packet_size"].as<int>(),
+                                user["traffic_part"].as<double>()});
     }
 
     int throughput_history_size = config["throughput_history_size"].as<int>();

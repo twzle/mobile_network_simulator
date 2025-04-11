@@ -72,6 +72,7 @@ public:
     int get_queue_limit();
     BSConfig get_bs_config();
     std::vector<UserConfig> get_user_configs();
+    UserConfig get_user_config(int user_id);
     int get_resource_block_per_tti_limit();
     int get_packet_size_limit();
     double get_carrier_frequency();

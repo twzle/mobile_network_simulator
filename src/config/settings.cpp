@@ -168,6 +168,11 @@ std::vector<UserConfig> Settings::get_user_configs()
     return this->user_configs;
 }
 
+UserConfig Settings::get_user_config(int user_id)
+{
+    return this->user_configs[user_id];
+}
+
 double Settings::get_time_lambda()
 {
     return this->time_lambda;

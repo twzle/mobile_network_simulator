@@ -3,7 +3,7 @@
 std::mt19937 UserGenerator::user_id_gen;
 std::mt19937 UserGenerator::user_move_direction_gen;
 
-std::uniform_int_distribution<> UserGenerator::user_id_distrib;
+std::discrete_distribution<> UserGenerator::user_id_distrib;
 std::uniform_int_distribution<> UserGenerator::user_move_direction_distrib;
 
 void UserGenerator::initialize()
@@ -21,12 +21,12 @@ int UserGenerator::generate_user_id()
     return user_id;
 }
 
-std::uniform_int_distribution<> UserGenerator::get_user_id_distribution()
+std::discrete_distribution<> UserGenerator::get_user_id_distribution()
 {
     return user_id_distrib;
 }
 
-void UserGenerator::set_user_id_distribution(std::uniform_int_distribution<> new_distrib)
+void UserGenerator::set_user_id_distribution(std::discrete_distribution<> new_distrib)
 {
     user_id_distrib = new_distrib;
 }
