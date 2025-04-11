@@ -206,7 +206,7 @@ void ThroughputStats::calculate_unused_resources_for_scheduler()
         
         unused_resources_for_scheduler = 1 - used_resources_for_scheduler;
 
-        _is_valid_throughput_for_scheduler = true;
+        _is_valid_unused_resources_for_scheduler = true;
 
         return;
     }
@@ -235,6 +235,8 @@ void ThroughputStats::calculate_unused_resources_for_scheduler()
             unused_resources_for_scheduler = 1;
 
             _is_valid_unused_resources_for_scheduler = true;
+
+            return;
         }
     }
 }

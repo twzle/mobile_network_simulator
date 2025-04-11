@@ -171,6 +171,7 @@ void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
             throughput_stats.is_valid_throughput_for_scheduler());
 
         throughput_stats.calculate_unused_resources_for_scheduler();
+
         stats.update_scheduler_unused_resources(
             throughput_stats.get_unused_resources_for_scheduler(),
             throughput_stats.is_valid_unused_resources_for_scheduler());

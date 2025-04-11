@@ -66,7 +66,7 @@ void MeanStats::collect_history()
         this->scheduler_throughput_history.push_back(
             stats.scheduler_average_throughput);
         this->scheduler_unused_resources_history.push_back(
-                stats.scheduler_average_unused_resources);
+            stats.scheduler_average_unused_resources);
 
         this->scheduler_packet_processing_delay_history.push_back(
             stats.scheduler_average_packet_processing_delay);
@@ -302,7 +302,7 @@ void MeanStats::calculate_confidence_interval(
 
 void MeanStats::evaluate_confidence_intervals()
 {
-    std::cout << "\n------------\n";
+    std::cout << "\n--------------\n\n";
     std::cout << "Доверительные интервалы" << std::endl;
 
     // Доверительный интервал для общего времени работы планировщика
@@ -434,7 +434,7 @@ void MeanStats::evaluate_confidence_user_packet_processing_delay_intervals()
 void MeanStats::show()
 {
     std::cout << "--------------\n\n";
-    std::cout << "MEAN STATS\n";
+    std::cout << "Статистика за весь период моделирования\n";
     std::cout << "\nMean total time = "
               << mean_scheduler_total_time << " s\n" // Общее время работы
               << "Mean processing time = "
@@ -466,6 +466,9 @@ void MeanStats::show()
               << "Max scheduler throughput = "
               << max_scheduler_throughput * 1000
               << " Mbit/s\n" // Максимальная пропускная способность (Мбит/с)
+              << "Mean scheduler unused resources rate = "
+              << mean_scheduler_unused_resources
+              << "\n" // Максимальная пропускная способность (Мбит/с)
               << "Mean scheduler packet processing delay time = "
               << mean_scheduler_packet_processing_delay * 1000
               << " ms\n"; // Среднее время обслуживания пакета
@@ -543,6 +546,9 @@ std::string MeanStats::write_yaml()
 
     out << YAML::Key << "max_scheduler_throughput"
         << YAML::Value << max_scheduler_throughput;
+
+    out << YAML::Key << "scheduler_unused_resources"
+        << YAML::Value << mean_scheduler_unused_resources;
 
     out << YAML::EndMap;
 

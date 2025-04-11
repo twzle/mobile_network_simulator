@@ -134,8 +134,7 @@ void IterationStats::update_scheduler_fairness_for_queues(
     if (is_valid)
     {
         scheduler_fairness_for_queues.emplace_back(
-            std::make_pair(tti_count, fairness_for_queues)
-        );
+            std::make_pair(tti_count, fairness_for_queues));
     }
 }
 
@@ -147,8 +146,7 @@ void IterationStats::update_scheduler_fairness_for_users(
     if (is_valid)
     {
         scheduler_fairness_for_users.emplace_back(
-            std::make_pair(tti_count, fairness_for_users)
-        );
+            std::make_pair(tti_count, fairness_for_users));
     }
 }
 
@@ -186,7 +184,7 @@ void IterationStats::add_queue_packet_stats(
 // Вывод статистики в stdout
 void IterationStats::print()
 {
-    std::cout << "\nITERATION STATS\n";
+    std::cout << "\nСтатистика итерации моделирования\n";
     std::cout << "\nPacket count = "
               << packet_count << "\n"
               << "Total scheduling time (total_time) = "
@@ -216,34 +214,41 @@ void IterationStats::print()
               << "Average scheduler throughput = "
               << scheduler_average_throughput * 1000 << " Mbit/s, "
               << scheduler_average_throughput * 1000 * 1000 << " Kbit/s\n"
+              << "Average scheduler unused resources rate = "
+              << scheduler_average_unused_resources
+              << "\n" // Среднее время задержки обслуживания пакета
               << "Average scheduler packet processing delay = "
               << scheduler_average_packet_processing_delay * 1000
               << " ms\n"; // Среднее время задержки обслуживания пакета
 
     print_queue_delays();
     print_user_delays();
+
+    std::cout << "\n";
 }
 
-void IterationStats::print_queue_delays(){
+void IterationStats::print_queue_delays()
+{
     for (size_t queue_id = 0;
-        queue_id < queue_average_packet_processing_delay.size();
-        ++queue_id)
-   {
-       std::cout << "Average queue packet processing delay time "
-                 << "(Queue #" << queue_id << ") = "
-                 << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
-   }
+         queue_id < queue_average_packet_processing_delay.size();
+         ++queue_id)
+    {
+        std::cout << "Average queue packet processing delay time "
+                  << "(Queue #" << queue_id << ") = "
+                  << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
+    }
 }
 
-void IterationStats::print_user_delays(){
+void IterationStats::print_user_delays()
+{
     for (size_t user_id = 0;
-        user_id < user_average_packet_processing_delay.size();
-        ++user_id)
-   {
-       std::cout << "Average user packet processing delay time "
-                 << "(User #" << user_id << ") = "
-                 << user_average_packet_processing_delay[user_id] * 1000 << " ms\n";
-   }
+         user_id < user_average_packet_processing_delay.size();
+         ++user_id)
+    {
+        std::cout << "Average user packet processing delay time "
+                  << "(User #" << user_id << ") = "
+                  << user_average_packet_processing_delay[user_id] * 1000 << " ms\n";
+    }
 }
 
 void IterationStats::evaluate(int queue_count, int user_count)
@@ -261,6 +266,7 @@ void IterationStats::evaluate(int queue_count, int user_count)
     evaluate_fairness_for_users_stats();
 
     evaluate_throughput_stats();
+    evaluate_unused_resources_stats();
 }
 
 void IterationStats::evaluate_queue_total_time_stats()
@@ -364,6 +370,7 @@ void IterationStats::evaluate_unused_resources_stats()
 {
     double sum_of_all_unused_resources = 0;
     // Подсчет суммы справедливостей за все время работы планировщика
+
     for (auto &stats : scheduler_unused_resources)
     {
         sum_of_all_unused_resources += stats;
@@ -454,13 +461,14 @@ void IterationStats::evaluate_user_delay_stats(int user_count)
 }
 
 void IterationStats::evaluate_scheduler_delay_stats()
-{   
+{
     int queue_count = this->queue_average_packet_processing_delay.size();
 
     double total_average_scheduler_packet_processing_delay = 0;
 
-    for (auto& queue_avg_delay_stats : this->queue_average_packet_processing_delay){
-        total_average_scheduler_packet_processing_delay += 
+    for (auto &queue_avg_delay_stats : this->queue_average_packet_processing_delay)
+    {
+        total_average_scheduler_packet_processing_delay +=
             queue_avg_delay_stats.second;
     }
 
