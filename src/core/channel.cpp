@@ -71,3 +71,18 @@ double Channel::get_interference_power()
 {
     return 0;
 }
+
+double Channel::get_carrier_frequency()
+{
+    return carrier_frequency;
+}
+
+double Channel::get_constant_offset()
+{
+    return constant_offset;
+}
+
+int Channel::get_power_bs_transmitted()
+{
+    return power_bs_transmitted;
+}

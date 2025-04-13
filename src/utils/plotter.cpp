@@ -4,6 +4,7 @@ Plotter::Plotter(const std::string& plotter_path){
     this->plotter_path = plotter_path;
 }
 
+
 void Plotter::run(const std::string& file_path){
     try {
         std::filesystem::path original_path = std::filesystem::current_path();

@@ -1,4 +1,5 @@
 #include "config/tbs.hpp"
+#include <iostream>
 
 std::vector<std::vector<std::pair<int, int> > > TBS::tbs_table;
 

@@ -5,7 +5,7 @@ void SchedulerSession::increment_processed_packet_count(int increment)
     this->processed_packets += increment;
 }
 
-int SchedulerSession::get_processed_packet_count(){
+int SchedulerSession::get_processed_packet_count() const {
     return this->processed_packets;
 }
 
@@ -19,12 +19,12 @@ void SchedulerSession::set_scheduling_end_time(double time)
     this->scheduling_end = time;
 }
 
-double SchedulerSession::get_scheduling_start_time()
+double SchedulerSession::get_scheduling_start_time() const
 {
     return this->scheduling_start;
 }
 
-double SchedulerSession::get_scheduling_end_time()
+double SchedulerSession::get_scheduling_end_time() const
 {
     return this->scheduling_end;
 }

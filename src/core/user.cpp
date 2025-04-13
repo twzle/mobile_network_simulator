@@ -1,6 +1,7 @@
 #include "core/user.hpp"
 #include "core/user_generator.hpp"
 #include "config/standard_info.hpp"
+#include "config/tbs.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -80,6 +81,11 @@ void User::set_resource_candidate(bool resource_candidate){
     this->resource_candidate = resource_candidate;
 }
 
+double User::get_current_throughput() const
+{
+    return current_throughput;
+}
+
 double User::get_average_throughput() const
 {
     return average_historical_throughput;
@@ -92,8 +98,16 @@ void User::set_current_throughput(double throughput)
 
 void User::increment_current_throughput(int rb_count)
 {   
-    int bytes_per_rb = StandardManager::get_resource_block_effective_data_size(cqi);
-    current_throughput += bytes_per_rb * rb_count;
+    std::tuple<std::string, double, double, int> mcs =
+        StandardManager::get_mcs_from_cqi(
+            cqi);
+    
+    int imcs = std::get<3>(mcs);
+    int itbs = StandardManager::get_tbs_from_mcs(imcs);
+
+    int bytes = TBS::get_size_for_rb(itbs, rb_count);
+
+    current_throughput += bytes;
 }
 
 void User::initialize_throughput_history(int throughput_history_size)
@@ -239,5 +253,8 @@ void User::set_deficit(double deficit)
 {
     if (deficit <= DEFICIT_MAX){
         this->deficit = deficit;
+    }
+    else if (deficit > DEFICIT_MAX){
+        this->deficit = DEFICIT_MAX;
     }
 }

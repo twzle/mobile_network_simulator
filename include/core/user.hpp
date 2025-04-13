@@ -35,6 +35,7 @@ public:
     double get_priority() const;
     void set_priority(double priority);
 
+    double get_current_throughput() const;
     double get_average_throughput() const;
     void set_current_throughput(double throughput);
     void increment_current_throughput(int rb_count);

@@ -22,6 +22,10 @@ public:
     double get_noise_power();
     double get_interference_power();
 
+    double get_carrier_frequency();
+    double get_constant_offset();
+    int get_power_bs_transmitted();
+
 
 private:
     double carrier_frequency; // Несущая частота в МГц

@@ -15,6 +15,10 @@ int TBS::find_min_rb_for_packet(int itbs, int packet_bytes)
     std::vector<std::pair<int, int> > tbs_row = tbs_table[itbs];
 
     // 3. Конвертируем байты в биты (TBS в таблице — всегда в битах)
+    if (packet_bytes <= 0){
+        return -1;
+    }
+
     int packet_bits = packet_bytes * 8;
 
     // 4. Ищем первый TBS >= packet_bits (бинарный поиск)
@@ -51,4 +55,12 @@ int TBS::get_size_for_rb(int itbs, int rb)
     int size_in_bytes = tbs_row[rb-1].first / 8;
 
     return size_in_bytes;
+}
+
+std::vector<std::vector<std::pair<int, int> > > TBS::get_table(){
+    return tbs_table;
+}
+
+int TBS::get_table_size(){
+    return tbs_table.size();
 }
