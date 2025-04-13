@@ -478,5 +478,17 @@ void IterationStats::evaluate_scheduler_delay_stats()
 
 void IterationStats::release_memory_resources()
 {
+    scheduler_throughput.clear();
+    scheduler_throughput.shrink_to_fit();
+
+    scheduler_unused_resources.clear();
+    scheduler_unused_resources.shrink_to_fit();
+
+    scheduler_fairness_for_queues.clear();
+    scheduler_fairness_for_queues.shrink_to_fit();
+    scheduler_fairness_for_users.clear();
+    scheduler_fairness_for_users.shrink_to_fit();
+
     packet_stats.clear();
+    packet_stats.shrink_to_fit();
 }
