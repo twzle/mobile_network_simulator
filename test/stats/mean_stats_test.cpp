@@ -80,17 +80,19 @@ TEST_F(MeanStatsTest, CalculateMeanValues)
 }
 
 
-// TEST_F(MeanStatsTest, CalculateStandardDeviation)
-// {
-//     std::vector<double> values = {10.0, 20.0};
-//     double mean = 15.0;
+TEST_F(MeanStatsTest, CalculateStandardDeviation)
+{
+    std::vector<double> values = {10.0, 20.0};
+    double mean = 15.0;
 
-//     double stdDev = meanStats.calculate_standard_deviation_for_metric(values, mean);
+    double stdDev = meanStats.calculate_standard_deviation_for_metric(values, mean);
 
-//     // Проверяем расчет стандартного отклонения
-//     // sqrt(((10-15)^2 + (20-15)^2) / (2-1)) = sqrt(50) ≈ 7.071
-//     EXPECT_NEAR(7.071, stdDev, 0.001);
-// }
+    // Проверяем расчет стандартного отклонения
+    // sqrt(((10-15)^2 + (20-15)^2) / (2-1)) = sqrt(50) ≈ 7.071
+
+    std::cout << stdDev << "\n";
+    EXPECT_NEAR(7.071, stdDev, 0.001);
+}
 
 TEST_F(MeanStatsTest, CalculateExecutionCount)
 {

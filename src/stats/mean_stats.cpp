@@ -285,12 +285,12 @@ double MeanStats::calculate_standard_deviation_for_metric(
     if (values.size() == 1)
     {
         square_of_standard_deviation =
-            sum_of_squared_deviations / (stats_array.size());
+            sum_of_squared_deviations / (values.size());
     }
     else if (values.size() > 1)
     {
         square_of_standard_deviation =
-            sum_of_squared_deviations / (stats_array.size() - 1);
+            sum_of_squared_deviations / (values.size() - 1);
     }
 
     // sqrt(sum(Xi - X)^2 / (n - 1))
