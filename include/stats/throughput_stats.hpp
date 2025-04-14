@@ -61,6 +61,14 @@ public:
     double get_unused_resources_for_scheduler();
     bool is_valid_unused_resources_for_scheduler();
 
+    int get_total_allocated_effective_data_size();
+    int get_total_allocated_resource_blocks();
+    int get_max_allocated_resource_blocks();
+    double get_tti_duration();
+
+    size_t get_user_count();
+    size_t get_queue_count();
+
 private:
     int history_size_limit;                  // Максимальный размер истории записи статистики (число TTI)
     int current_history_size;                // Текущий размер истории записи статистики (число TTI)

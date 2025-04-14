@@ -62,16 +62,18 @@ public:
         SchedulerState scheduler_state, bool force_update) = 0;
     virtual void evaluate_throughput_stats(bool force_update) = 0;
 
-protected:
     int convert_packet_size_to_rb_number(User *user, int packet_size);
+
     virtual void sync_user_channels() = 0;
+
+    void mark_as_resource_candidate(int queue, User* user);
 
     void save_processed_packet_stats(
         Packet &packet, 
         int packet_size_in_bytes, int packet_size_in_rb, 
         double current_time);
 
-    void mark_as_resource_candidate(int queue, User* user);
+    int get_total_packets();
 
 protected:
     int total_packets = 0;                      // Общее число пакетов для обслуживания

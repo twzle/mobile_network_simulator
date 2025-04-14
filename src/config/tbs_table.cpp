@@ -766,3 +766,7 @@ void TBS::initialize()
     tbs_table.push_back(itbs_26a);
 }
 
+void TBS::clear(){
+    tbs_table.clear();
+}
+

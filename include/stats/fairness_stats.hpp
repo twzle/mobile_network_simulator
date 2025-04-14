@@ -61,6 +61,12 @@ public:
     double get_fairness_for_users();
     bool is_valid_fairness_for_users();
 
+    int get_total_allocated_effective_data_size();
+    double get_tti_duration();
+
+    size_t get_user_count();
+    size_t get_queue_count();
+
 private:
     int history_size_limit;                  // Максимальный размер истории записи статистики (число TTI)
     int current_history_size;                // Текущий размер истории записи статистики (число TTI)

@@ -11,6 +11,7 @@ protected:
     {
         if (!initialized)
         {
+            TBS::clear();
             TBS::initialize();
             initialized = true;
         }

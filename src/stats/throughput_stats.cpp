@@ -251,3 +251,27 @@ bool ThroughputStats::is_valid_unused_resources_for_scheduler()
     return _is_valid_unused_resources_for_scheduler;
 }
 
+int ThroughputStats::get_total_allocated_effective_data_size(){
+    return total_allocated_effective_data_size;
+}
+
+int ThroughputStats::get_total_allocated_resource_blocks(){
+    return total_allocated_resource_blocks;
+}
+
+int ThroughputStats::get_max_allocated_resource_blocks(){
+    return max_allocated_resource_blocks;
+}
+
+double ThroughputStats::get_tti_duration(){
+    return tti_duration;
+}
+
+size_t ThroughputStats::get_user_count(){
+    return user_count;
+}
+
+size_t ThroughputStats::get_queue_count(){
+    return queue_count;
+}
+

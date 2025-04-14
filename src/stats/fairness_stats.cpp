@@ -223,3 +223,19 @@ bool FairnessStats::is_valid_fairness_for_users()
 {
     return _is_valid_fairness_for_users;
 }
+
+int FairnessStats::get_total_allocated_effective_data_size(){
+    return total_allocated_effective_data_size;
+}
+
+double FairnessStats::get_tti_duration(){
+    return tti_duration;
+}
+
+size_t FairnessStats::get_user_count(){
+    return user_count;
+}
+
+size_t FairnessStats::get_queue_count(){
+    return queue_count;
+}

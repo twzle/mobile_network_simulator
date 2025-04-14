@@ -151,3 +151,7 @@ void BaseScheduler::mark_as_resource_candidate(int queue, User *user)
     fairness_stats.mark_queue_as_resource_candidate(queue);
     throughput_stats.mark_queue_as_resource_candidate(queue);
 }
+
+int BaseScheduler::get_total_packets(){
+    return total_packets;
+}

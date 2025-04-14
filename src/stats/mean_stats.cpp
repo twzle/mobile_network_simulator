@@ -16,6 +16,10 @@ void MeanStats::calculate(double bandwidth)
 
 void MeanStats::init_history()
 {
+    if (stats_array.empty()){
+        return;
+    }
+
     int iterations_count = stats_array.size();
 
     this->scheduler_total_time_history.reserve(iterations_count);
@@ -107,6 +111,10 @@ void MeanStats::collect_user_packet_processing_delay_history()
 // Подсчет среднего арифметического базовых параметров работы планировщика
 void MeanStats::calculate_mean_values()
 {
+    if (stats_array.empty()){
+        return;
+    }
+
     for (auto &stats : stats_array)
     {
         common_scheduler_total_time += stats.scheduler_total_time;
@@ -479,6 +487,7 @@ void MeanStats::show()
 
 void MeanStats::show_queue_delays()
 {
+    std::cout << queue_packet_processing_delay_history.size() << "\n";
     for (auto &queue : queue_packet_processing_delay_history)
     {
         std::cout << "Mean queue packet processing delay time "
