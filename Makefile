@@ -3,7 +3,7 @@ CXXFLAGS = -O2 -Wall -Werror -Wextra -std=c++17 -Iinclude
 LDFLAGS = -lyaml-cpp
 TEST_LDFLAGS = -lgtest -lgtest_main -lpthread
 
-EXE = drr
+EXE = simulator
 TEST_EXE = test_runner
 SRCDIRS = src scenarios/cpp
 TESTDIR = test

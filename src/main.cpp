@@ -9,33 +9,41 @@
 #include "config/bs_config.hpp"
 #include "config/tbs.hpp"
 #include <stdint.h>
+#include <chrono>
 
 // Место для указания используемого сценария
-Settings use_scenario() {
+Settings use_scenario()
+{
     return BasicScenario::create_settings();
 }
 
-Settings initialize_settings(int argc, char* argv[]) {
+Settings initialize_settings(int argc, char *argv[])
+{
     Settings settings;
 
-    if (argc > 1) {
+    if (argc > 1)
+    {
         std::string config_file = argv[1];
-        try {
+        try
+        {
             settings = load_settings_from_yaml(config_file);
             std::cout << "Loaded settings from " << config_file << "\n\n";
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception &e)
+        {
             std::cerr << "Failed to load YAML settings: " << e.what() << "\n";
             exit(1);
         }
-    } else {
+    }
+    else
+    {
         settings = use_scenario();
         std::cout << "Using default settings" << "\n\n";
     }
     return settings;
 }
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     TBS::initialize();
 
@@ -71,5 +79,6 @@ int main(int argc, char* argv[])
 
     Plotter plotter = Plotter();
     plotter.run(stats_file_path);
+        
     return 0;
 }
