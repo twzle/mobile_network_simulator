@@ -1,9 +1,16 @@
-scheduler_packet_processing_delay: 0.0010970997813395818
+scheduler_total_time: 10.1281
+scheduler_processing_time: 1.8152
+scheduler_idle_time: 0
+scheduler_wait_time: 8.31290
+scheduler_packet_processing_delay: 0.0005001
 queue_packet_processing_delays:
-  0: 0.000997363437581438
+  0: 0.000502647
+  1: 0.000497552
 user_packet_processing_delays:
-  0: 0.0005049304041876099
-  1: 0.0005018171297665371
-  2: 0.0005045262289993087
-  3: 0.0009115340877719116
-  4: 0.002577409867123426
+  0: 0.000498270
+  1: 0.000497031
+  2: 0.000508036
+  3: 0.000497170
+scheduler_throughput: 0.00110187
+max_scheduler_throughput: 0.055056
+scheduler_unused_resources: 0.867776
