@@ -15,25 +15,26 @@ Settings load_settings_from_yaml(const std::string &filename)
     std::string tti_duration = config["tti_duration"].as<std::string>();
     std::string channel_sync_interval = config["channel_sync_interval"].as<std::string>();
 
-    double carrier_frequency = config["carrier_frequency"].as<double>();
-    int bs_transmission_power = config["bs_transmission_power"].as<int>();
-
-    double bandwidth = config["bandwidth"].as<double>();
     uint8_t base_cqi = config["base_cqi"].as<uint8_t>();
-
-    int packet_count = config["packet_count"].as<int>();
-    int packet_size = config["packet_size"].as<int>();
     double time_lambda = config["time_lambda"].as<double>();
-
-    int queue_count = config["queue_count"].as<int>();
-    double queue_quant = config["queue_quant"].as<double>();
-    int queue_limit = config["queue_limit"].as<int>();
     int users_per_tti_limit = config["users_per_tti_limit"].as<int>();
 
     // Базовая станция
     BSConfig bs_config = {config["bs_config"]["x"].as<double>(),
                           config["bs_config"]["y"].as<double>(),
-                          config["bs_config"]["z"].as<double>()};
+                          config["bs_config"]["z"].as<double>(),
+                          config["bs_config"]["carrier_frequency"].as<double>(),
+                          config["bs_config"]["bandwidth"].as<double>(),
+                          config["bs_config"]["transmission_power"].as<int>(),
+                        };
+
+    // Загрузка пользователей
+    std::vector<QueueConfig> queue_configs;
+    for (const auto &queue : config["queue_configs"])
+    {
+        queue_configs.push_back({queue["packet_count"].as<int>(),
+                                queue["quant"].as<double>()});
+    }
 
     // Загрузка пользователей
     std::vector<UserConfig> user_configs;
@@ -54,8 +55,7 @@ Settings load_settings_from_yaml(const std::string &filename)
 
     return Settings(
         launches, standard_type, base_cqi, tti_duration, channel_sync_interval,
-        scheduler_type, bandwidth, packet_count, packet_size, queue_count, queue_quant,
-        queue_limit, time_lambda, user_configs, bs_config, carrier_frequency,
-        bs_transmission_power, area_type, users_per_tti_limit, 
+        scheduler_type, queue_configs, user_configs, time_lambda, 
+        bs_config, area_type, users_per_tti_limit, 
         throughput_history_size, fairness_history_size);
 }

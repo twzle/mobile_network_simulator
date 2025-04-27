@@ -8,6 +8,7 @@
 #include <tuple>
 #include <stdint.h>
 #include "const.hpp"
+#include "config/tbs.hpp"
 
 struct StandardInfo
 {

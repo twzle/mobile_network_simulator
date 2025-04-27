@@ -362,7 +362,7 @@ void MeanStats::evaluate_confidence_intervals()
     calculate_confidence_interval(
         scheduler_fairness_for_users_history,
         mean_scheduler_fairness_for_users,
-        0.001);
+        0.01);
 
     // Доверительный интервал для справделивости распределения RB между очередями
     std::cout << "\nОбщая доля неиспользованных ресурсов"
@@ -487,7 +487,6 @@ void MeanStats::show()
 
 void MeanStats::show_queue_delays()
 {
-    std::cout << queue_packet_processing_delay_history.size() << "\n";
     for (auto &queue : queue_packet_processing_delay_history)
     {
         std::cout << "Mean queue packet processing delay time "

@@ -79,11 +79,13 @@ int StandardManager::get_cqi_from_sinr(
     if (it == standard_info.sinr_to_cqi.end())
     {
         cqi = std::prev(it)->second; // Если SINR больше всех ключей, берём максимальный
-    } 
+    }
     else if (it == standard_info.sinr_to_cqi.begin())
     {
         cqi = it->second; // Если SINR меньше всех ключей, берём минимальный
-    } else {
+    }
+    else
+    {
         cqi = it->second;
     }
 
@@ -115,26 +117,22 @@ int StandardManager::get_tbs_from_mcs(
 int StandardManager::get_resource_elements_in_resource_block()
 {
     StandardInfo standard_info = get_standard_info(current_standard_name);
-    return (int) standard_info.resource_elements;
+    return (int)standard_info.resource_elements;
 }
 
 int StandardManager::get_resource_block_effective_data_size(
     const uint8_t cqi)
 {
-    const double spectral_efficiency =
-            StandardManager::get_cqi_efficiency(cqi);
 
-    const int resource_elements_per_resource_block =
-            StandardManager::get_resource_elements_in_resource_block();
+    std::tuple<std::string, double, double, int> mcs =
+        StandardManager::get_mcs_from_cqi(cqi);
 
-    const double effective_bits_per_resource_block =
-        spectral_efficiency * resource_elements_per_resource_block;
+    int imcs = std::get<3>(mcs);
+    int itbs = StandardManager::get_tbs_from_mcs(imcs);
 
-    // Округление вниз — деление на 8 отбрасывает остаток
-    int effective_bytes_per_resource_block = 
-        effective_bits_per_resource_block / 8;
+    int bytes = TBS::get_size_for_rb(itbs, 1);
 
-    return effective_bytes_per_resource_block;
+    return bytes;
 }
 
 double StandardManager::get_channel_sync_interval(
@@ -162,28 +160,53 @@ void StandardManager::initialize()
                 "Long-Term Evolution",
                 {{"1ms", 0.001}},
                 {{"10ms", 0.010}},
-                {
-                    // 3GPP Table 7.2.3-1
-                    {1, {"QPSK", 0.0762, 0.1523, 5}}, {2, {"QPSK", 0.1172, 0.2344, 6}}, 
-                    {3, {"QPSK", 0.1885, 0.3770, 8}}, {4, {"QPSK", 0.3008, 0.6016, 9}}, 
-                    {5, {"QPSK", 0.4385, 0.8770, 10}}, {6, {"QPSK", 0.5879, 1.1758, 12}}, 
-                    {7, {"16-QAM", 0.3691, 1.4766, 13}}, {8, {"16-QAM", 0.4785, 1.9141, 14}},
-                    {9, {"16-QAM", 0.6016, 2.4063, 16}}, {10, {"64-QAM", 0.4551, 2.7305, 17}}, 
-                    {11, {"64-QAM", 0.5537, 3.3223, 19}}, {12, {"64-QAM", 0.6504, 3.9023, 20}}, 
-                    {13, {"64-QAM", 0.7539, 4.5234, 21}}, {14, {"64-QAM", 0.8525, 5.1152, 23}}, 
-                    {15, {"64-QAM", 0.9258, 5.5547, 24}}
-                },
-                {
-                    // 3GPP Table 7.1.7.1-1
-                    {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, 
-                    {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 9}, {11, 10}, 
-                    {12, 11}, {13, 12}, {14, 13}, {15, 14}, {16, 15}, {17, 15}, 
-                    {18, 16}, {19, 17}, {20, 18}, {21, 19}, {22, 20}, {23, 21}, 
-                    {24, 22}, {25, 23}, {26, 24}, {27, 25}, {28, 26}                  
-                },
-                {
-                    {"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}
-                },
+                {// 3GPP Table 7.2.3-1
+                 {1, {"QPSK", 0.0762, 0.1523, 5}},
+                 {2, {"QPSK", 0.1172, 0.2344, 6}},
+                 {3, {"QPSK", 0.1885, 0.3770, 8}},
+                 {4, {"QPSK", 0.3008, 0.6016, 9}},
+                 {5, {"QPSK", 0.4385, 0.8770, 10}},
+                 {6, {"QPSK", 0.5879, 1.1758, 12}},
+                 {7, {"16-QAM", 0.3691, 1.4766, 13}},
+                 {8, {"16-QAM", 0.4785, 1.9141, 14}},
+                 {9, {"16-QAM", 0.6016, 2.4063, 16}},
+                 {10, {"64-QAM", 0.4551, 2.7305, 17}},
+                 {11, {"64-QAM", 0.5537, 3.3223, 19}},
+                 {12, {"64-QAM", 0.6504, 3.9023, 20}},
+                 {13, {"64-QAM", 0.7539, 4.5234, 21}},
+                 {14, {"64-QAM", 0.8525, 5.1152, 23}},
+                 {15, {"64-QAM", 0.9258, 5.5547, 24}}},
+                {// 3GPP Table 7.1.7.1-1
+                 {0, 0},
+                 {1, 1},
+                 {2, 2},
+                 {3, 3},
+                 {4, 4},
+                 {5, 5},
+                 {6, 6},
+                 {7, 7},
+                 {8, 8},
+                 {9, 9},
+                 {10, 9},
+                 {11, 10},
+                 {12, 11},
+                 {13, 12},
+                 {14, 13},
+                 {15, 14},
+                 {16, 15},
+                 {17, 15},
+                 {18, 16},
+                 {19, 17},
+                 {20, 18},
+                 {21, 19},
+                 {22, 20},
+                 {23, 21},
+                 {24, 22},
+                 {25, 23},
+                 {26, 24},
+                 {27, 25},
+                 {28, 26}},
+                {{"QPSK", 2}, {"16-QAM", 4}, {"64-QAM", 8}},
                 {{-6.9390, 1}, {-5.1470, 2}, {-3.1800, 3}, {-1.2530, 4}, {0.7610, 5}, {2.6990, 6}, {4.6930, 7}, {6.5250, 8}, {8.5730, 9}, {10.3660, 10}, {12.2890, 11}, {14.1730, 12}, {15.8880, 13}, {17.8140, 14}, {19.8290, 15}},
                 {{1.4, 6}, {3, 15}, {5, 25}, {10, 50}, {15, 75}, {20, 100}},
                 {"DefaultRRScheduler",
@@ -193,9 +216,9 @@ void StandardManager::initialize()
                  "DefaultPFScheduler"},
                 {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
                 {"Dense Urban", "Urban", "Suburban"},
-                {4, 8}, // Лимит пользователей обслуживаемых за TTI 
+                {4, 8},     // Лимит пользователей обслуживаемых за TTI
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)
-            }, // 168 * 0.1523 * 100 / 8 = 319 байт  
+            },              // 168 * 0.1523 * 100 / 8 = 319 байт
         },
     };
 }

@@ -8,14 +8,10 @@ Settings::Settings(
     std::string tti_duration,
     std::string channel_sync_interval,
     std::string scheduler_type,
-    double bandwidth,
-    int packet_count, int packet_size,
-    int queue_count, double queue_quant, int queue_limit,
-    double time_lambda,
+    std::vector<QueueConfig> queue_configs,
     std::vector<UserConfig> user_configs,
+    double time_lambda,
     BSConfig bs_config,
-    double carrier_frequency,
-    int bs_transmission_power,
     std::string area_type,
     int users_per_tti_limit,
     int throughput_history_size,
@@ -28,22 +24,20 @@ Settings::Settings(
     this->tti_duration = tti_duration;
     this->channel_sync_interval = channel_sync_interval;
     this->scheduler_type = scheduler_type;
-    this->bandwidth = bandwidth;
-    this->packet_count = packet_count;
-    this->packet_size = packet_size;
-    this->queue_count = queue_count;
-    this->queue_quant = queue_quant;
-    this->queue_limit = queue_limit;
+    this->queue_configs = queue_configs;
+    this->queue_count = queue_configs.size();
     this->time_lambda = time_lambda;
     this->user_configs = user_configs;
     this->user_count = user_configs.size();
     this->bs_config = bs_config;
-    this->carrier_frequency = carrier_frequency;
-    this->bs_transmission_power = bs_transmission_power;
     this->area_type = area_type;
     this->users_per_tti_limit = users_per_tti_limit;
     this->throughput_history_size = throughput_history_size;
     this->fairness_history_size = fairness_history_size;
+
+    for (auto& queue_config : queue_configs){
+        this->total_packet_count += queue_config.get_packet_count();
+    }
 }
 
 int Settings::get_launches()
@@ -125,17 +119,12 @@ std::string Settings::get_scheduler_name()
 
 double Settings::get_bandwidth()
 {
-    return this->bandwidth;
+    return this->bs_config.get_bandwidth();
 }
 
-int Settings::get_packet_count()
+int Settings::get_total_packet_count()
 {
-    return this->packet_count;
-}
-
-int Settings::get_packet_size()
-{
-    return this->packet_size;
+    return this->total_packet_count;
 }
 
 int Settings::get_queue_count()
@@ -148,19 +137,19 @@ int Settings::get_user_count()
     return this->user_count;
 }
 
-double Settings::get_queue_quant()
-{
-    return this->queue_quant;
-}
-
-int Settings::get_queue_limit()
-{
-    return this->queue_limit;
-}
-
 BSConfig Settings::get_bs_config()
 {
     return this->bs_config;
+}
+
+std::vector<QueueConfig> Settings::get_queue_configs()
+{
+    return this->queue_configs;
+}
+
+QueueConfig Settings::get_queue_config(int queue_id)
+{
+    return this->queue_configs[queue_id];
 }
 
 std::vector<UserConfig> Settings::get_user_configs()
@@ -180,12 +169,12 @@ double Settings::get_time_lambda()
 
 double Settings::get_carrier_frequency()
 {
-    return this->carrier_frequency;
+    return this->bs_config.get_carrier_frequency();
 }
 
 int Settings::get_bs_transmission_power()
 {
-    return this->bs_transmission_power;
+    return this->bs_config.get_transmission_power();
 }
 
 std::string Settings::get_area_type()
@@ -201,7 +190,7 @@ int Settings::get_users_per_tti_limit()
 int Settings::get_resource_block_per_tti_limit()
 {
     int resource_block_per_tti_limit =
-        StandardManager::get_rb_number_from_bandwidth(bandwidth);
+        StandardManager::get_rb_number_from_bandwidth(bs_config.get_bandwidth());
 
     return resource_block_per_tti_limit;
 }

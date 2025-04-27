@@ -47,6 +47,7 @@ std::unique_ptr<BaseScheduler> Executor::initialize_scheduler(){
     scheduler->set_tti_duration(settings.get_tti_value());
     scheduler->set_channel_sync_interval(settings.get_channel_sync_interval_value());
     scheduler->set_base_cqi(settings.get_base_cqi());
+
     scheduler->set_channel(
         Channel(
             settings.get_carrier_frequency(), 
@@ -74,11 +75,13 @@ void Executor::execute()
     {
         TimeGenerator::reset_time();
 
-        PacketQueue queue(
-            settings.get_queue_quant(),
-            settings.get_queue_limit());
+        QueueConfig queue_config = settings.get_queue_config(queue_id);
 
-        for (int j = 0; j < settings.get_packet_count(); ++j)
+        PacketQueue queue(
+            queue_config.get_quant(),
+            queue_config.get_packet_count());
+
+        for (int j = 0; j < queue_config.get_packet_count(); ++j)
         {
             User *user = scheduler->get_user_ptr(UserGenerator::generate_user_id());
             if (user != nullptr)

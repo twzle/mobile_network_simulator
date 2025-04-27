@@ -25,7 +25,6 @@ void BasePFScheduler::run()
     while (session.get_processed_packet_count() < this->total_packets)
     {
         // Начало TTI
-        // main_queue.print();
 
         reset_served_users();
         flush_user_context();

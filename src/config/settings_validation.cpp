@@ -57,25 +57,16 @@ void Settings::validate()
 
     try
     {
-        StandardManager::get_rb_number_from_bandwidth(bandwidth);
+        StandardManager::get_rb_number_from_bandwidth(bs_config.get_bandwidth());
     }
     catch (const std::out_of_range &e)
     {
         throw std::invalid_argument("Bandwidth should be one of [1.4, 3, 5, 10, 15, 20] MHz.");
     }
 
-    if (packet_count < 1)
+    if (total_packet_count < 1)
     {
         throw std::invalid_argument("Packet count should be greater than or equal to 1.");
-    }
-
-    if (packet_size < 1 || packet_size > get_packet_size_limit())
-    {
-        std::ostringstream msg;
-        msg << "Invalid packet size (current range [1, "
-            << get_packet_size_limit() << "] bytes). "
-            << "Maximum defined by current bandwidth and base CQI.";
-        throw std::invalid_argument(msg.str());
     }
 
     if (queue_count < 1)
@@ -83,9 +74,27 @@ void Settings::validate()
         throw std::invalid_argument("Queue count should be greater than or equal to 1.");
     }
 
-    if (queue_quant + epsilon < 0)
+    int queue_id = 0;
+    for (auto &queue : queue_configs)
     {
-        throw std::invalid_argument("Queue quant should be greater than or equal to 0.");
+        if (queue.get_packet_count() < 1){
+            throw std::invalid_argument(
+                "Queue #" + std::to_string(queue_id) +
+                " has invalid packet count: " +
+                std::to_string(queue.get_packet_count()) + " \n" +
+                "Expected packet count: [1, +inf)");
+        }
+
+        if (queue.get_quant() <= epsilon)
+        {
+            throw std::invalid_argument(
+                "Queue #" + std::to_string(queue_id) +
+                " has invalid quant: " +
+                std::to_string(queue.get_quant()) + " \n" +
+                "Expected quant: (0, +inf)");
+        }
+
+        ++queue_id;
     }
 
     if (time_lambda + epsilon <= 0)
@@ -156,6 +165,28 @@ void Settings::validate()
                 "Expected quant: (0, +inf)");
         }
 
+        if (user.get_packet_size() < 1 || 
+            user.get_packet_size() > get_packet_size_limit())
+        {
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " has invalid packet size: " +
+                std::to_string(user.get_packet_size()) + " \n" +
+                "Expected packet size: [1, " + 
+                std::to_string(get_packet_size_limit()) + 
+                "] bytes). Maximum defined by current bandwidth and base CQI."
+            );
+        }
+
+        if (user.get_traffic_part() <= epsilon)
+        {
+            throw std::invalid_argument(
+                "User #" + std::to_string(user_id) +
+                " has invalid traffic_part: " +
+                std::to_string(user.get_traffic_part()) + " \n" +
+                "Expected traffic part: (0, +inf)");
+        }
+
         ++user_id;
     }
 
@@ -175,14 +206,15 @@ void Settings::validate()
         throw std::invalid_argument("Invalid area type.");
     }
 
-    if (carrier_frequency < 700 || carrier_frequency > 3000)
+    double carrier_frequency = bs_config.get_carrier_frequency();
+    if (carrier_frequency < 700 - epsilon || carrier_frequency > 3000 + epsilon)
     {
-        throw std::invalid_argument("Carrier frequency should be in range [700, 3000] MHz.");
+        throw std::invalid_argument(
+            "Carrier frequency should be in range [700, 3000] MHz.");
     }
 
-    if (bs_transmission_power != 43 &&
-        bs_transmission_power != 46 &&
-        bs_transmission_power != 49)
+    int bs_tx_power = bs_config.get_transmission_power();
+    if (bs_tx_power != 43 && bs_tx_power != 46 && bs_tx_power != 49)
     {
         throw std::invalid_argument("BS transmission power should be in range (43, 46, 49) dB.");
     }
