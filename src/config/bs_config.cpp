@@ -2,7 +2,7 @@
 
 BSConfig::BSConfig() : 
     x(0), y(0), z(0), 
-    carrier_frequency(2000), bandwidth(20), transmission_power(46) 
+    carrier_frequency(0), bandwidth(0), transmission_power(0) 
 {}
 
 BSConfig::BSConfig(

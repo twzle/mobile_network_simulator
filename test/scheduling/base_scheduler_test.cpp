@@ -68,7 +68,7 @@ protected:
         testScheduler().set_tti_stats(100, 4, 2, 0.001, 1000);
 
         // Выполняется один раз перед всеми тестами
-        BSConfig bs_config(0.0, 0.0, 30.0);
+        BSConfig bs_config(0.0, 0.0, 30.0, 2100, 20, 40);
         testScheduler().set_base_station(bs_config);
 
         std::vector<UserConfig> user_configs{

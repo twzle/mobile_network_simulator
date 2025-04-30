@@ -10,7 +10,6 @@ Settings::Settings(
     std::string scheduler_type,
     std::vector<QueueConfig> queue_configs,
     std::vector<UserConfig> user_configs,
-    double time_lambda,
     BSConfig bs_config,
     std::string area_type,
     int users_per_tti_limit,
@@ -26,7 +25,6 @@ Settings::Settings(
     this->scheduler_type = scheduler_type;
     this->queue_configs = queue_configs;
     this->queue_count = queue_configs.size();
-    this->time_lambda = time_lambda;
     this->user_configs = user_configs;
     this->user_count = user_configs.size();
     this->bs_config = bs_config;
@@ -34,6 +32,7 @@ Settings::Settings(
     this->users_per_tti_limit = users_per_tti_limit;
     this->throughput_history_size = throughput_history_size;
     this->fairness_history_size = fairness_history_size;
+    this->total_packet_count = 0;
 
     for (auto& queue_config : queue_configs){
         this->total_packet_count += queue_config.get_packet_count();
@@ -160,11 +159,6 @@ std::vector<UserConfig> Settings::get_user_configs()
 UserConfig Settings::get_user_config(int user_id)
 {
     return this->user_configs[user_id];
-}
-
-double Settings::get_time_lambda()
-{
-    return this->time_lambda;
 }
 
 double Settings::get_carrier_frequency()

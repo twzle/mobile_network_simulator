@@ -37,7 +37,6 @@ public:
         std::string scheduler_type,
         std::vector<QueueConfig> queue_configs,
         std::vector<UserConfig> user_configs,
-        double time_lambda,
         BSConfig bs_config,
         std::string area_type,
         int users_per_tti_limit,
@@ -56,7 +55,6 @@ public:
     std::unique_ptr<BaseScheduler> get_scheduler_instance();
     std::string get_scheduler_name();
     double get_bandwidth();
-    double get_time_lambda();
     int get_total_packet_count();
     int get_packet_size();
     int get_queue_count();
@@ -89,7 +87,6 @@ private:
     std::vector<QueueConfig> queue_configs; // Конфигурации очередей
     int user_count;                         // Количество пользователей
     std::vector<UserConfig> user_configs;   // Конфигурации пользователей
-    double time_lambda;                     // Частота прихода пакетов в единицу времени
     BSConfig bs_config;                     // Конфигурация базовой станции
     std::string area_type;                  // Тип местности
     int users_per_tti_limit;                // Лимит обслуживаемых пользователей за TTI

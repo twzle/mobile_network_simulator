@@ -13,8 +13,6 @@ Executor::Executor(Settings settings)
         traffic_parts.push_back(user_config.get_traffic_part());
     }
 
-    TimeGenerator::set_distribution(
-        std::exponential_distribution<>(settings.get_time_lambda()));
     UserGenerator::set_user_id_distribution(
         std::discrete_distribution<>(traffic_parts.begin(), traffic_parts.end()));
     UserGenerator::set_user_move_direction_distribution(
@@ -73,9 +71,12 @@ void Executor::execute()
     // Наполнение очередей пакетами
     for (int queue_id = 0; queue_id < settings.get_queue_count(); ++queue_id)
     {
+        QueueConfig queue_config = settings.get_queue_config(queue_id);
+
         TimeGenerator::reset_time();
 
-        QueueConfig queue_config = settings.get_queue_config(queue_id);
+        TimeGenerator::set_distribution(
+            std::exponential_distribution<>(queue_config.get_time_lambda()));
 
         PacketQueue queue(
             queue_config.get_quant(),

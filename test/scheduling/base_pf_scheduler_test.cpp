@@ -15,7 +15,7 @@ protected:
         scheduler.set_users_per_tti_limit(2);
         scheduler.set_tti_stats(100, 4, 2, 0.001, 1000);
         // Настройка базовой станции
-        BSConfig bs_config(0.0, 0.0, 30.0);
+        BSConfig bs_config(0.0, 0.0, 30.0, 2100, 20, 40);
         scheduler.set_base_station(bs_config);
 
         // Настройка пользователей

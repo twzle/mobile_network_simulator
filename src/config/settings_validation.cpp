@@ -94,12 +94,16 @@ void Settings::validate()
                 "Expected quant: (0, +inf)");
         }
 
-        ++queue_id;
-    }
+        if (queue.get_time_lambda() + epsilon <= 0)
+        {
+            throw std::invalid_argument(
+                "Queue #" + std::to_string(queue_id) +
+                " has invalid time lambda: " +
+                std::to_string(queue.get_quant()) + " \n" +
+                "Expected time lambda: (0, +inf)");
+        }
 
-    if (time_lambda + epsilon <= 0)
-    {
-        throw std::invalid_argument("Time lambda should be greater than 0.");
+        ++queue_id;
     }
 
     if (std::abs(bs_config.get_x()) > epsilon ||

@@ -1,7 +1,8 @@
 CXX = g++
 CXXFLAGS = -O2 -Wall -Werror -Wextra -std=c++17 -Iinclude
+TEST_CXXFLAGS = $(CXXFLAGS) -fprofile-arcs -ftest-coverage
 LDFLAGS = -lyaml-cpp
-TEST_LDFLAGS = -lgtest -lgtest_main -lpthread
+TEST_LDFLAGS = -lgtest -lgtest_main -lpthread --coverage  
 
 EXE = simulator
 TEST_EXE = test_runner
@@ -10,14 +11,10 @@ TESTDIR = test
 OBJDIR = obj
 TESTOBJDIR = $(OBJDIR)/test
 
-# Ищем все .cpp файлы в src и scenarios/cpp
 SOURCES = $(shell find $(SRCDIRS) -name '*.cpp')
-# Ищем все тестовые .cpp файлы
 TEST_SOURCES = $(shell find $(TESTDIR) -name '*.cpp')
 
-# Преобразуем пути из SRCDIRS/*.cpp в OBJDIR/*.o
 OBJECTS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SOURCES))
-# Преобразуем пути из TESTDIR/*.cpp в TESTOBJDIR/*.o
 TEST_OBJECTS = $(patsubst %.cpp, $(TESTOBJDIR)/%.o, $(TEST_SOURCES))
 
 all: $(EXE)
@@ -29,20 +26,20 @@ $(EXE): $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $(EXE) $(CXXFLAGS) $(LDFLAGS)
 
 $(TEST_EXE): $(filter-out $(OBJDIR)/src/main.o, $(OBJECTS)) $(TEST_OBJECTS)
-	$(CXX) $^ -o $@ $(CXXFLAGS) $(LDFLAGS) $(TEST_LDFLAGS)
+	$(CXX) $^ -o $@ $(TEST_CXXFLAGS) $(LDFLAGS) $(TEST_LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp
-	@mkdir -p $(dir $@) # Создаем вложенные папки в obj/ при необходимости
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c -MMD -o $@ $<
 
 $(TESTOBJDIR)/%.o: %.cpp
-	@mkdir -p $(dir $@) # Создаем вложенные папки в obj/test/ при необходимости
-	$(CXX) $(CXXFLAGS) -I$(TESTDIR) -c -MMD -o $@ $<
+	@mkdir -p $(dir $@)
+	$(CXX) $(TEST_CXXFLAGS) -I$(TESTDIR) -c -MMD -o $@ $< 
 
 -include $(OBJECTS:.o=.d)
 -include $(TEST_OBJECTS:.o=.d)
 
 clean:
-	rm -rf $(OBJDIR) $(EXE) $(TEST_EXE)
+	rm -rf $(OBJDIR) $(EXE) $(TEST_EXE) *.gcda *.gcno coverage.info coverage_report
 
 .PHONY: clean all test

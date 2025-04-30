@@ -7,7 +7,6 @@ tti_duration: "1ms"
 channel_sync_interval: "10ms"
 
 base_cqi: 1
-time_lambda: 10000
 users_per_tti_limit: 8
 
 bs_config:
@@ -21,6 +20,7 @@ bs_config:
 queue_configs:
   - packet_count: 1000
     quant: 10
+    time_lambda: 10000
 
 user_configs:
   - x: 1000

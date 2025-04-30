@@ -16,7 +16,6 @@ Settings load_settings_from_yaml(const std::string &filename)
     std::string channel_sync_interval = config["channel_sync_interval"].as<std::string>();
 
     uint8_t base_cqi = config["base_cqi"].as<uint8_t>();
-    double time_lambda = config["time_lambda"].as<double>();
     int users_per_tti_limit = config["users_per_tti_limit"].as<int>();
 
     // Базовая станция
@@ -33,7 +32,8 @@ Settings load_settings_from_yaml(const std::string &filename)
     for (const auto &queue : config["queue_configs"])
     {
         queue_configs.push_back({queue["packet_count"].as<int>(),
-                                queue["quant"].as<double>()});
+                                queue["quant"].as<double>(),
+                                queue["time_lambda"].as<double>()});
     }
 
     // Загрузка пользователей
@@ -55,7 +55,7 @@ Settings load_settings_from_yaml(const std::string &filename)
 
     return Settings(
         launches, standard_type, base_cqi, tti_duration, channel_sync_interval,
-        scheduler_type, queue_configs, user_configs, time_lambda, 
+        scheduler_type, queue_configs, user_configs, 
         bs_config, area_type, users_per_tti_limit, 
         throughput_history_size, fairness_history_size);
 }
