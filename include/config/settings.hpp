@@ -27,7 +27,7 @@
 class Settings
 {
 public:
-    Settings() = default;
+    Settings();
     Settings(
         int launches,
         std::string standard_type,

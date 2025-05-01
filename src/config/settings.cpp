@@ -1,6 +1,27 @@
 #include "config/settings.hpp"
 #include <sstream>
 
+Settings::Settings() {
+    this->launches = 1;
+    this->standard_type = "LTE";
+    this->base_cqi = 1;
+    this->tti_duration = "1ms";
+    this->channel_sync_interval = "10ms";
+    this->scheduler_type = "DefaultDRRScheduler";
+    this->queue_count = queue_configs.size();
+    this->user_count = user_configs.size();
+    this->bs_config = BSConfig();
+    this->area_type = "urban";
+    this->users_per_tti_limit = 4;
+    this->throughput_history_size = 200;
+    this->fairness_history_size = 1;
+    this->total_packet_count = 0;
+
+    for (auto& queue_config : queue_configs){
+        this->total_packet_count += queue_config.get_packet_count();
+    }
+}
+
 Settings::Settings(
     int launches,
     std::string standard_type,

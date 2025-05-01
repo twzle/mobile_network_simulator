@@ -18,6 +18,7 @@ public:
     void update_user_throughputs();
     void exclude_users_from_scheduling();
     void collect_relevant_packets(double current_time);
+    void sort_users();
     void filter_packets_of_excluded_from_scheduling_users();
 
     void schedule(PacketQueue &&packet_queue) override;

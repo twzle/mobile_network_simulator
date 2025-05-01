@@ -417,7 +417,7 @@ void MeanStats::evaluate_confidence_queue_packet_processing_delay_intervals()
         calculate_confidence_interval(
             queue_packet_processing_delay_history[queue_id],
             mean_queue_packet_processing_delays[queue_id],
-            0.001);
+            0.00001);
     }
 }
 

@@ -32,6 +32,7 @@ void BasePFScheduler::run()
         update_user_priorities();
 
         collect_relevant_packets(current_time);
+        sort_users();
         exclude_users_from_scheduling();
         filter_packets_of_excluded_from_scheduling_users();
 
@@ -151,6 +152,21 @@ void BasePFScheduler::collect_relevant_packets(double current_time)
     }
 }
 
+void BasePFScheduler::sort_users()
+{
+    // Фильтрация неуникальных указателей на пользователей
+    std::unordered_set<User *> unique_users(
+        sorted_resource_candidates_for_tti.begin(),
+        sorted_resource_candidates_for_tti.end());
+
+    sorted_resource_candidates_for_tti.assign(unique_users.begin(), unique_users.end());
+
+    std::sort(
+        sorted_resource_candidates_for_tti.begin(),
+        sorted_resource_candidates_for_tti.end(),
+        UserPFComparator());
+}
+
 /*
 Подсчет статистики по результатам работы планировщика
 */
@@ -265,21 +281,10 @@ void BasePFScheduler::update_user_throughputs()
 
 void BasePFScheduler::exclude_users_from_scheduling()
 {
-    // Фильтрация неуникальных указателей на пользователей
-    std::unordered_set<User *> unique_users(
-        sorted_resource_candidates_for_tti.begin(),
-        sorted_resource_candidates_for_tti.end());
-    sorted_resource_candidates_for_tti.assign(unique_users.begin(), unique_users.end());
-
     if (sorted_resource_candidates_for_tti.size() <= (size_t)users_per_tti_limit)
     {
         return;
     }
-
-    std::sort(
-        sorted_resource_candidates_for_tti.begin(),
-        sorted_resource_candidates_for_tti.end(),
-        UserPFComparator());
 
     int priority_collision_start_idx = 0;
     int priority_collision_end_idx = 0;

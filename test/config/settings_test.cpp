@@ -41,6 +41,26 @@ protected:
 
 bool SettingsTest::initialized = false;
 
+TEST_F(SettingsTest, DefaultConstructor) {
+    Settings settings;
+
+    // Проверка простых параметров
+    EXPECT_EQ(settings.get_launches(), 1);
+    EXPECT_EQ(settings.get_standard_type(), "LTE");
+    EXPECT_EQ((int) settings.get_base_cqi(), 1);
+    EXPECT_EQ(settings.get_scheduler_name(), "DefaultDRRScheduler");
+    EXPECT_DOUBLE_EQ(settings.get_bandwidth(), 0);
+    EXPECT_EQ(settings.get_queue_count(), 0);
+    EXPECT_EQ(settings.get_user_count(), 0);
+    EXPECT_DOUBLE_EQ(settings.get_carrier_frequency(), 0);
+    EXPECT_EQ(settings.get_bs_transmission_power(), 0);
+    EXPECT_EQ(settings.get_area_type(), "urban");
+    EXPECT_EQ(settings.get_users_per_tti_limit(), 4);
+    EXPECT_EQ(settings.get_throughput_history_size(), 200);
+    EXPECT_EQ(settings.get_fairness_history_size(), 1);
+    EXPECT_EQ(settings.get_total_packet_count(), 0); // 100 + 200
+}
+
 TEST_F(SettingsTest, ConstructorAndBasicGetters) {
     Settings settings(
         5,                      // launches

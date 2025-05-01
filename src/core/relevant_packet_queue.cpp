@@ -20,7 +20,9 @@ void RelevantPacketQueue::print()
         Packet packet = this->front();
         std::cout << "PACKET = " << i << "\n"
                   << "SCHEDULE TIME = " << packet.get_scheduled_at() << "\n"
-                  << "USER = " << packet.get_user_ptr()->get_id() << "\n\n";
+                  << "USER = " << packet.get_user_ptr()->get_id() << "\n"
+                  << "PRIORITY = " << packet.get_user_ptr()->get_priority() << "\n"
+                  << "TPUT = " << packet.get_user_ptr()->get_average_throughput() << "\n\n";
         this->packet_queue.pop(); // Удаляем элемент после его обработки
         tmp.push(packet);
 

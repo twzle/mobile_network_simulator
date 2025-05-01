@@ -1,10 +1,17 @@
 #include <gtest/gtest.h>
+#include <memory>
 #include "scheduling/base_scheduler.hpp"
 
 class TestableBaseScheduler : public BaseScheduler
 {
 public:
-    // Реализация чисто виртуальных методов (если они есть)
+    static int destructor_calls;
+
+    ~TestableBaseScheduler() override
+    {
+        destructor_calls++;
+    }
+
     void run() override
     {
         return;
@@ -52,6 +59,8 @@ protected:
         return;
     }
 };
+
+int TestableBaseScheduler::destructor_calls = 0;
 
 class BaseSchedulerTest : public ::testing::Test
 {
@@ -131,8 +140,9 @@ TEST_F(BaseSchedulerTest, PacketSizeConversion)
     EXPECT_GT(rb_count2, rb_count);
 }
 
-TEST_F(BaseSchedulerTest, StatsRecording) {
-    User* user = scheduler.get_user_ptr(0);
+TEST_F(BaseSchedulerTest, StatsRecording)
+{
+    User *user = scheduler.get_user_ptr(0);
     ASSERT_NE(nullptr, user);
 
     // Создаем тестовый пакет
@@ -146,7 +156,7 @@ TEST_F(BaseSchedulerTest, StatsRecording) {
     scheduler.save_processed_packet_stats(packet, packet_size_bytes, packet_size_rb, current_time);
 
     // Проверяем статистику
-    IterationStats& stats = scheduler.get_stats();
+    IterationStats &stats = scheduler.get_stats();
 
     EXPECT_EQ(stats.packet_stats.size(), 1);
 }
@@ -169,4 +179,23 @@ TEST_F(BaseSchedulerTest, EdgeCases)
     // Конвертация слишком большого размера
     rb_count = scheduler.convert_packet_size_to_rb_number(user, 50000);
     EXPECT_EQ(-1, rb_count);
+}
+
+TEST_F(BaseSchedulerTest, VirtualDestructorWorks)
+{
+    TestableBaseScheduler::destructor_calls = 0;
+
+    {
+        std::unique_ptr<BaseScheduler> scheduler = std::make_unique<TestableBaseScheduler>();
+    }
+    EXPECT_EQ(TestableBaseScheduler::destructor_calls, 1);
+}
+
+TEST_F(BaseSchedulerTest, DerivedDestructorCalledViaBasePointer)
+{
+    TestableBaseScheduler::destructor_calls = 0;
+    BaseScheduler *scheduler = new TestableBaseScheduler();
+    delete scheduler;
+
+    EXPECT_EQ(TestableBaseScheduler::destructor_calls, 1);
 }

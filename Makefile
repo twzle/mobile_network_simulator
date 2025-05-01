@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -O2 -Wall -Werror -Wextra -std=c++17 -Iinclude
-TEST_CXXFLAGS = $(CXXFLAGS) -fprofile-arcs -ftest-coverage
+CXXFLAGS = -fprofile-arcs -ftest-coverage -Wall -Werror -Wextra -std=c++17 -Iinclude
+TEST_CXXFLAGS = $(CXXFLAGS)
 LDFLAGS = -lyaml-cpp
 TEST_LDFLAGS = -lgtest -lgtest_main -lpthread --coverage  
 

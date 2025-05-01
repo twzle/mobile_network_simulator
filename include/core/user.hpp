@@ -74,14 +74,11 @@ private:
     static int last_id; // Статическая переменная для отслеживания последнего id
 };
 
-struct UserPFComparator
-{
-    bool operator()(const User *lhs, const User *rhs) const
-    {
-        if (lhs->get_priority() != rhs->get_priority())
-        {
-            return lhs->get_priority() > rhs->get_priority(); // Больше приоритет — выше
+struct UserPFComparator {
+    bool operator()(const User *lhs, const User *rhs) const {
+        if (lhs->get_priority() != rhs->get_priority()) {
+            return lhs->get_priority() > rhs->get_priority(); 
         }
-        return lhs->get_average_throughput() < rhs->get_average_throughput(); // Меньший throughput — выше
+        return lhs->get_average_throughput() < rhs->get_average_throughput();
     }
 };
