@@ -386,7 +386,7 @@ void MeanStats::evaluate_confidence_intervals()
 
 void MeanStats::calculate_max_scheduler_throughput(double bandwidth)
 {
-    int max_cqi = 15;
+    int max_cqi = 1;
 
     std::tuple<std::string, double, double, int> max_mcs =
         StandardManager::get_mcs_from_cqi(max_cqi);
@@ -443,43 +443,43 @@ void MeanStats::show()
 {
     std::cout << "--------------\n\n";
     std::cout << "Статистика за весь период моделирования\n";
-    std::cout << "\nMean total time = "
-              << mean_scheduler_total_time << " s\n" // Общее время работы
-              << "Mean processing time = "
+    std::cout << "\nСреднее время моделирования = "
+              << mean_scheduler_total_time << " с\n" // Общее время работы
+              << "Среднее время обработки пакетов = "
               << mean_scheduler_processing_time
-              << " s (" // Общее время обслуживания пакетов и доля от общего времени
+              << " с (" // Общее время обслуживания пакетов и доля от общего времени
               << 100 * (mean_scheduler_processing_time / mean_scheduler_total_time)
-              << "% of all)\n"
-              << "Mean idle time = "
+              << "%)\n"
+              << "Среднее время простоя = "
               << mean_scheduler_idle_time
-              << " s (" // Общее время простоя и доля от общего времени
+              << " с (" // Общее время простоя и доля от общего времени
               << 100 * (mean_scheduler_idle_time / mean_scheduler_total_time)
-              << "% of all)\n"
-              << "Mean wait time = "
+              << "%)\n"
+              << "Среднее время ожидания пакетов = "
               << mean_scheduler_wait_time
-              << " s (" // Общее время простоя и доля от общего времени
+              << " с (" // Общее время простоя и доля от общего времени
               << 100 * (mean_scheduler_wait_time / mean_scheduler_total_time)
-              << "% of all)\n"
-              << "Mean fairness of RB allocation for queues = "
+              << "%)\n"
+              << "Средняя справедливость распределения ресурсов между очередями = "
               << mean_scheduler_fairness_for_queues
               << "\n" // Средняя справедливость распределения RB по очередям
-              << "Mean fairness of RB allocation for users = "
+              << "Средняя справедливость распределения ресурсов между пользователями = "
               << mean_scheduler_fairness_for_users
               << "\n" // Средняя справедливость распределения RB по пользователям
-              << "Mean scheduler throughput = "
+              << "Средняя пропускная способность планировщика = "
               << mean_scheduler_throughput * 1000
-              << " Mbit/s, " // Средняя пропускная способность (Мбит/с)
+              << " Mбит/с, " // Средняя пропускная способность (Мбит/с)
               << mean_scheduler_throughput * 1000 * 1000
-              << " Kbit/s\n" // Средняя пропускная способность (Кбит/с)
-              << "Max scheduler throughput = "
+              << " Кбит/с\n" // Средняя пропускная способность (Кбит/с)
+              << "Максимальная пропускная способность планировщика = "
               << max_scheduler_throughput * 1000
-              << " Mbit/s\n" // Максимальная пропускная способность (Мбит/с)
-              << "Mean scheduler unused resources rate = "
+              << " Mбит/с\n" // Максимальная пропускная способность (Мбит/с)
+              << "Среднее число неиспользованных ресурсов канала = "
               << mean_scheduler_unused_resources
               << "\n" // Максимальная пропускная способность (Мбит/с)
-              << "Mean scheduler packet processing delay time = "
+              << "Средняя задержка обслуживания пакета = "
               << mean_scheduler_packet_processing_delay * 1000
-              << " ms\n"; // Среднее время обслуживания пакета
+              << " мс\n"; // Среднее время обслуживания пакета
 
     show_queue_delays();
     show_user_delays();
@@ -489,9 +489,9 @@ void MeanStats::show_queue_delays()
 {
     for (auto &queue : queue_packet_processing_delay_history)
     {
-        std::cout << "Mean queue packet processing delay time "
-                  << "(Queue #" << queue.first << ") = "
-                  << mean_queue_packet_processing_delays[queue.first] * 1000 << " ms\n";
+        std::cout << "Средняя задержка облсуживания пакетов "
+                  << "(Очередь #" << queue.first << ") = "
+                  << mean_queue_packet_processing_delays[queue.first] * 1000 << " мс\n";
     }
 }
 
@@ -499,9 +499,9 @@ void MeanStats::show_user_delays()
 {
     for (auto &user : user_packet_processing_delay_history)
     {
-        std::cout << "Mean user packet processing delay time "
-                  << "(User #" << user.first << ") = "
-                  << mean_user_packet_processing_delays[user.first] * 1000 << " ms\n";
+        std::cout << "Средняя задержка обслуживания пакетов "
+                  << "(Пользователь #" << user.first << ") = "
+                  << mean_user_packet_processing_delays[user.first] * 1000 << " мс\n";
     }
 }
 

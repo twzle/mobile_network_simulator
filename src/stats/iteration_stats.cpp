@@ -185,41 +185,38 @@ void IterationStats::add_queue_packet_stats(
 void IterationStats::print()
 {
     std::cout << "\nСтатистика итерации моделирования\n";
-    std::cout << "\nPacket count = "
+    std::cout << "\nЧисло пакетов = "
               << packet_count << "\n"
-              << "Total scheduling time (total_time) = "
-              << scheduler_total_time << " s\n" // Общее время работы
-              << "Total processing time (processing_time) = "
+              << "Время работы планировщика (total_time) = "
+              << scheduler_total_time << " с\n" // Общее время работы
+              << "Время обработки пакетов (processing_time) = "
               << scheduler_processing_time
-              << " s (" // Общее время обслуживания пакетов и доля от общего времени
+              << " с (" // Общее время обслуживания пакетов и доля от общего времени
               << 100 * (scheduler_processing_time / scheduler_total_time)
-              << "% of all)\n"
-              << "Total idle time (idle_time) = "
+              << "%)\n"
+              << "Время простоя (idle_time) = "
               << scheduler_idle_time
-              << " s (" // Общее время простоя и доля от общего времени
+              << " с (" // Общее время простоя и доля от общего времени
               << 100 * (scheduler_idle_time / scheduler_total_time)
-              << "% of all)\n"
-              << "Total wait time (wait_time) = "
+              << "%)\n"
+              << "Время ожидания пакетов (wait_time) = "
               << scheduler_wait_time
-              << " s (" // Общее время простоя и доля от общего времени
+              << " с (" // Общее время простоя и доля от общего времени
               << 100 * (scheduler_wait_time / scheduler_total_time)
-              << "% of all)\n"
-              << "Average packet processing time ((processing_time + idle_time) / packet_count) = "
-              << ((scheduler_processing_time + scheduler_idle_time) / packet_count) * 1000
-              << " ms\n" // Среднее время обслуживания пакета
-              << "Average fairness for queues = "
+              << "%)\n"
+              << "Справедливость распределения ресурсов между очередями = "
               << scheduler_average_fairness_for_queues << "\n"
-              << "Average fairness for users = "
+              << "Справедливость распределения ресурсов между пользователями = "
               << scheduler_average_fairness_for_users << "\n"
-              << "Average scheduler throughput = "
-              << scheduler_average_throughput * 1000 << " Mbit/s, "
-              << scheduler_average_throughput * 1000 * 1000 << " Kbit/s\n"
-              << "Average scheduler unused resources rate = "
+              << "Пропускная способность планировщика = "
+              << scheduler_average_throughput * 1000 << " Мбит/с, "
+              << scheduler_average_throughput * 1000 * 1000 << " Кбит/с\n"
+              << "Доля неиспользованных ресурсов = "
               << scheduler_average_unused_resources
               << "\n" // Среднее время задержки обслуживания пакета
-              << "Average scheduler packet processing delay = "
+              << "Задержка обслуживания пакета = "
               << scheduler_average_packet_processing_delay * 1000
-              << " ms\n"; // Среднее время задержки обслуживания пакета
+              << " мс\n"; // Среднее время задержки обслуживания пакета
 
     print_queue_delays();
     print_user_delays();
@@ -233,9 +230,9 @@ void IterationStats::print_queue_delays()
          queue_id < queue_average_packet_processing_delay.size();
          ++queue_id)
     {
-        std::cout << "Average queue packet processing delay time "
-                  << "(Queue #" << queue_id << ") = "
-                  << queue_average_packet_processing_delay[queue_id] * 1000 << " ms\n";
+        std::cout << "Задержка обслуживания пакетов "
+                  << "(Очередь #" << queue_id << ") = "
+                  << queue_average_packet_processing_delay[queue_id] * 1000 << " мс\n";
     }
 }
 
@@ -245,9 +242,9 @@ void IterationStats::print_user_delays()
          user_id < user_average_packet_processing_delay.size();
          ++user_id)
     {
-        std::cout << "Average user packet processing delay time "
-                  << "(User #" << user_id << ") = "
-                  << user_average_packet_processing_delay[user_id] * 1000 << " ms\n";
+        std::cout << "Задержка обслуживания пакетов "
+                  << "(Пользователь #" << user_id << ") = "
+                  << user_average_packet_processing_delay[user_id] * 1000 << " мс\n";
     }
 }
 

@@ -26,7 +26,7 @@ void Executor::run()
         TimeGenerator::reset_time();
         User::reset_last_id();
 
-        std::cout << "Running \"" << settings.get_scheduler_name() 
+        std::cout << "Запущен \"" << settings.get_scheduler_name() 
             << "\" #" << i + 1 << "...\n";
         this->execute();
     }
