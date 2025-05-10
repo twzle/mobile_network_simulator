@@ -49,6 +49,10 @@ public:
     static StandardInfo get_standard_info(const std::string &standard_name);
     static void set_current_standard(const std::string &standard_name);
 
+    // Статическая функция для получения информации о стандарте
+    static double get_bandwidth();
+    static void set_bandwidth(const double bandwidth);
+
     // Статическая функция для получения TTI по строковому ключу
     static double get_tti(
         const std::string &tti_name);
@@ -90,4 +94,5 @@ private:
     // Информации о стандартах
     static std::map<std::string, StandardInfo> standard_info_map;
     static std::string current_standard_name;
+    static double current_bandwidth;
 };

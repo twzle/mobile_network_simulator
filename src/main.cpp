@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 
     Settings settings = initialize_settings(argc, argv);
     StandardManager::set_current_standard(settings.get_standard_type());
+    StandardManager::set_bandwidth(settings.get_bandwidth());
 
     try
     {
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
     executor.run();
 
     MeanStats &stats = executor.get_stats();
-    stats.calculate(settings.get_bandwidth());
+    stats.calculate(StandardManager::get_bandwidth());
     stats.show();
     stats.evaluate_confidence_intervals();
 

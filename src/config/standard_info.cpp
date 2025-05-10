@@ -6,6 +6,8 @@ std::map<std::string, StandardInfo> StandardManager::standard_info_map;
 
 // Статическое объявление текущего названия стандарта
 std::string StandardManager::current_standard_name = "LTE";
+// Статическое объявление текущего названия стандарта
+double StandardManager::current_bandwidth = 20;
 
 // Статическая функция для получения информации о стандарте
 void StandardManager::set_current_standard(const std::string &standard_name)
@@ -26,6 +28,28 @@ void StandardManager::set_current_standard(const std::string &standard_name)
 StandardInfo StandardManager::get_standard_info(const std::string &standard_name)
 {
     return standard_info_map.at(standard_name);
+}
+
+// Статическая функция для получения информации о стандарте
+void StandardManager::set_bandwidth(const double bandwidth)
+{
+    try
+    {
+        StandardInfo info = get_standard_info(current_standard_name);
+        info.bandwidth_to_rb.at(bandwidth);
+    }
+    catch (std::exception &ex)
+    {
+        throw(ex);
+    }
+
+    current_bandwidth = bandwidth;
+}
+
+// Статическая функция для получения информации о стандарте
+double StandardManager::get_bandwidth()
+{
+    return current_bandwidth;
 }
 
 // Статическая функция для получения TTI по строковому ключу

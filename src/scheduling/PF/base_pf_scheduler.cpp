@@ -217,7 +217,7 @@ void BasePFScheduler::sync_user_channels()
                 channel.get_path_loss(user_to_bs_distance, bs_height, user_height);
 
             double user_received_signal_power =
-                channel.get_recieved_signal_power(path_loss);
+                channel.get_received_signal_power(path_loss);
 
             double noise_power = channel.get_noise_power();
 
@@ -226,7 +226,9 @@ void BasePFScheduler::sync_user_channels()
 
             double sinr = channel.get_sinr(
                 user_received_signal_power,
-                noise_power, interference_power);
+                noise_power,
+                interference_power
+            );
 
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
 

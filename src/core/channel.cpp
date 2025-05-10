@@ -1,21 +1,32 @@
 #include "core/channel.hpp"
 
 Channel::Channel()
-    : carrier_frequency(0), constant_offset(0), power_bs_transmitted(0)
+    : carrier_frequency(0), constant_offset(0), power_bs_transmitted(0), power_interference(-120)
 {
 }
 
-Channel::Channel(double carrier_frequency, int power_bs_transmitted, std::string area_type)
+Channel::Channel(
+    double carrier_frequency, 
+    int power_bs_transmitted, 
+    std::string area_type)
     : carrier_frequency(carrier_frequency),
       power_bs_transmitted(power_bs_transmitted)
 {
-    if (area_type == "Dense Urban"){
+    if (area_type == "Dense Urban")
+    {
         constant_offset = 3;
-    } else if (area_type == "Urban"){
+        power_interference = -120;
+    }
+    else if (area_type == "Urban")
+    {
         constant_offset = 0;
-    } else if (area_type == "Suburban"){
-        double log_frequency = log10(carrier_frequency/28);
+        power_interference = -120;
+    }
+    else if (area_type == "Suburban")
+    {
+        double log_frequency = log10(carrier_frequency / 28);
         constant_offset = -(2 * log_frequency * log_frequency + 5.4);
+        power_interference = -120;
     }
 }
 
@@ -40,36 +51,45 @@ double Channel::get_path_loss(
     return path_loss;
 }
 
-double Channel::get_sinr(
-    double user_received_signal_power,
-    double noise_power, double interference_power)
-{
-    double sinr = user_received_signal_power - noise_power - interference_power;
-
-    return sinr;
+double Channel::get_snr(double user_received_signal_power, double noise_power) {
+    return user_received_signal_power - noise_power; // SNR в dB
 }
 
-double Channel::get_recieved_signal_power(double path_loss)
+double Channel::get_sinr(
+    double user_received_signal_power,
+    double noise_power,
+    double interference_power)
+{
+    // Переводим все величины из dBm в линейные (mW)
+    double signal_mW = pow(10, user_received_signal_power / 10);
+    double noise_mW = pow(10, noise_power / 10);
+    double interference_mW = pow(10, interference_power / 10);
+
+    // Вычисляем SINR в линейной форме
+    double sinr_linear = signal_mW / (noise_mW + interference_mW);
+
+    // Перевод в dB
+    return 10 * log10(sinr_linear);
+}
+
+double Channel::get_received_signal_power(double path_loss)
 {
     double power_user_received = power_bs_transmitted - path_loss;
 
     return power_user_received;
 }
 
-double Channel::get_noise_power()
-{
-    double k_Boltzmann = 1.380649e-23; // Дж/К
-    double T = 290.0;                  // Температура в Кельвинах
-    double B = 20e6;                   // Полоса пропускания 20 МГц
+double Channel::get_noise_power() {
+    const double k_Boltzmann = 1.380649e-23;     // Дж/К
+    const double T = 290.0;                      // Температура в Кельвинах
+    const double B = StandardManager::get_bandwidth() * 1e6; // Полоса в Гц
 
-    double power_noise = 10 * log10(k_Boltzmann * T * B); // dBm
-
-    return power_noise;
+    // Правильный расчёт: 10*log10(kBTB [Вт]) + 30 -> перевод в dBm
+    return 10 * log10(k_Boltzmann * T * B) + 30; // Пример: -101 dBm для 20 МГц
 }
 
-double Channel::get_interference_power()
-{
-    return 0;
+double Channel::get_interference_power() {
+    return power_interference; // Уже задано для Dense Urban/Urban/Suburban
 }
 
 double Channel::get_carrier_frequency()

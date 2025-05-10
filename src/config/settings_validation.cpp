@@ -106,11 +106,11 @@ void Settings::validate()
         ++queue_id;
     }
 
-    if (std::abs(bs_config.get_x()) > epsilon ||
-        std::abs(bs_config.get_y()) > epsilon ||
-        std::abs(bs_config.get_z() - 25) > epsilon)
+    if (bs_config.get_x() < 0 - epsilon ||
+        bs_config.get_y() < 0 - epsilon ||
+        bs_config.get_z() < 25 - epsilon || bs_config.get_z() > 50 + epsilon)
     {
-        throw std::invalid_argument("Base station should be place in {0, 0, 25}.");
+        throw std::invalid_argument("Base station should be place in {0, 0, [25; 50]}.");
     }
 
     if (user_configs.size() < 1){
