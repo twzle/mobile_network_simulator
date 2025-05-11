@@ -152,7 +152,7 @@ void User::move(double time_in_seconds)
     double new_x = old_x;
     double new_y = old_y;
 
-    if (move_direction == "forward")
+    if (move_direction == "north")
     {
         new_y += move_delta;
 
@@ -168,7 +168,7 @@ void User::move(double time_in_seconds)
             new_y = -min_allowed_y;
         }
     }
-    else if (move_direction == "backward")
+    else if (move_direction == "south")
     {
         new_y -= move_delta;
 
@@ -184,7 +184,7 @@ void User::move(double time_in_seconds)
             new_y = -min_allowed_y;
         }
     }
-    else if (move_direction == "right")
+    else if (move_direction == "east")
     {
         new_x += move_delta;
 
@@ -200,7 +200,7 @@ void User::move(double time_in_seconds)
             new_x = -min_allowed_x;
         }
     }
-    else if (move_direction == "left")
+    else if (move_direction == "west")
     {
         new_x -= move_delta;
 

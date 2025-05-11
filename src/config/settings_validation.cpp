@@ -148,16 +148,16 @@ void Settings::validate()
                 "speed ∈ [0, 100] km/h");
         }
 
-        if (user.get_direction() != "forward" && user.get_direction() != "backward" &&
-            user.get_direction() != "left" && user.get_direction() != "right" &&
+        if (user.get_direction() != "north" && user.get_direction() != "south" &&
+            user.get_direction() != "west" && user.get_direction() != "east" &&
             user.get_direction() != "random")
         {
             throw std::invalid_argument(
                 "User #" + std::to_string(user_id) +
                 " has invalid mobility direction: " +
                 user.get_direction() + " \n" +
-                "Expected direction: \"forward\", \"backward\", " +
-                "\"left\", \"right\", \"random\"");
+                "Expected direction: \"north\", \"south\", " +
+                "\"west\", \"east\", \"random\"");
         }
 
         if (user.get_quant() <= epsilon)
