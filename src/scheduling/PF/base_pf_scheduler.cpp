@@ -61,9 +61,8 @@ void BasePFScheduler::run()
 
                 // Кандидаты на получение ресурсов пользователь и очередь
                 mark_as_resource_candidate(
-                    packet.get_queue(), 
-                    packet.get_user_ptr()
-                );
+                    packet.get_queue(),
+                    packet.get_user_ptr());
 
                 // Возврат в исходную очередь вместо обслуживания
                 relevant_queue.pop();
@@ -84,9 +83,8 @@ void BasePFScheduler::run()
 
                 // Кандидаты на получение ресурсов пользователь и очередь
                 mark_as_resource_candidate(
-                    packet.get_queue(), 
-                    packet.get_user_ptr()
-                );
+                    packet.get_queue(),
+                    packet.get_user_ptr());
 
                 save_processed_packet_stats(
                     packet,
@@ -137,9 +135,8 @@ void BasePFScheduler::collect_relevant_packets(double current_time)
 
         // Отметка пользователя как активного претендента на ресурсы
         mark_as_resource_candidate(
-            packet.get_queue(), 
-            packet.get_user_ptr()
-        );
+            packet.get_queue(),
+            packet.get_user_ptr());
 
         packet.get_user_ptr()->set_resource_candidate(true);
 
@@ -184,6 +181,18 @@ void BasePFScheduler::evaluate_stats()
 
     evaluate_fairness_stats(SchedulerState::UNDEFINED, true);
     evaluate_throughput_stats(true);
+
+    for (auto &user : connected_users)
+    {
+        double throughput = throughput_stats.calculate_throughput_for_user(
+            user.first);
+
+        stats.update_user_throughput(
+            user.first,
+            throughput);
+    }
+
+    std::cout << "\n";
 }
 
 void BasePFScheduler::sync_user_channels()
@@ -227,12 +236,17 @@ void BasePFScheduler::sync_user_channels()
             double sinr = channel.get_sinr(
                 user_received_signal_power,
                 noise_power,
-                interference_power
-            );
+                interference_power);
 
             int cqi = StandardManager::get_cqi_from_sinr(sinr);
 
             user.set_cqi(cqi);
+
+            // auto mcs = StandardManager::get_mcs_from_cqi(cqi);
+            // int imcs = std::get<3>(mcs);
+            // auto tbs = StandardManager::get_tbs_from_mcs(std::get<3>(mcs));
+            // std::cout << "user #" << user.get_id() << ", cqi = " << cqi <<
+            // ", mcs = " << imcs << ", tbs = " << tbs << "\n";
         }
         else
         {
@@ -266,7 +280,6 @@ void BasePFScheduler::update_user_priorities()
         double priority = max_throughput_for_rb / average_throughput;
 
         user_info.second.set_priority(priority);
-
     }
 }
 
@@ -400,7 +413,8 @@ void BasePFScheduler::evaluate_fairness_stats(
         return;
     }
 
-    if (scheduler_state > SchedulerState::WAIT){
+    if (scheduler_state > SchedulerState::WAIT)
+    {
         fairness_stats.increment_current_history_size();
     }
 
@@ -440,6 +454,8 @@ void BasePFScheduler::evaluate_throughput_stats(bool force_update)
             throughput_stats.get_unused_resources_for_scheduler(),
             throughput_stats.is_valid_unused_resources_for_scheduler());
 
+        throughput_stats.update_throughput_for_users();
+
         throughput_stats.reset();
 
         return;
@@ -454,6 +470,8 @@ void BasePFScheduler::evaluate_throughput_stats(bool force_update)
     stats.update_scheduler_unused_resources(
         throughput_stats.get_unused_resources_for_scheduler(),
         throughput_stats.is_valid_unused_resources_for_scheduler());
+
+    throughput_stats.update_throughput_for_users();
 
     throughput_stats.reset();
 }

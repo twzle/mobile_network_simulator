@@ -16,7 +16,8 @@ void MeanStats::calculate(double bandwidth)
 
 void MeanStats::init_history()
 {
-    if (stats_array.empty()){
+    if (stats_array.empty())
+    {
         return;
     }
 
@@ -44,6 +45,17 @@ void MeanStats::init_queue_processing_delay_history()
          ++queue_id)
     {
         this->queue_packet_processing_delay_history[queue_id].reserve(iterations_count);
+    }
+}
+
+void MeanStats::init_user_throughput_history()
+{
+    int iterations_count = stats_array.size();
+    for (size_t user_id = 0;
+         user_id < stats_array[0].user_throughputs.size();
+         ++user_id)
+    {
+        this->user_throughput_history[user_id].reserve(iterations_count);
     }
 }
 
@@ -78,6 +90,7 @@ void MeanStats::collect_history()
 
     collect_queue_packet_processing_delay_history();
     collect_user_packet_processing_delay_history();
+    collect_user_throughput_history();
 }
 
 void MeanStats::collect_queue_packet_processing_delay_history()
@@ -108,10 +121,25 @@ void MeanStats::collect_user_packet_processing_delay_history()
     }
 }
 
+void MeanStats::collect_user_throughput_history()
+{
+    for (auto &stats : stats_array)
+    {
+        for (size_t user_id = 0;
+             user_id < stats.user_throughputs.size();
+             ++user_id)
+        {
+            this->user_throughput_history[user_id]
+                .push_back(stats.user_throughputs[user_id]);
+        }
+    }
+}
+
 // Подсчет среднего арифметического базовых параметров работы планировщика
 void MeanStats::calculate_mean_values()
 {
-    if (stats_array.empty()){
+    if (stats_array.empty())
+    {
         return;
     }
 
@@ -154,6 +182,8 @@ void MeanStats::calculate_mean_values()
     calculate_mean_queue_packet_processing_delays();
     calculate_mean_user_packet_processing_delays();
     calculate_mean_scheduler_packet_processing_delay();
+
+    calculate_mean_user_throughputs();
 }
 
 // Подсчет среднего арифметического задержек обработки пакетов
@@ -216,6 +246,26 @@ void MeanStats::calculate_mean_scheduler_packet_processing_delay()
     }
 
     mean_scheduler_packet_processing_delay /= stats_array.size();
+}
+
+// Подсчет среднего арифметического задержек обработки пакетов для планировщика
+void MeanStats::calculate_mean_user_throughputs()
+{
+    for (auto &stats : stats_array)
+    {
+        for (auto &user : stats.user_throughputs)
+        {
+            int user_id = user.first;
+            double user_throughput = user.second;
+
+            mean_user_throughputs[user_id] += user_throughput;
+        }
+    }
+
+    for (auto &user : mean_user_throughputs)
+    {
+        mean_user_throughputs[user.first] /= stats_array.size();
+    }
 }
 
 /*
@@ -370,7 +420,7 @@ void MeanStats::evaluate_confidence_intervals()
     calculate_confidence_interval(
         scheduler_unused_resources_history,
         mean_scheduler_unused_resources,
-        0.001);
+        0.01);
 
     // Доверительный интервал для средней задержки обслуживания пакетов
     std::cout << "\nОбщая средняя задержка обслуживания пакетов"
@@ -382,6 +432,7 @@ void MeanStats::evaluate_confidence_intervals()
 
     evaluate_confidence_queue_packet_processing_delay_intervals();
     evaluate_confidence_user_packet_processing_delay_intervals();
+    evaluate_confidence_user_throughput_intervals();
 }
 
 void MeanStats::calculate_max_scheduler_throughput(double bandwidth)
@@ -438,6 +489,24 @@ void MeanStats::evaluate_confidence_user_packet_processing_delay_intervals()
     }
 }
 
+void MeanStats::evaluate_confidence_user_throughput_intervals()
+{
+    for (size_t user_id = 0;
+         user_id < user_throughput_history.size();
+         ++user_id)
+    {
+        // Задержка обработки пакетов по пользователям
+        std::cout << "\nОбщая средняя пропускная способность пользователя №"
+                  << user_id + 1
+                  << " (user_throughput)" << std::endl;
+        calculate_confidence_interval(
+            user_throughput_history[user_id],
+            mean_user_throughputs[user_id],
+            0.001);
+    }
+}
+
+
 // Вывод в stdout срденего арифметического по статистике работы планировщика
 void MeanStats::show()
 {
@@ -476,13 +545,14 @@ void MeanStats::show()
               << " Mбит/с\n" // Максимальная пропускная способность (Мбит/с)
               << "Среднее число неиспользованных ресурсов канала = "
               << mean_scheduler_unused_resources
-              << "\n" // Максимальная пропускная способность (Мбит/с)
+              << "\n" // Доля неиспользованных ресурсов (%)
               << "Средняя задержка обслуживания пакета = "
               << mean_scheduler_packet_processing_delay * 1000
               << " мс\n"; // Среднее время обслуживания пакета
 
     show_queue_delays();
     show_user_delays();
+    show_user_throughputs();
 }
 
 void MeanStats::show_queue_delays()
@@ -502,6 +572,16 @@ void MeanStats::show_user_delays()
         std::cout << "Средняя задержка обслуживания пакетов "
                   << "(Пользователь #" << user.first << ") = "
                   << mean_user_packet_processing_delays[user.first] * 1000 << " мс\n";
+    }
+}
+
+void MeanStats::show_user_throughputs()
+{
+    for (auto &user : user_throughput_history)
+    {
+        std::cout << "Средняя пропускная способность "
+                  << "(Пользователь #" << user.first << ") = "
+                  << mean_user_throughputs[user.first] * 1000 << " Мбит/с\n";
     }
 }
 

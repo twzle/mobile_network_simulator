@@ -179,6 +179,55 @@ void ThroughputStats::calculate_throughput_for_scheduler()
     }
 }
 
+
+void ThroughputStats::update_throughput_for_users()
+{
+    for (auto &user : user_statuses)
+    {
+        if (user.second.is_resource_candidate)
+        {
+            /*
+            Пропускная способность (Мбит/мс) =
+            (Размер данных выделенных за TTI (байт/мс) * 8 / (1000 * 1000) / )
+            */
+
+            // Пропускная способность (байт/мс) -> (бит/мс)
+            double bits_per_ms = user.second.allocated_effective_data_size * 8;
+
+            // Пропускная способность (Мбит/мс)
+            double throughput = bits_per_ms / (1000 * 1000);
+
+            std::pair<int, double> user_throughput = user_total_throughputs[user.first];
+
+            user_throughput.first++;
+            user_throughput.second += throughput;
+
+            user_total_throughputs[user.first] = user_throughput;
+        }
+    }
+}
+
+// Средняя пропускная способность для пользователя (Мбит/мс)
+double ThroughputStats::calculate_throughput_for_user(int user_id)
+{
+    auto &user_throughput = user_total_throughputs[user_id];
+
+    {
+        if (user_throughput.first == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            // Средняя пропускная способность (Мбит/мс)
+            double average_throughput = 
+                (double) user_throughput.second / (double) user_throughput.first; 
+            
+            return average_throughput;
+        }
+    }
+}
+
 double ThroughputStats::get_throughput_for_scheduler()
 {
     return throughput_for_scheduler;
@@ -197,13 +246,13 @@ void ThroughputStats::calculate_unused_resources_for_scheduler()
     if (total_allocated_resource_blocks > 0)
     {
         /*
-        Доля неиспользованных ресурсов = 1 - (RB/RB_max) 
+        Доля неиспользованных ресурсов = 1 - (RB/RB_max)
         */
 
-        double used_resources_for_scheduler = 
-            (double) total_allocated_resource_blocks / 
-            (double) max_allocated_resource_blocks;
-        
+        double used_resources_for_scheduler =
+            (double)total_allocated_resource_blocks /
+            (double)max_allocated_resource_blocks;
+
         unused_resources_for_scheduler = 1 - used_resources_for_scheduler;
 
         _is_valid_unused_resources_for_scheduler = true;
@@ -251,27 +300,32 @@ bool ThroughputStats::is_valid_unused_resources_for_scheduler()
     return _is_valid_unused_resources_for_scheduler;
 }
 
-int ThroughputStats::get_total_allocated_effective_data_size(){
+int ThroughputStats::get_total_allocated_effective_data_size()
+{
     return total_allocated_effective_data_size;
 }
 
-int ThroughputStats::get_total_allocated_resource_blocks(){
+int ThroughputStats::get_total_allocated_resource_blocks()
+{
     return total_allocated_resource_blocks;
 }
 
-int ThroughputStats::get_max_allocated_resource_blocks(){
+int ThroughputStats::get_max_allocated_resource_blocks()
+{
     return max_allocated_resource_blocks;
 }
 
-double ThroughputStats::get_tti_duration(){
+double ThroughputStats::get_tti_duration()
+{
     return tti_duration;
 }
 
-size_t ThroughputStats::get_user_count(){
+size_t ThroughputStats::get_user_count()
+{
     return user_count;
 }
 
-size_t ThroughputStats::get_queue_count(){
+size_t ThroughputStats::get_queue_count()
+{
     return queue_count;
 }
-

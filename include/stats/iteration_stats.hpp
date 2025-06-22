@@ -74,6 +74,9 @@ public:
     void update_scheduler_throughput(
         double throughput,
         bool is_valid);
+    void update_user_throughput(
+        int user_id,
+        double throughput);
     void update_scheduler_unused_resources(
         double unused_resources,
         bool is_valid);
@@ -95,6 +98,7 @@ public:
     void evaluate_scheduling_stats();
 
     void evaluate_throughput_stats();
+    void evaluate_user_throughput_stats();
     void evaluate_unused_resources_stats();
 
     void release_memory_resources();
@@ -102,14 +106,17 @@ public:
     void print();
     void print_user_delays();
     void print_queue_delays();
+    void print_user_throughputs();
 
     void draw_delay_plot();
     void draw_scheduling_plot();
 
     int packet_count = 0; // Общее число обслуженных пакетов
 
-    std::vector<double> scheduler_throughput; // За каждый TTI (Мбит/мс)
-    double scheduler_average_throughput = 0;  // Среднее за весь период работы (Мбит/мс)
+    // За каждый TTI (Мбит/мс)
+    std::vector<double> scheduler_throughput;
+    std::map<int, double> user_throughputs;
+    double scheduler_average_throughput = 0; // Среднее за весь период работы (Мбит/мс)
 
     std::vector<double> scheduler_unused_resources; // За каждый TTI (доля RB от максимума)
     double scheduler_average_unused_resources = 0;  // Среднее за весь период работы (доля RB от максимума)

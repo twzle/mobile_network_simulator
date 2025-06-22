@@ -106,6 +106,16 @@ void BaseRRScheduler::evaluate_stats()
 
     evaluate_fairness_stats(SchedulerState::UNDEFINED, true);
     evaluate_throughput_stats(true);
+
+    for (auto &user : connected_users)
+    {
+        double throughput = throughput_stats.calculate_throughput_for_user(
+            user.first);
+
+        stats.update_user_throughput(
+            user.first,
+            throughput);
+    }
 }
 
 /*
@@ -176,6 +186,8 @@ void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
             throughput_stats.get_unused_resources_for_scheduler(),
             throughput_stats.is_valid_unused_resources_for_scheduler());
 
+        throughput_stats.update_throughput_for_users();
+
         throughput_stats.reset();
 
         return;
@@ -190,6 +202,8 @@ void BaseRRScheduler::evaluate_throughput_stats(bool force_update)
     stats.update_scheduler_unused_resources(
         throughput_stats.get_unused_resources_for_scheduler(),
         throughput_stats.is_valid_unused_resources_for_scheduler());
+
+    throughput_stats.update_throughput_for_users();
 
     throughput_stats.reset();
 }

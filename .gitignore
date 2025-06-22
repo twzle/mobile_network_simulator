@@ -553,5 +553,7 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 venv/
+build/
+coverage_report/
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,intellij+all,cmake,visualstudio,visualstudiocode

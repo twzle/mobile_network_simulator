@@ -54,6 +54,8 @@ public:
         int packet_size_in_bytes, int resource_blocks);
 
     void calculate_throughput_for_scheduler();
+    double calculate_throughput_for_user(int user_id);
+    void update_throughput_for_users();
     double get_throughput_for_scheduler();
     bool is_valid_throughput_for_scheduler();
 
@@ -84,6 +86,10 @@ private:
     size_t user_count;                                 // Общее количество пользователей
     size_t candidate_user_count;                       // Количество пользователей нуждающихся в RB
     std::map<int, UserThroughputStatus> user_statuses; // Число выделенных RB по пользователям
+
+    // Пропускная способность по пользователям (Мбит/мс)
+    // (user_id -> (size, total_throughput))
+    std::map<int, std::pair<int, double>> user_total_throughputs;
 
     double throughput_for_scheduler;         // Пропускная способность планировщика (Мбит/мс)
     bool _is_valid_throughput_for_scheduler; // Стоит ли учитывать пропускную сп-ность в расчетах

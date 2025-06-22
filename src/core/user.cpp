@@ -11,7 +11,7 @@ User::User(
     uint8_t cqi, 
     Position position, Mobility mobility, 
     int throughput_history_size, double quant)
-    : id(++last_id), cqi(cqi), time_from_last_channel_sync(0), 
+    : id(last_id++), cqi(cqi), time_from_last_channel_sync(0), 
     position(position), mobility(mobility),
     quant(quant)
 {
@@ -25,7 +25,7 @@ void User::initialize()
 
 void User::reset_last_id()
 {
-    last_id = -1;
+    last_id = 0;
 }
 
 int User::get_id() const

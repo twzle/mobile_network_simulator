@@ -160,6 +160,14 @@ void IterationStats::update_scheduler_throughput(
     }
 }
 
+void IterationStats::update_user_throughput(
+    int user_id,
+    double throughput)
+{
+    // std::cout << "USER #" << user_id << ", TPUT = " << throughput << "\n";
+    user_throughputs[user_id] = throughput;
+}
+
 void IterationStats::update_scheduler_unused_resources(
     double unused_resources,
     bool is_valid)
@@ -220,6 +228,7 @@ void IterationStats::print()
 
     print_queue_delays();
     print_user_delays();
+    print_user_throughputs();
 
     std::cout << "\n";
 }
@@ -245,6 +254,18 @@ void IterationStats::print_user_delays()
         std::cout << "Задержка обслуживания пакетов "
                   << "(Пользователь #" << user_id << ") = "
                   << user_average_packet_processing_delay[user_id] * 1000 << " мс\n";
+    }
+}
+
+void IterationStats::print_user_throughputs()
+{
+    for (size_t user_id = 0;
+         user_id < user_throughputs.size();
+         ++user_id)
+    {
+        std::cout << "Пропускная способность "
+                  << "(Пользователь #" << user_id << ") = "
+                  << user_throughputs[user_id] * 1000 << " Мбит/c\n";
     }
 }
 

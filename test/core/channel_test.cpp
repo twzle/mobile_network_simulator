@@ -66,7 +66,7 @@ TEST_F(ChannelTest, ReceivedSignalPower) {
     double path_loss = ch.get_path_loss(DISTANCE_100M, BS_HEIGHT, UE_HEIGHT);
     double expected_power = POWER_40W - path_loss;
     
-    EXPECT_NEAR(ch.get_recieved_signal_power(path_loss), expected_power, DELTA);
+    EXPECT_NEAR(ch.get_received_signal_power(path_loss), expected_power, DELTA);
 }
 
 // Test SINR calculation

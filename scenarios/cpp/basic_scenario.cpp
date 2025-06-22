@@ -2,52 +2,78 @@
 
 namespace BasicScenario {
     Settings create_settings() {
-        int launches = 1;
+        int launches = 100;
         std::string standard_type = "LTE";
-        std::string scheduler_type = "FixedDRRScheduler";
-        std::string area_type = "Dense Urban";
+        std::string scheduler_type = "DefaultDRRScheduler";
+        std::string area_type = "Suburban";
     
         std::string tti_duration = "1ms";
         std::string channel_sync_interval = "10ms";
     
-        uint8_t base_cqi = 1;
+        uint8_t base_cqi = 4;
         int users_per_tti_limit = 8;
 
-        double carrier_frequency = 2000;
-        double bandwidth = 5;
+        double carrier_frequency = 1800;
+        double bandwidth = 20;
         int transmission_power = 46;
     
         BSConfig bs_config = {
-            0, 0, 25, 
+            0, 0, 30, 
             carrier_frequency, bandwidth, transmission_power
         };
 
         std::vector<QueueConfig> queue_configs = {
-            {1000, 100, 60},
-            {1000, 100, 60},
-            {1000, 100, 60},
-            {1000, 100, 60},
-            {1000, 100, 60},
+            {3000, 1000, 10000},
         };
     
         std::vector<UserConfig> user_configs = {
-            {1000, 1000, 1.5, 0, "random", 10, 256, 0.2},
-            {6500, 6500, 1.5, 0, "random", 10, 256, 0.2},
-            {8000, 8000, 1.5, 0, "random", 10, 256, 0.2},
-            {10000, 10000, 1.5, 0, "random", 10, 256, 0.2},
-            {11000, 11000, 1.5, 0, "random", 10, 256, 0.2},
+            {750, 750, 1.5, 0, "random", 11, 200, 1}, // 1 км
+            {2122, 2122, 1.5, 0, "random", 11, 200, 1}, // 3 км
+            {3600, 3600, 1.5, 0, "random", 11, 200, 1}, // 5 км
+            {4250, 4250, 1.5, 0, "random", 11, 200, 1}, // 6 км
+            // {4597, 4597, 1.5, 0, "random", 11, 500, 1}, // 6.5 км
+            {7075, 7075, 1.5, 0, "random", 11, 200, 1}, // 10 км
         };
 
+
         // std::vector<UserConfig> user_configs = {
-        //     {1000, 1000, 1.5, 0, "random", 10, 150, 0.2},
-        //     {1000, 1000, 1.5, 0, "random", 10, 150, 0.2},
-        //     {1000, 1000, 1.5, 0, "random", 10, 150, 0.2},
-        //     {1000, 1000, 1.5, 0, "random", 10, 150, 0.2},
-        //     {1000, 1000, 1.5, 0, "random", 10, 150, 0.2},
+        //     {750, 750, 1.5, 0, "random", 11, 500, 1},
+        //     {750, 750, 1.5, 0, "random", 11, 500, 1},
+        //     {750, 750, 1.5, 0, "random", 11, 500, 1},
+        // };
+
+        // std::vector<UserConfig> user_configs = {
+        //     {2122, 2122, 1.5, 0, "random", 11, 500, 1},
+        //     {2122, 2122, 1.5, 0, "random", 11, 500, 1},
+        //     {2122, 2122, 1.5, 0, "random", 11, 500, 1},
+        // };
+
+        // std::vector<UserConfig> user_configs = {
+        //     {3600, 3600, 1.5, 0, "random", 11, 500, 1},
+        //     {3600, 3600, 1.5, 0, "random", 11, 500, 1},
+        //     {3600, 3600, 1.5, 0, "random", 11, 500, 1},
+        // };
+
+        // std::vector<UserConfig> user_configs = {
+        //     {4250, 4250, 1.5, 0, "random", 11, 500, 1},
+        //     {4250, 4250, 1.5, 0, "random", 11, 500, 1},
+        //     {4250, 4250, 1.5, 0, "random", 11, 500, 1},
+        // };
+
+        // std::vector<UserConfig> user_configs = {
+        //     {4597, 4597, 1.5, 0, "random", 11, 500, 1},
+        //     {4597, 4597, 1.5, 0, "random", 11, 500, 1},
+        //     {4597, 4597, 1.5, 0, "random", 11, 500, 1},
+        // };
+
+        // std::vector<UserConfig> user_configs = {
+        //     {7075, 7075, 1.5, 0, "random", 11, 500, 1},
+        //     {7075, 7075, 1.5, 0, "random", 11, 500, 1},
+        //     {7075, 7075, 1.5, 0, "random", 11, 500, 1},
         // };
 
         int throughput_history_size = 200;
-        int fairness_history_size = 200;
+        int fairness_history_size = 7;
     
         return Settings(
             launches, standard_type, base_cqi, tti_duration, channel_sync_interval,

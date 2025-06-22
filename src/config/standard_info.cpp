@@ -238,7 +238,7 @@ void StandardManager::initialize()
                  "CyclicDRRScheduler", "CyclicDRRSchedulerWithUserQuant",
                  "DefaultDRRScheduler", "DefaultDRRSchedulerWithUserQuant",
                  "DefaultPFScheduler"},
-                {{0, "random"}, {1, "forward"}, {2, "backward"}, {3, "left"}, {4, "right"}},
+                {{0, "random"}, {1, "north"}, {2, "south"}, {3, "east"}, {4, "west"}},
                 {"Dense Urban", "Urban", "Suburban"},
                 {4, 8},     // Лимит пользователей обслуживаемых за TTI
                 12 * 7 * 2, // Число RE (12 поднесущих * 7 OFDMA-символов * 2 слота в субкадре)

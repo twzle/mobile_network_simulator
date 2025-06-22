@@ -25,6 +25,7 @@ public:
     void calculate_mean_packet_scheduling_time();
     void calculate_mean_queue_processing_time();
     void calculate_max_scheduler_throughput(double bandwidth);
+    void calculate_mean_user_throughputs();
 
     // Подсчет стандартного отклонения величины
     double calculate_standard_deviation_for_metric(
@@ -43,17 +44,21 @@ public:
     void evaluate_confidence_intervals();
     void evaluate_confidence_queue_packet_processing_delay_intervals();
     void evaluate_confidence_user_packet_processing_delay_intervals();
+    void evaluate_confidence_user_throughput_intervals();
 
     void init_history();
     void init_queue_processing_delay_history();
+    void init_user_throughput_history();
 
     void collect_history();
     void collect_queue_packet_processing_delay_history();
     void collect_user_packet_processing_delay_history();
+    void collect_user_throughput_history();
 
     void show();
     void show_queue_delays();
     void show_user_delays();
+    void show_user_throughputs();
 
     void draw_delay_plot();
     void draw_scheduling_plot();
@@ -116,6 +121,9 @@ public:
     std::map<int, double> mean_user_packet_processing_delays;
     // История ср. задержек обработки пакетов в планировщике по итерациям
     std::vector<double> scheduler_packet_processing_delay_history;
+    // История ср. времени задержек обработки пакетов по пользователям по итерациям
+    std::map<int, std::vector<double> > user_throughput_history;
+    std::map<int, double> mean_user_throughputs;
     double mean_scheduler_packet_processing_delay = 0;
 
     std::vector<IterationStats> stats_array;
